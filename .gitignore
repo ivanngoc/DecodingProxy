@@ -1,0 +1,12 @@
+DecodingProxy/bin/Debug/net6.0/DecodingProxy.pdb
+DecodingProxy/bin/
+DecodingProxy/obj/
+HttpRecorder/obj/
+HttpDecodingProxy/obj/
+HttpDecodingProxy/bin/
+ProxyLibs/obj/
+ProxyMITM/bin/
+ProxyMITM/obj/
+TcpDecodingProxy/obj/
+ProxyLibs/bin/
+TcpDecodingProxy/bin/

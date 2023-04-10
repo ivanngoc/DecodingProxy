@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HttpDecodingProxy\HttpDecodingProxy.csproj" />
+    <ProjectReference Include="..\TcpDecodingProxy\TcpDecodingProxy.csproj" />
+  </ItemGroup>
+
+</Project>
