@@ -1,0 +1,19 @@
+{
+  "port_http": 8080,
+  "port_https": 443,
+
+  "path_cert_cache_forged": "C:\\Users\\ngoc\\Documents\\Builds\\cert cache forged",
+  "path_cert_cache_original": "C:\\Users\\ngoc\\Documents\\Builds\\cert cache original",
+
+  "path_ca_key": "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem",
+  "path_ca_cert": "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem",
+
+  "rules": [
+    {
+      "protocol": "http/https",
+      "mode": "two_way",
+      "domain": "www.google.com",
+      "options": [ 0, 1, 2, 3 ]
+    }
+  ]
+}

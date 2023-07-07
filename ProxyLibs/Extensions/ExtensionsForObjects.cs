@@ -5,6 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ProxyLibs.Extensions
 {
+
     public static class ExtensionsForObjects
     {
         public static T DeepCopy<T>(this T s) where T : class

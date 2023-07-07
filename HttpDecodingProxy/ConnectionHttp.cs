@@ -4,11 +4,10 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using HttpDecodingProxy.http;
+using HttpDecodingProxy.ForHttp;
 
 namespace IziHardGames.Proxy.Http
 {
-
 
     /// <summary>
     /// CONNECT is intended for use in requests to a proxy. 
@@ -18,7 +17,7 @@ namespace IziHardGames.Proxy.Http
     /// </summary>
     public class ConnectionHttp : IConnection, IDisposable
     {
-        private Http11Fields headers;
+        private HttpFieldsV11 headers;
         private TcpClient client;
         private NetworkStream clientStream;
         private SslStream sslClient;
@@ -27,8 +26,9 @@ namespace IziHardGames.Proxy.Http
         private readonly string certName = "ngoc_ssl.cer";
         private readonly string certNamePvk = "ngoc_ssl.pvk";
         private readonly string certPath = "/cert/";
+        public object ConnectToProx { get; }
 
-        public ConnectionHttp(Http11Fields headers, System.Net.Sockets.TcpClient client)
+        public ConnectionHttp(HttpFieldsV11 headers, System.Net.Sockets.TcpClient client)
         {
             this.headers = headers;
             this.client = client;
@@ -105,12 +105,16 @@ namespace IziHardGames.Proxy.Http
 
         public static ConnectionHttp Test(TcpClient client)
         {
-            ConnectionHttp http = new ConnectionHttp(new Http11Fields(), client);
+            ConnectionHttp http = new ConnectionHttp(new HttpFieldsV11(), client);
             http.TunnelingSsl();
             throw new NotImplementedException();
         }
 
-        public object ConnectToProx { get; }
+        public static void Test1(TcpClient client)
+        {
+            HttpListener httpListener = new HttpListener();
+            throw new System.NotImplementedException();
+        }
 
 
     }

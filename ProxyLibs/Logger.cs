@@ -1,6 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //SslTcpProxy.Test();
 
+using Microsoft.Extensions.Logging;
+
 namespace IziHardGames
 {
     public static class Logger
@@ -9,13 +11,14 @@ namespace IziHardGames
         public static string Filter { get; set; }
 
         private static readonly object lockLog = new object();
+        public static Microsoft.Extensions.Logging.ILogger logger;
 
         public static void SetFilter(string filter)
         {
             Filter = filter;
             IsLogWithFilter = true;
         }
-        public static void LogLine(string msg, string filter, ConsoleColor color = ConsoleColor.White)
+        public static void LogLine(string msg, string filter, ConsoleColor color = ConsoleColor.Gray)
         {
             if (IsLogWithFilter && filter != Filter)
             {
@@ -23,24 +26,41 @@ namespace IziHardGames
             }
             LogLine(msg, color);
         }
-        public static void LogLine(string msg, ConsoleColor color = ConsoleColor.White)
+        public static void LogLine(string msg, ConsoleColor color = ConsoleColor.Gray)
         {
-            lock (lockLog)
+            if (logger != null)
             {
-                var cacheColor = Console.ForegroundColor;
-                Console.ForegroundColor = color;
-                Console.WriteLine(GetTimeStamp() + msg);
-                Console.ForegroundColor = cacheColor;
+                logger.Log(LogLevel.Information, msg);
+            }
+            else
+            {
+                Task.Run(() =>
+                {
+                    lock (lockLog)
+                    {
+                        var cacheColor = Console.ForegroundColor;
+                        Console.ForegroundColor = color;
+                        Console.WriteLine(GetTimeStamp() + msg);
+                        Console.ForegroundColor = cacheColor;
+                    }
+                });
             }
         }
         public static void LogException(Exception ex)
         {
-            lock (lockLog)
+            if (logger != null)
             {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(GetTimeStamp() + ex.ToString());
-                Console.ForegroundColor = color;
+                logger.LogError(ex.ToString());
+            }
+            else
+            {
+                lock (lockLog)
+                {
+                    var color = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(GetTimeStamp() + ex.ToString());
+                    Console.ForegroundColor = color;
+                }
             }
         }
         public static void Log(char c)
@@ -52,15 +72,45 @@ namespace IziHardGames
         }
         public static void Log(string msg)
         {
-            lock (lockLog)
+            if (logger != null)
             {
-                Console.Write(msg);
+                logger.Log(LogLevel.Information, msg);
+            }
+            else
+            {
+                lock (lockLog)
+                {
+                    Console.Write(msg);
+                }
             }
         }
 
         public static string GetTimeStamp()
         {
             return DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.ffffff    ");
+        }
+
+        internal static void LogInformation(string msg)
+        {
+            if (logger != null)
+            {
+                logger.LogInformation(msg);
+            }
+            else
+            {
+                throw new NullReferenceException($"Logger is not set");
+            }
+        }
+        internal static void LogWarning(string msg)
+        {
+            if (logger != null)
+            {
+                logger.Log(LogLevel.Warning, msg);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

@@ -1,20 +1,18 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //SslTcpProxy.Test();
 
+using IziHardGames.Libs.NonEngine.Memory;
 using System.Net.Sockets;
 
-namespace HttpDecodingProxy.http
+namespace HttpDecodingProxy.ForHttp
 {
     [Serializable]
-    public class HttpRequest : HttpOject
+    public class HttpRequest : HttpObject, IHttpRequest
     {
-        // https://httpwg.org/specs/rfc9112.html#message.body
-        // The presence of a message body in a request is signaled by a Content-Length or Transfer-Encoding header field.
-        // Request message framing is independent of method semantics.
-
-        public HttpRequest(HttpProxyMessage message) : base(message)
+        public HttpRequest() : base()
         {
-            fields.IsRequest = true;
-        }       
+            this.type = HttpLibConstants.TYPE_REQUEST;
+            this.fields.IsRequest = true;
+        }
     }
 }

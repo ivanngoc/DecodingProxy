@@ -3,19 +3,36 @@
 
 using System.Net.Sockets;
 
-namespace HttpDecodingProxy.http
+namespace HttpDecodingProxy.ForHttp
 {
+    public class HttpResponse<T>
+    {
+        private T item;
+    }
+
     [Serializable]
-    public class HttpResponse : HttpOject
+    public class HttpResponse : HttpObject, IHttpResponse
+    {
+        public string Status { get => throw new System.NotImplementedException(); }
+        public HttpResponse() : base()
+        {
+            this.type = HttpLibConstants.TYPE_RESPONSE;
+            this.fields.IsResponse = true;
+        }
+    }
+
+    public interface IHttpRequest
     {
 
-        // https://httpwg.org/specs/rfc9112.html#message.body
-        // The presence of a message body in a response, as detailed in Section 6.3,
-        // depends on both the request method to which it is responding and the response status code.
-        // This corresponds to when response content is allowed by HTTP semantics (Section 6.4.1 of [HTTP]).
-        public HttpResponse(HttpProxyMessage httpMessage) : base(httpMessage)
-        {
-            fields.IsResponse = true;
-        }
+    }
+
+    public interface IHttpResponse
+    {
+        public string Status { get; }
+    }
+
+    public interface IHttpObject
+    {
+
     }
 }

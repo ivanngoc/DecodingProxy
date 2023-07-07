@@ -1,0 +1,37 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+table {
+    width: 100%;
+    border: 5px solid black;
+}
+
+th {
+    background-color: grey;
+    color: white;
+    border: solid black;
+}
+
+td {
+    border: solid black;
+}
+tr
+{
+    border: solid black;
+}

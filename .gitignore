@@ -10,3 +10,6 @@ ProxyMITM/obj/
 TcpDecodingProxy/obj/
 ProxyLibs/bin/
 TcpDecodingProxy/bin/
+.vs/
+*/bin/
+*/obj/

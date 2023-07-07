@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "IziHardGames.Proxy.gRPC";
+
+package proxy;
+
+
+service ProxyPublisher {
+  rpc GetHubs (Request) returns (Reply);
+}
+
+message Request {
+  string name = 1;
+}
+
+message Reply {
+  string message = 1;
+  repeated DataConnection connection = 2;
+}
+
+message DataConnection
+{
+	string domain = 1;
+	int32 count = 2;
+}

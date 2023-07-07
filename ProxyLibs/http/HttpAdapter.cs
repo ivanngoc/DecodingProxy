@@ -3,7 +3,7 @@
 
 using System.Net;
 
-namespace HttpDecodingProxy.http
+namespace HttpDecodingProxy.ForHttp
 {
     public class HttpAdapter
     {

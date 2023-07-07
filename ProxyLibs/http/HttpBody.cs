@@ -2,12 +2,15 @@
 //SslTcpProxy.Test();
 
 using IziHardGames;
+using IziHardGames.Proxy.Sniffing.ForHttp;
 using ProxyLibs.Extensions;
 using System.Buffers;
+using System.Diagnostics.SymbolStore;
 using System.Drawing;
 using System.Net;
+using System.Text;
 
-namespace HttpDecodingProxy.http
+namespace HttpDecodingProxy.ForHttp
 {
     /// <summary>
     /// https://httpwg.org/specs/rfc9112.html#message.body
@@ -15,19 +18,35 @@ namespace HttpDecodingProxy.http
     [Serializable]
     public class HttpBody : IDisposable
     {
+        public const int DEFAULT_SIZE_FIRST_LINE = 128;
+        public const int INITIAL_BUFFER_SIZE = (1 << 20) * 8;
+
         private byte[] buffer = Array.Empty<byte>();
         private int bufferLength;
         private readonly List<byte[]> chunks = new List<byte[]>();
         [NonSerialized] public Memory<byte> datas;
+        internal int leftToRead;
+        internal int completed;
+        public bool isCompleted;
+        public bool isChunked;
+        public bool isRedingChunk;
+        public bool isRedingEnclosure;
+
+        public string Utf8 => Encoding.UTF8.GetString(datas.Span);
+        private static readonly object lockWrite = new object();
+
+        private MemoryStream memoryStream;
 
         /// <summary>
         /// https://httpwg.org/specs/rfc9112.html#message.body.length
+        /// <see cref="HttpPipedIntermediary.AwaitBody(HttpBinary, IziHardGames.Libs.Networking.Pipelines.TcpClientPiped)"/>
+        /// <see cref="HttpObject.FillBodyChunked(in ReadOnlySequence{byte})"/>
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="obj"></param>
-        public void ReadBody(Stream stream, HttpOject obj)
+        public void ReadBody(Stream stream, HttpObject obj)
         {
-            Http11Fields fields = obj.fields;
+            HttpFieldsV11 fields = obj.fields;
 
             if (fields.IsRequest)
             {
@@ -38,10 +57,10 @@ namespace HttpDecodingProxy.http
             }
             if (fields.IsResponse)
             {
-                if (obj.httpMessage.request.fields.IsMethod(WebRequestMethods.Http.Head)) return;
-                if (fields.IsStatusCodeRange(Http.StatusCodes.INFORMATIONAL_100) || (fields.IsStatusCode(Http.StatusCodes.NO_CONTENT_204) || fields.IsStatusCode(Http.StatusCodes.NOT_MODIFIED_304))) return;
+                if (obj.bind.request.fields.IsMethod(WebRequestMethods.Http.Head)) return;
+                if (fields.IsStatusCodeRange(HttpLibConstants.StatusCodes.INFORMATIONAL_100) || (fields.IsStatusCode(HttpLibConstants.StatusCodes.NO_CONTENT_204) || fields.IsStatusCode(HttpLibConstants.StatusCodes.NOT_MODIFIED_304))) return;
 
-                if (obj.httpMessage.request.fields.Method == WebRequestMethods.Http.Connect && fields.IsStatusCodeRange(Http.StatusCodes.SUCCESSFUL_200)) return;
+                if (obj.bind.request.fields.Method == WebRequestMethods.Http.Connect && fields.IsStatusCodeRange(HttpLibConstants.StatusCodes.SUCCESSFUL_200)) return;
             }
 
 
@@ -49,7 +68,7 @@ namespace HttpDecodingProxy.http
             {
                 if (fields.IsChunkedLast())
                 {
-                    ReadChunk(stream, obj);
+                    ReadChunks(stream, obj);
                 }
                 else
                 {
@@ -77,44 +96,50 @@ namespace HttpDecodingProxy.http
                     }
                 }
                 return;
-                //else
-                //{
-                //    Logger.LogException(new NotImplementedException($"ReadBody not implemented:{Environment.NewLine}{obj.sb.ToString()}"));
-
-                //    if (fields.Method == WebRequestMethods.Http.Connect)
-                //    {
-                //        while (true)
-                //        {
-                //            Console.Write((char)stream.ReadByte());
-                //        }
-                //    }
-                //    TextReader tr = new StreamReader(stream);
-
-                //    while (true)
-                //    {
-                //        Console.WriteLine(tr.ReadLine());
-                //    }
-                //}
             }
         }
 
-        private static void ReadBodyAsDocument(Stream stream, Http11Fields fields)
+        private static void ReadBodyAsDocument(Stream stream, HttpFieldsV11 fields)
         {
             throw new System.NotImplementedException();
         }
 
-        private void ReadChunk(Stream stream, HttpOject obj)
+        /// <summary>
+        /// https://httpwg.org/specs/rfc9112.html#chunked.encoding
+        /// </summary>
+        /// <example>
+        /*
+            HTTP/1.1 200 OK
+            Content-Type: text/plain
+            Transfer-Encoding: chunked
+            Date: Wed, 12 Apr 2023 00:08:35 GMT
+
+            25;some-extension-name=some-value
+            This is the data in the first chunk
+
+            1C;another-extension-name=another-value
+            and this is the second one
+
+            0
+
+        */
+        /// </example>
+        /// <param name="stream"></param>
+        /// <param name="obj"></param>
+        private void ReadChunks(Stream stream, HttpObject obj)
         {
             Logger.LogLine($"Begin Read Chunk");
 
             var fields = obj.fields;
-            buffer = ArrayPool<byte>.Shared.Rent((1 << 20) * 8);
+            buffer = ArrayPool<byte>.Shared.Rent(INITIAL_BUFFER_SIZE);
 
             while (true)
             {
-                string hex = stream.ReadLine(128, buffer, bufferLength, out int length);
+                string hexSizeAndExtensions = stream.ReadLine(DEFAULT_SIZE_FIRST_LINE, buffer, bufferLength, out int length);
+                if (hexSizeAndExtensions.Contains(';')) throw new System.NotImplementedException("There is no implementation for chunk extensions");
+                string hexSize = hexSizeAndExtensions;
                 bufferLength += length;
-                int size = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                int size = int.Parse(hexSize, System.Globalization.NumberStyles.HexNumber);
                 // if last chunk
                 if (size == 0) break;
                 Logger.LogLine($"Size: {size}");
@@ -155,19 +180,111 @@ namespace HttpDecodingProxy.http
 
         public void Dispose()
         {
-            ArrayPool<byte>.Shared.Return(buffer);
-            buffer = Array.Empty<byte>();
+            if (buffer.Length > 0) ArrayPool<byte>.Shared.Return(buffer);
+            else
+                buffer = Array.Empty<byte>();
+
             bufferLength = default;
             chunks.Clear();
             datas = default;
+            leftToRead = default;
+            isChunked = false;
+            isCompleted = false;
+            isRedingChunk = default;
+            isRedingEnclosure = default;
+            completed = 0;
+
+            if (memoryStream != null)
+            {
+                memoryStream.Dispose();
+                memoryStream = default;
+            }
         }
 
         internal void WriteTo(Stream stream)
         {
             if (datas.Length > 0)
             {
-                stream.Write(datas.Span);
+                stream.Write(buffer, 0, bufferLength);
             }
         }
+
+        internal string ToStringInfo()
+        {
+            return Encoding.UTF8.GetString(datas.Span);
+        }
+
+        public static void GetBodyLength(StringBuilder sb, int start, int length)
+        {
+            int end = start + length;
+
+            //if (sb.RangeContains(Http.FieldNames.) ;
+
+            for (int i = start; i < end; i++)
+            {
+
+            }
+        }
+
+        public static EBodyLengthDefenitionType DefineLengthType(StringBuilder sb)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        internal void SetBodyLength(int bodyLength)
+        {
+            this.leftToRead = bodyLength;
+            buffer = ArrayPool<byte>.Shared.Rent(bodyLength);
+            datas = new Memory<byte>(buffer, 0, bodyLength);
+        }
+
+        public void AppendChunked(ReadOnlySequence<byte> seq)
+        {
+            int length = (int)seq.Length;
+            foreach (var seg in seq)
+            {
+                memoryStream.Write(seg.Span);
+            }
+            completed += length;
+
+            if (isRedingChunk)
+            {
+                leftToRead -= length;
+                isRedingChunk = leftToRead > 0;
+            }
+        }
+        public void Append(ReadOnlySequence<byte> seq)
+        {
+            int length = (int)seq.Length;
+            seq.CopyTo(datas.Span.Slice(completed, length));
+            completed += length;
+            leftToRead -= length;
+        }
+
+        public void Complete()
+        {
+            isCompleted = true;
+        }
+
+        public void BeginChunked()
+        {
+            isChunked = true;
+            memoryStream = new MemoryStream();
+        }
+        public void EndChunked()
+        {
+            buffer = memoryStream.ToArray();
+            memoryStream.Dispose();
+            memoryStream = default;
+        }
+    }
+
+    public enum EBodyLengthDefenitionType
+    {
+        None,
+        Empty,
+        TillStreamEnd,
+        Chunked,
+        DefinedByContentLength,
     }
 }

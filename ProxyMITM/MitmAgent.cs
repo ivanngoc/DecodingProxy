@@ -6,4 +6,12 @@ namespace IziHardGames.Proxy.MITM
     {
         private TcpMediator intermediary;
     }
+
+    /// <summary>
+    /// Is it possible to decode stream without parsing it?
+    /// </summary>
+    public class SocksMitm
+    {
+
+    }
 }

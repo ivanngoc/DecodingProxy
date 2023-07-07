@@ -1,0 +1,47 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome111sss1</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<div>
+<button onclick="sayHello()">
+    Refresh
+</button>
+</div>
+
+<div>
+<table>
+<thead>
+<tr>
+<th>Connection</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+        @{
+            // TODO: Report Bug: Ctrl + K,D постоянно сдвигает тело цикла вправо на 1 tab
+            foreach (var item in Model.Connections)
+            {
+                <tr>
+                    <td>@item.Domain</td>
+                    <td>@item.Count</td>
+                    <td>2.3</td>
+                </tr>
+            }
+        }
+</table>
+</div>
+
+<script>
+     function sayHello()
+     {
+        console.log("Pressed Button");
+     }
+</script>
+

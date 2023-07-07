@@ -3,17 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecodingProxy", "DecodingProxy\DecodingProxy.csproj", "{8E842A52-49FE-4297-8A83-7802B5579FBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecodingHttp", "HttpDecodingProxy\ProxyForDecodingHttp.csproj", "{629E7E70-608C-44BD-9C89-EED26A2C6546}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpDecodingProxy", "HttpDecodingProxy\HttpDecodingProxy.csproj", "{629E7E70-608C-44BD-9C89-EED26A2C6546}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TcpDecodingProxy", "TcpDecodingProxy\TcpDecodingProxy.csproj", "{E327BA1B-BC69-4B11-8213-249E66D5EC27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecodingTcp", "TcpDecodingProxy\ProxyForDecodingTcp.csproj", "{E327BA1B-BC69-4B11-8213-249E66D5EC27}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyMITM", "ProxyMITM\ProxyMITM.csproj", "{5CF74B81-1A15-4233-A9DA-44EF897EB3E2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyLibs", "ProxyLibs\ProxyLibs.csproj", "{E09BF8D2-01F8-4368-BD28-CD0C336385E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpRecorder", "HttpRecorder\HttpRecorder.csproj", "{778B8D77-4A3D-47CD-A94E-968192A90B24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForRecording", "HttpRecorder\ProxyForRecording.csproj", "{778B8D77-4A3D-47CD-A94E-968192A90B24}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyServerWebGUI", "ProxyServerWebGUI\ProxyServerWebGUI.csproj", "{D14A5661-DA0D-42F5-88C2-F27543929FCE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecoding", "ProxyForDecoding\ProxyForDecoding.csproj", "{C88A4541-5741-499B-9DF7-ACDB0ED4FDC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IziHardGamesLibHttp", "IziHardGamesLibHttp\IziHardGamesLibHttp.csproj", "{EB5C11DB-CD25-4324-8F35-99108F4F3889}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +25,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8E842A52-49FE-4297-8A83-7802B5579FBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E842A52-49FE-4297-8A83-7802B5579FBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E842A52-49FE-4297-8A83-7802B5579FBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E842A52-49FE-4297-8A83-7802B5579FBC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{629E7E70-608C-44BD-9C89-EED26A2C6546}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{629E7E70-608C-44BD-9C89-EED26A2C6546}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{629E7E70-608C-44BD-9C89-EED26A2C6546}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +45,18 @@ Global
 		{778B8D77-4A3D-47CD-A94E-968192A90B24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{778B8D77-4A3D-47CD-A94E-968192A90B24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{778B8D77-4A3D-47CD-A94E-968192A90B24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D14A5661-DA0D-42F5-88C2-F27543929FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D14A5661-DA0D-42F5-88C2-F27543929FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D14A5661-DA0D-42F5-88C2-F27543929FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D14A5661-DA0D-42F5-88C2-F27543929FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C88A4541-5741-499B-9DF7-ACDB0ED4FDC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C88A4541-5741-499B-9DF7-ACDB0ED4FDC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C88A4541-5741-499B-9DF7-ACDB0ED4FDC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C88A4541-5741-499B-9DF7-ACDB0ED4FDC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB5C11DB-CD25-4324-8F35-99108F4F3889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB5C11DB-CD25-4324-8F35-99108F4F3889}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB5C11DB-CD25-4324-8F35-99108F4F3889}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB5C11DB-CD25-4324-8F35-99108F4F3889}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "ProxyForDecoding": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5104;https://localhost:7256",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

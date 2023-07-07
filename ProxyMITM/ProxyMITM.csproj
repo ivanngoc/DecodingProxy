@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HttpDecodingProxy\HttpDecodingProxy.csproj" />
-    <ProjectReference Include="..\TcpDecodingProxy\TcpDecodingProxy.csproj" />
+    <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HttpDecodingProxy\ProxyForDecodingHttp.csproj" />
   </ItemGroup>
 
 </Project>
