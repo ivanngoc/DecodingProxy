@@ -14,7 +14,9 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
-using ManagerConnectionsToDomain = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain>;
+using ConnectionsToDomain = IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>;
+using ManagerConnectionsToDomain = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>>;
+using ManagerConnectionsToDomainSsl = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls>;
 
 namespace IziHardGames.Proxy.Http
 {
@@ -27,9 +29,10 @@ namespace IziHardGames.Proxy.Http
         public GlobalProxySettings settings = new GlobalProxySettings();
         public readonly ManagerForHttpClientForIntercepting managerForHttpClientForIntercepting = new ManagerForHttpClientForIntercepting();
         public readonly ManagerForHttpMessages managerForHttpMessages = new ManagerForHttpMessages();
-        public readonly ManagerForConnectionsToDomain managerForConnectionsToDomain = new ManagerForConnectionsToDomain();
         public readonly ManagerForConnectionToAgent managerForConnectionsToAgent = new ManagerForConnectionToAgent();
-        private readonly ManagerConnectionsToDomain manager;
+        public readonly ManagerConnectionsToDomain manager;
+        public readonly ManagerConnectionsToDomainSsl managerSsl;
+        public readonly ManagerForConnectionsToDomain managerForConnectionsToDomain = new ManagerForConnectionsToDomain();
 
         private object lockList = new object();
         public CertManager certManager;
@@ -38,7 +41,7 @@ namespace IziHardGames.Proxy.Http
         private ConsumingProvider consumingProvider;
         private IBlockConsumer[] consumersRequest;
         private IBlockConsumer[] consumersResponse;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+        private CancellationTokenSource cts = new CancellationTokenSource();
         private ILogger logger;
 
         public HttpSpyProxy()
@@ -48,6 +51,19 @@ namespace IziHardGames.Proxy.Http
                 var pool = PoolObjectsConcurent<ConnectionsToDomain>.Shared;
                 var rent = pool.Rent();
                 rent.BindToPool(pool);
+                rent.Key = key;
+                rent.Start();
+                rent.RegistRuturnToManager(manager!.Return);
+                return rent;
+            });
+
+            managerSsl = new ManagerConnectionsToDomainSsl((key) =>
+            {
+                var pool = PoolObjectsConcurent<ConnectionsToDomainTls>.Shared;
+                var rent = pool.Rent();
+                rent.Key = key;
+                rent.BindToPool(pool);
+                rent.RegistRuturnToManager(managerSsl!.Return);
                 rent.Start();
                 return rent;
             });
@@ -90,9 +106,9 @@ namespace IziHardGames.Proxy.Http
 
             //tcpServer.Start(token);
             var task = Task.Run(async () => await RunWithPipedTcp(token), token);
-            //var taskSsl = Task.Run(async () => await tcpServer.StartSSL(AcceptClientSsl, token), token);
-            //await Task.WhenAll(task, taskSsl).ConfigureAwait(false);
-            await task.ConfigureAwait(false);
+            var taskSsl = Task.Run(async () => await tcpServer.StartSSL(AcceptClientSsl, token), token);
+            await Task.WhenAll(task, taskSsl).ConfigureAwait(false);
+            //await task.ConfigureAwait(false);
         }
 
         private async Task RunWithPipedTcp(CancellationToken token)
@@ -105,8 +121,8 @@ namespace IziHardGames.Proxy.Http
         private async Task<TcpClientPiped> AcceptClient(TcpClientPiped agent, CancellationToken token)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-            using (HttpPipedIntermediary parserRequest = PoolObjectsConcurent<HttpPipedIntermediary>.Shared.Rent().Init(consumingProvider, manager))
+            var pool = PoolObjectsConcurent<HttpPipedIntermediary>.Shared;
+            using (HttpPipedIntermediary parserRequest = pool.Rent().Init(consumingProvider, manager, pool))
             {
                 await parserRequest.Run(agent, cts).ConfigureAwait(false);
             }
@@ -129,7 +145,8 @@ namespace IziHardGames.Proxy.Http
             return obj;
         }
 
-        private async Task<ProxyBridge> CreateProxyBridgeSsl(TcpWrap tcpDecodingClient)
+        [Obsolete]
+        private async Task<ProxyBridge> CreateBridge(TcpWrap tcpDecodingClient)
         {
             var client = tcpDecodingClient.Client;
             var stream = client.GetStream();
@@ -152,26 +169,54 @@ namespace IziHardGames.Proxy.Http
             Logger.LogLine($"Connection to {host} allocated");
             return proxyBridge;
         }
+        private async Task MaintainSslSession(TcpClientPiped tcpClientPiped, CancellationTokenSource cts)
+        {
+
+
+
+
+            //var client = tcpDecodingClient.Client;
+            //var stream = client.GetStream();
+
+            //var initMsg = managerForHttpMessages.ReadFirstRequest(stream);
+            //var startOptions = initMsg.ToStartOptions();
+            //startOptions.cts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+            //startOptions.consumingProvider = consumingProvider;
+
+            //SelectProtocol(initMsg);
+
+            //string host = startOptions.Host;
+            //Logger.LogLine($"Init Msg:{host}. Method:{initMsg.request.fields.Method}{Environment.NewLine}{initMsg.request.fields.ToStringInfo()}", ConsoleColor.Yellow);
+
+            //initMsg.Dispose();
+
+            //ConnectionsToDomainTls ctd = managerForConnectionsToDomain.GetOrCreate(startOptions, caRootCert);
+            //ProxyBridge proxyBridge = await managerForHttpClientForIntercepting.CreateBridge(this, ctd, tcpDecodingClient, startOptions).ConfigureAwait(false);
+
+            //Logger.LogLine($"Connection to {host} allocated");
+            //return proxyBridge;
+
+
+        }
 
         private void SelectProtocol(HttpProxyMessage initMsg)
         {
             var version = initMsg.request.fields.Version;
             if (version != HttpLibConstants.version11.ToLowerInvariant()) throw new NotSupportedException($"Protocol Other Than HTTP/1.1 is not implemented yet");
         }
+        [Obsolete]
         private async Task AcceptWithTwoWayModeSsl(TcpWrap wrap)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(this.cts.Token);
             var ns = wrap.Client.GetStream();
             ns.ReadTimeout = 15000;
 
-            var bridge = await CreateProxyBridgeSsl(wrap).ConfigureAwait(false);
+            var bridge = await CreateBridge(wrap).ConfigureAwait(false);
             StartOptions options = bridge.startOptions;
 
-            if (options.IsHttps)
+            if (options.ValidateHttps())
             {
                 await bridge.RunTwoWayMode(options, wrap, consumersRequest, consumersResponse).ConfigureAwait(false);
-                //httpClient.StartDequeueMsgMode(options, managerForHttpMessages);
-
                 managerForHttpClientForIntercepting.Remove(bridge);
                 CloseConnection(bridge);
                 Logger.LogLine($"Connection closed ssl", ConsoleColor.Cyan);
@@ -182,7 +227,50 @@ namespace IziHardGames.Proxy.Http
                 throw new NotImplementedException();
             }
             options.Dispose();
-            await Task.Delay(100).ConfigureAwait(false);
+        }
+        private async Task AcceptPipedSsl(TcpClientPiped agent)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(this.cts.Token);
+
+            var pool = PoolObjectsConcurent<HttpPipedIntermediary>.Shared;
+            var pool2 = PoolObjectsConcurent<TcpClientPipedSsl>.Shared;
+
+            var taskFill = agent.StopWriteLoop();
+
+            using (HttpPipedIntermediary parserRequest = pool.Rent().Init(consumingProvider, manager, pool))
+            {
+                using (var initMsg = await parserRequest.AwaitMsg(HttpLibConstants.TYPE_REQUEST, agent, cts, PoolObjectsConcurent<HttpBinary>.Shared).ConfigureAwait(false))
+                {
+                    if (initMsg.FindMethod() == EHttpMethod.CONNECT)
+                    {
+                        var pair = initMsg.FindHostAndPortFromField();
+                        var hub = managerSsl.GetOrCreate($"{pair.Item1}:{pair.Item2}");
+                        hub.UpdateAddress(pair.Item1, pair.Item2);
+                        var t1 = hub.GetOrCreate("Origin Ssl", pool2);
+                        var t2 = agent.SendAsync(HttpProxyMessage.response200, cts.Token);
+
+                        SslStream agentSsl = new SslStream(agent);
+
+                        await t1.ConfigureAwait(false);
+                        await t2.ConfigureAwait(false);
+                        //await Task.WhenAll(t1, t2).ConfigureAwait(false);
+
+                        var origin = t1.Result;
+
+                        SslStream originSsl = new SslStream(agent);
+
+                    }
+                    else
+                    {
+                        // need maintain connection without CONNECT
+                        throw new NotImplementedException($"On accepting client with SSL port there must be CONNECT method first if this app behave as proxy (NOT MITM)");
+                    }
+                    await MaintainSslSession(agent, cts).ConfigureAwait(false);
+                }
+            }
+            await Task.WhenAll(taskFill).ConfigureAwait(false);
+
+            Console.WriteLine($"{nameof(HttpSpyProxy)} AcceptClient loop ended");
         }
 
         private void CloseConnection(ProxyBridge item)
@@ -198,7 +286,10 @@ namespace IziHardGames.Proxy.Http
         }
         public void Dispose()
         {
-            cts.TryReset();
+            if (!cts.TryReset())
+            {
+                cts = new CancellationTokenSource();
+            }
             sniffList.Clear();
         }
 
@@ -218,7 +309,7 @@ namespace IziHardGames.Proxy.Http
             this.consumingProvider = consumingProvider;
             ConfigJson.EnsureConfigExist();
             UpdateSettings();
-            CertManager.CreateDefault();
+            CertManager.CreateDefault(ConfigJson.PathCertForged, ConfigJson.PathCertOriginal);
             Init(logger, CertManager.Shared, consumingProvider);
             await Run(cts.Token).ConfigureAwait(false);
         }

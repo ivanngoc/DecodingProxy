@@ -33,7 +33,7 @@ namespace IziHardGames.Proxy
         {
             string host = options.Host;
             ProxyBridge client;
-            ConnectionToOriginTls cto;
+            ConnectionToOriginTlsV1 cto;
 
             if (options.IsHttps)
             {

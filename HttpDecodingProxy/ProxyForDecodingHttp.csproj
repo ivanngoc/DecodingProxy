@@ -8,7 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProxyLibs\ProxyLibs.csproj" />
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
     <ProjectReference Include="..\TcpDecodingProxy\ProxyForDecodingTcp.csproj" />
   </ItemGroup>
 

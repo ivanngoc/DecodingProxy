@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
+    <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="http\http 1.1\" />
+    <Folder Include="http\http 2\" />
+    <Folder Include="http\http 3\" />
+    <Folder Include="http\Interfaces\" />
+    <Folder Include="RPC Communication\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Threading.csproj" />
+    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForObject.csproj" />
+    <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+  </ItemGroup>
+
+</Project>

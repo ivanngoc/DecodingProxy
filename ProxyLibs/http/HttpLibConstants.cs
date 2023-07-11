@@ -15,6 +15,9 @@ namespace HttpDecodingProxy.ForHttp
         public const int LENGTH_LF = 2;
 
         public const int MAX_INT_CHARS = 10;
+        /// <summary>
+        /// request-line = method SP request-target SP HTTP-version SP = Space 
+        /// </summary>
         public const int TYPE_REQUEST = TwoWayMode.TYPE_REQUEST;
         /// <summary>
         /// status-line = HTTP-version SP status-code SP [ reason-phrase ]

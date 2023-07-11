@@ -134,7 +134,10 @@ namespace IziHardGames.Proxy.Http
             httpStreamRequest = null;
             nsToAgent = default;
             nsToOrigin = default;
-            cts.TryReset();
+            if (!cts.TryReset())
+            {
+                cts = new CancellationTokenSource();
+            }
         }
     }
 }

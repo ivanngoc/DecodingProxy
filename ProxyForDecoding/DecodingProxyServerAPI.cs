@@ -25,7 +25,7 @@ namespace IziHardGames.Proxy
             var reply = new Reply();
             reply.Connection.AddRange(httpDecodingProxyServer.managerForConnectionsToDomain.items.Values.Select(x => new DataConnection()
             {
-                Domain = x.AddressAndPort,
+                Domain = x.Key,
                 Count = x.Count,
             }));
             return Task.FromResult<Reply>(reply);

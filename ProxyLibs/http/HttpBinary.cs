@@ -5,19 +5,20 @@ using IziHardGames.Libs.IO;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.NonEngine.Enumerators;
 using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Proxy.Sniffing.ForHttp;
 using System;
 using System.Buffers;
-using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace HttpDecodingProxy.ForHttp
 {
-    public class HttpBinary : IHttpObject, IDisposable
+
+
+    public class HttpBinary : IHttpObject, IDisposable, ICloneable
     {
-        public byte[]? buffer;
+        protected byte[]? buffer;
         private int length;
+        private int lengthAnalyzed;
         public int offset;
         public int indexEndFields;
         /// <summary>
@@ -26,7 +27,7 @@ namespace HttpDecodingProxy.ForHttp
         public int indexEndBody;
         private (int, int)[] maps;
         private int fieldsCount;
-        private int fieldsCountTemp;
+        private int fieldsCountMapped;
         private IPoolObjects<HttpBinary>? pool;
         public int type;
         public string debug;
@@ -35,7 +36,7 @@ namespace HttpDecodingProxy.ForHttp
         private int deaths;
 
         public int FieldsCount => fieldsCount;
-        public int FieldsCountTemp => fieldsCountTemp;
+        public int FieldsCountMapped => fieldsCountMapped;
         public int LengthBody => indexEndBody - indexEndFields;
         public int Length => length;
         /// <summary>
@@ -43,16 +44,17 @@ namespace HttpDecodingProxy.ForHttp
         /// </summary>
         public int LengthHeaders => indexEndFields - offset;
         public string Fields => ToStringFieldsFromMap();
-        public string Raw => Encoding.UTF8.GetString(buffer.Take(length).ToArray());
+        public string Raw => ToString();
         public bool IsCloseRequired => CheckCloseConnection();
-        public Memory<byte> Memory => new Memory<byte>(buffer, offset, length);
-        public Span<byte> Span => Memory.Span;
-        public Memory<byte> this[string fieldName] => GetFieldValue(fieldName);
-        public Span<byte> this[int index] => GetLineByIndex(index);
+        public ReadOnlyMemory<byte> Memory => new Memory<byte>(buffer, offset, length);
+        public ReadOnlySpan<byte> Span => Memory.Span;
+        public ReadOnlyMemory<byte> this[string fieldName] => GetFieldValue(fieldName);
+        public ReadOnlySpan<byte> this[int index] => GetLineByIndex(index);
 
         public HttpBinary()
         {
             buffer = Array.Empty<byte>();
+            //buffer = new byte[(1 << 20) * 16];
             maps = Array.Empty<(int, int)>();
         }
         public HttpBinary(int size)
@@ -70,18 +72,17 @@ namespace HttpDecodingProxy.ForHttp
         {
             deaths++;
             if (buffer.Length > 0) ArrayPool<byte>.Shared.Return(buffer);
-            else
-                buffer = Array.Empty<byte>();
+            buffer = Array.Empty<byte>();
 
             if (maps.Length > 0) ArrayPool<(int, int)>.Shared.Return(maps);
-            else
-                maps = Array.Empty<(int, int)>();
+            maps = Array.Empty<(int, int)>();
 
             pool.Return(this);
             pool = default;
             fieldsCount = default;
-            fieldsCountTemp = default;
+            fieldsCountMapped = default;
             length = default;
+            lengthAnalyzed = default;
             offset = default;
             indexEndBody = default;
             indexEndFields = default;
@@ -96,7 +97,7 @@ namespace HttpDecodingProxy.ForHttp
             {
                 var newarr = ArrayPool<byte>.Shared.Rent(targetSize);
                 if (this.length > 0) Array.Copy(buffer, 0, newarr, 0, this.length);
-                ArrayPool<byte>.Shared.Return(buffer);
+                if (buffer.Length != 0) ArrayPool<byte>.Shared.Return(buffer);
                 buffer = newarr;
             }
             return targetSize;
@@ -104,17 +105,17 @@ namespace HttpDecodingProxy.ForHttp
 
 
         #region Getters
-        private Memory<byte> GetFieldValue(string fieldName)
+        private ReadOnlyMemory<byte> GetFieldValue(string fieldName)
         {
             throw new NotImplementedException();
         }
-        private Span<byte> GetLineByIndex(int index)
+        private ReadOnlySpan<byte> GetLineByIndex(int index)
         {
-            return new Span<byte>(buffer, maps[index].Item1, maps[index].Item2);
+            return new ReadOnlySpan<byte>(buffer, maps[index].Item1, maps[index].Item2);
         }
-        public Memory<byte> GetMemory()
+        public ReadOnlyMemory<byte> GetMemory()
         {
-            return new Memory<byte>(buffer, offset, length);
+            return new ReadOnlyMemory<byte>(buffer, offset, length);
         }
         /// <summary>
         /// <see cref="HttpBody.ReadBody(Stream, HttpObject)"/>
@@ -124,20 +125,24 @@ namespace HttpDecodingProxy.ForHttp
         {
             if (CheckNoBody())
             {
+                lengthAnalyzed = 0;
                 return 0;
             }
             if (CheckChunked())
             {
+                lengthAnalyzed = -2;
                 return -2;
             }
             else if (TryGetFieldValueAsInt(HttpLibConstants.FieldNames.NAME_CONTENT_LENGTH, out int val))
             {
+                lengthAnalyzed = val;
                 return val;
             }
+            lengthAnalyzed = -3;
             return -3;
         }
 
-        public (string, int) GetHostAndPortFromField()
+        public (string, int) FindHostAndPortFromField()
         {
             if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_HOST, out var value))
             {
@@ -155,9 +160,9 @@ namespace HttpDecodingProxy.ForHttp
             return new EnumeratorArrayRef<(int, int)>(maps, fieldsCount);
         }
 
-        public bool TryGetFieldValueCI(string fieldName, out Span<byte> bytes)
+        public bool TryGetFieldValueCI(string fieldName, out ReadOnlySpan<byte> bytes)
         {
-            for (int i = 0; i < fieldsCount; i++)
+            for (int i = 0; i < fieldsCountMapped; i++)
             {
                 var span = new Span<byte>(buffer, maps[i].Item1, maps[i].Item2);
                 if (span.Length < fieldName.Length) continue;
@@ -212,18 +217,18 @@ namespace HttpDecodingProxy.ForHttp
 
         public Span<byte> AddField(ReadOnlySequence<byte> readOnlySequence, int offset)
         {
-            this.fieldsCountTemp++;
+            this.fieldsCount++;
             int sizeToAdd = (int)readOnlySequence.Length;
             this.length = EnsureCapacity(sizeToAdd);
-            Memory<byte> segment = new Memory<byte>(buffer, offset, sizeToAdd);
-            readOnlySequence.CopyTo(segment.Span);
-            return segment.Span;
+            Span<byte> segment = new Span<byte>(buffer, offset, sizeToAdd);
+            readOnlySequence.CopyToSafe(segment);
+            return segment;
         }
 
         public void AddBody(ReadOnlySequence<byte> readOnlySequence)
         {
             int lengthToCopy = (int)readOnlySequence.Length;
-            readOnlySequence.CopyTo(new Span<byte>(buffer, this.length, lengthToCopy));
+            readOnlySequence.CopyToSafe(new Span<byte>(buffer, this.length, lengthToCopy));
             this.length += lengthToCopy;
         }
         public void AddBodyForSure(ReadOnlySequence<byte> readOnlySequence)
@@ -231,7 +236,7 @@ namespace HttpDecodingProxy.ForHttp
             var offset = this.length;
             this.length = EnsureCapacity((int)readOnlySequence.Length);
             int lengthToCopy = (int)readOnlySequence.Length;
-            readOnlySequence.CopyTo(new Span<byte>(buffer, offset, lengthToCopy));
+            readOnlySequence.CopyToSafe(new Span<byte>(buffer, offset, lengthToCopy));
         }
 
         public void BodyStart()
@@ -245,19 +250,22 @@ namespace HttpDecodingProxy.ForHttp
         }
         internal void AllocateFieldsMap()
         {
-            var count = fieldsCountTemp;
-            var newMap = ArrayPool<(int, int)>.Shared.Rent(count);
-            if (maps.Length > 0)
+            if (maps.Length < fieldsCount)
             {
-                Array.Copy(maps, 0, newMap, 0, count);
-                ArrayPool<(int, int)>.Shared.Return(maps);
+                var newMap = ArrayPool<(int, int)>.Shared.Rent(fieldsCount);
+                if (maps.Length > 0)
+                {
+                    Array.Copy(maps, 0, newMap, 0, fieldsCountMapped);
+                    ArrayPool<(int, int)>.Shared.Return(maps);
+                }
+                maps = newMap;
             }
-            maps = newMap;
         }
 
         internal void MapField(int index, int offset, int length)
         {
             maps[index] = (offset, length);
+            fieldsCountMapped++;
         }
 
         public string ToStringFields()
@@ -266,7 +274,7 @@ namespace HttpDecodingProxy.ForHttp
         }
         public string ToStringFieldsFromMap()
         {
-            return maps.Take(fieldsCount)
+            return maps.Take(fieldsCountMapped)
                   .Select(x => new Memory<byte>(buffer, x.Item1, x.Item2))
                   .Select(y => Encoding.UTF8.GetString(y.Span))
                   .Aggregate((x, y) => x + y);
@@ -278,7 +286,7 @@ namespace HttpDecodingProxy.ForHttp
         /// <returns></returns>
         public bool CheckChunked()
         {
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_TRANSFER_ENCODING, out Span<byte> span))
+            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_TRANSFER_ENCODING, out ReadOnlySpan<byte> span))
             {
                 return span.GotSubsequenceProbablyAtBackCI(HttpLibConstants.FieldValues.VALUE_CHUNKED);
             }
@@ -311,7 +319,7 @@ namespace HttpDecodingProxy.ForHttp
         {
             // status-line = HTTP-version SP status-code SP [ reason-phrase ]
             // SP (space)
-            Span<byte> span = new Span<byte>(buffer, maps[0].Item1, maps[0].Item2);
+            ReadOnlySpan<byte> span = new ReadOnlySpan<byte>(buffer, maps[0].Item1, maps[0].Item2);
             int count = 0;
             Span<int> values = stackalloc int[2];
 
@@ -341,6 +349,10 @@ namespace HttpDecodingProxy.ForHttp
         }
 
 
+        public string ToStringHex()
+        {
+            return GetMemory().Span.ToStringHex();
+        }
         public override string ToString()
         {
             return Encoding.UTF8.GetString(GetMemory().Span);
@@ -357,12 +369,11 @@ namespace HttpDecodingProxy.ForHttp
 
         internal void FieldsEnd()
         {
-            fieldsCount = fieldsCountTemp;
             indexEndFields = length;
             debug = Encoding.UTF8.GetString(GetMemory().Span);
         }
 
-        internal async Task<bool> TryReadBodyUntilEnd(TcpClientPiped client, CancellationTokenSource cts)
+        internal async Task<bool> TryReadBodyUntilEnd<T>(T client, CancellationTokenSource cts) where T : IReader, ICheckConnection
         {
             if (isReadingUntilCloseConnection)
             {
@@ -372,7 +383,7 @@ namespace HttpDecodingProxy.ForHttp
             return false;
         }
 
-        public async Task ReadBodyUntilEnd(TcpClientPiped client)
+        public async Task ReadBodyUntilEnd<T>(T client) where T : IReader, ICheckConnection
         {
             while (client.CheckConnectIndirectly())
             {
@@ -385,9 +396,9 @@ namespace HttpDecodingProxy.ForHttp
         /// <summary>
         /// Apply fields to control connection and so on
         /// </summary>
-        public void ApplyControls(TcpClientPiped pipedTcpClient)
+        public void ApplyControls<T>(T pipedTcpClient) where T : IApplyControl
         {
-            var version = GetVersion();
+            var version = FindVersion();
 
             if (version == EHttpVersion.Version11)
             {
@@ -406,7 +417,7 @@ namespace HttpDecodingProxy.ForHttp
             timeout = default;
             max = default;
 
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_KEEP_ALIVE, out Span<byte> span))
+            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_KEEP_ALIVE, out ReadOnlySpan<byte> span))
             {
                 int index = 0;
                 int offset = 0;
@@ -419,11 +430,11 @@ namespace HttpDecodingProxy.ForHttp
                 {
                     int start = offset;
                     isKeepItterate = span.TryFindSplit(ConstantsUtf8.COMMA, ref index, ref offset, ref length);
-                    Span<byte> slice = span.Slice(start, length);
+                    ReadOnlySpan<byte> slice = span.Slice(start, length);
                     int indexTimeout = slice.EndOfSubstringCI("timeout=");
                     if (indexTimeout > 0)
                     {
-                        Span<byte> value = slice.Slice(indexTimeout + 1);
+                        ReadOnlySpan<byte> value = slice.Slice(indexTimeout + 1);
                         timeout = value.ParseToInt32();
                         isTimeout = true;
                     }
@@ -432,7 +443,7 @@ namespace HttpDecodingProxy.ForHttp
                         int indexMax = slice.EndOfSubstringCI("max=");
                         if (indexMax > 0)
                         {
-                            Span<byte> value = slice.Slice(indexMax + 1);
+                            ReadOnlySpan<byte> value = slice.Slice(indexMax + 1);
                             max = value.ParseToInt32();
                             isMax = true;
                         }
@@ -445,7 +456,7 @@ namespace HttpDecodingProxy.ForHttp
         }
         public string GetVersionString()
         {
-            switch (GetVersion())
+            switch (FindVersion())
             {
                 case EHttpVersion.None: throw new ArgumentOutOfRangeException();
                 case EHttpVersion.Version10: return HttpLibConstants.version10;
@@ -455,9 +466,9 @@ namespace HttpDecodingProxy.ForHttp
                 default: goto case EHttpVersion.None;
             }
         }
-        public EHttpVersion GetVersion()
+        public EHttpVersion FindVersion()
         {
-            Span<byte> version;
+            ReadOnlySpan<byte> version;
             var span = this[0];
 
             if (type == HttpLibConstants.TYPE_REQUEST)
@@ -474,5 +485,97 @@ namespace HttpDecodingProxy.ForHttp
             if (version.GotSubsequenceProbablyAtBackCI(HttpLibConstants.version10)) return EHttpVersion.Version11;
             throw new ArgumentException($"Can't parse version. Recived:{version.ToStringUtf8()}");
         }
+        public EHttpMethod FindMethod()
+        {
+            ReadOnlySpan<byte> method;
+            var span = this[0];
+            if (type == HttpLibConstants.TYPE_REQUEST)
+            {   //   get start-line
+                method = span.FindSplit(ConstantsUtf8.SPACE, 0);
+                ///<see cref="HttpMethod"/>
+                if (method[0] == 'G') return EHttpMethod.GET;
+                if (method[0] == 'C') return EHttpMethod.CONNECT;
+                if (method[0] == 'P' && method[1] == 'U') return EHttpMethod.PUT;
+                if (method[0] == 'P' && method[1] == 'O') return EHttpMethod.POST;
+                return EHttpMethod.NOT_IMPLEMENTED;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Method Is Available Only for Request type");
+            }
+        }
+
+        public bool Validate()
+        {
+            var v = FindVersion();
+            return true;
+        }
+
+        public object Clone()
+        {
+            return new HttpBinary()
+            {
+                buffer = buffer.ToArray(),
+                maps = maps.ToArray(),
+                offset = offset,
+                deaths = deaths,
+                fieldsCount = fieldsCount,
+                fieldsCountMapped = fieldsCountMapped,
+                generation = generation,
+                indexEndBody = indexEndBody,
+                indexEndFields = indexEndFields,
+                isReadingUntilCloseConnection = isReadingUntilCloseConnection,
+                length = length,
+                lengthAnalyzed = lengthAnalyzed,
+                type = type,
+
+
+                pool = default,
+                debug = debug,
+            };
+        }
+
+#if DEBUG
+        public static async Task Test()
+        {
+            TestDataFromFile provider = new TestDataFromFile();
+            var cts = new CancellationTokenSource();
+            provider.Start();
+
+            using (HttpPipedIntermediary inter = new HttpPipedIntermediary().Init(new IziHardGames.Proxy.Consuming.ConsumingProvider(), new IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain<TcpClientPiped>>(null), null))
+            {
+                while (!provider.isEnded)
+                {
+                    var req = await inter.AwaitMsg(HttpLibConstants.TYPE_RESPONSE, provider, cts, PoolObjectsConcurent<HttpBinary>.Shared);
+                    Console.WriteLine(req.Fields);
+                }
+            }
+        }
+
+        public class TestDataFromFile : TcpClientPiped
+        {
+            private FileStream fs;
+            public bool isEnded;
+
+            public void Start()
+            {
+                string filename = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\test data\\test.txt";
+                this.fs = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                FillPipe();
+            }
+
+            public async Task FillPipe()
+            {
+                while (fs.Position < fs.Length)
+                {
+                    var memory = writer.GetMemory(4096);
+                    var readed = await fs.ReadAsync(memory).ConfigureAwait(false);
+                    writer.Advance(readed);
+                    var res = await writer.FlushAsync().ConfigureAwait(false);
+                }
+                isEnded = true;
+            }
+        }
+#endif
     }
 }

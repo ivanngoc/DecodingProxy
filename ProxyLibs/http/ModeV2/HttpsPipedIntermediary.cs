@@ -30,19 +30,19 @@ namespace IziHardGames.Proxy.Sniffing.ForHttps
             var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
             using (agent)
             {
-                Task t1 = agent.FillPipeAsync(cts);
+                Task t1 = agent.RunWriterLoop();
                 var reader = agent.reader;
 
                 using (var initMsg = await AwaitMsg(HttpLibConstants.TYPE_REQUEST, agent, cts, PoolObjectsConcurent<HttpBinary>.Shared).ConfigureAwait(false))
                 {
                     using (TcpClientPiped origin = PoolObjectsConcurent<TcpClientPiped>.Shared.Rent())
                     {
-                        var pair = initMsg.GetHostAndPortFromField();
-                        var t2 = origin.ConnectAsync(pair.Item1, pair.Item2);
+                        var pair = initMsg.FindHostAndPortFromField();
+                        var t2 = origin.ConnectAsyncTcp(pair.Item1, pair.Item2);
 
                         var t3 = agent.SendAsync(HttpLibConstants.Responses.bytesOk11, cts.Token);
 
-                        /// <see cref="ConnectionToOriginTls.ConnectSsl(ConnectionsToDomainTls, string, int)"/>
+                        /// <see cref="ConnectionToOriginTlsV1.ConnectSsl(ConnectionsToDomainTls, string, int)"/>
                         using (SslStream sslAgent = new SslStream(agent))
                         {
                             X509Certificate2 forgedOriginCert = null;

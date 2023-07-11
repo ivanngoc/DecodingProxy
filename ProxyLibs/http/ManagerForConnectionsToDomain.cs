@@ -24,7 +24,7 @@ namespace IziHardGames.Proxy
             else
             {
                 var result = new ConnectionsToDomainTls();
-                result.InitAsync(options, caRootCert);
+                result.InitCerts(options, caRootCert);
                 items.TryAdd(key, result);
                 return result;
             }

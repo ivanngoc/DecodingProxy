@@ -21,7 +21,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             PoolObjects<ProxyBridgeSsl>.Shared.Return(this);
         }
 
-        public override async Task MakeInterceptingBridge(ConnectionToOriginTls cto, ConnectionToAgentTls cta)
+        public override async Task MakeInterceptingBridge(ConnectionToOriginTlsV1 cto, ConnectionToAgentTls cta)
         {
             StartOptions options = startOptions;
 

@@ -20,13 +20,13 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
     public class ProxyBridge : IDisposable
     {
         #region Networking
-        public string AddressAndPort => connectionsToDomain.AddressAndPort;
+        public string AddressAndPort => connectionsToDomain.Key;
         public ConnectionToAgentTls Cta => connectionToAgent;
-        public ConnectionToOriginTls Cto => connectionToOrigin;
+        public ConnectionToOriginTlsV1 Cto => connectionToOrigin;
 
         protected ConnectionToAgentTls connectionToAgent;
         protected ConnectionsToDomainTls connectionsToDomain;
-        protected ConnectionToOriginTls connectionToOrigin;
+        protected ConnectionToOriginTlsV1 connectionToOrigin;
         #endregion
 
         private EClientStatus status;
@@ -67,7 +67,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             this.connectionsToDomain = ctd;
             this.startOptions = startOptions;
         }
-        public virtual async Task MakeInterceptingBridge(ConnectionToOriginTls cto, ConnectionToAgentTls cta)
+        public virtual async Task MakeInterceptingBridge(ConnectionToOriginTlsV1 cto, ConnectionToAgentTls cta)
         {
             Bind(cto);
             Bind(cta);
@@ -191,7 +191,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
             connectionToAgent.Dispose();
             connectionToOrigin.Dispose();
-            connectionsToDomain.Disconnect(this);
+            connectionsToDomain.Disconnect(this.Cto);
 
             CountMsg = default;
             RunTask = default;
@@ -208,7 +208,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 PoolObjects<ProxyBridge>.Shared.Return(this);
             }
         }
-        protected void Bind(ConnectionToOriginTls cto)
+        protected void Bind(ConnectionToOriginTlsV1 cto)
         {
             this.connectionToOrigin = cto;
         }

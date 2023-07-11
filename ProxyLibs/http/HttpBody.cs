@@ -181,8 +181,7 @@ namespace HttpDecodingProxy.ForHttp
         public void Dispose()
         {
             if (buffer.Length > 0) ArrayPool<byte>.Shared.Return(buffer);
-            else
-                buffer = Array.Empty<byte>();
+            buffer = Array.Empty<byte>();
 
             bufferLength = default;
             chunks.Clear();

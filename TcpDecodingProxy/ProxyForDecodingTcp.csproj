@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
     <ProjectReference Include="..\ProxyLibs\ProxyLibs.csproj" />
   </ItemGroup>
 

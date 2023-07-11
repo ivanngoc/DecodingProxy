@@ -587,19 +587,11 @@ namespace HttpDecodingProxy.ForHttp
                 {
                     return -2;
                 }
-                else
-                {
-                    // read until server close connection
-                    throw new System.NotImplementedException();
-                }
             }
-            else
+            if (TryFindContentLengthLine(out string contentLength))
             {
-                if (TryFindContentLengthLine(out string contentLength))
-                {
-                    int size = int.Parse(contentLength.Substring(16));
-                    return size;
-                }
+                int size = int.Parse(contentLength.Substring(16));
+                return size;
             }
             return -1;
         }

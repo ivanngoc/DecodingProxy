@@ -9,7 +9,11 @@ namespace System
 {
     public static class ExtensionsForMemory
     {
-        public static string ToStringUtf8(this Memory<byte> mem)
+        public static string ToStringHex(in this ReadOnlyMemory<byte> mem)
+        {
+            return mem.Span.ToStringHex();
+        }
+        public static string ToStringUtf8(in this ReadOnlyMemory<byte> mem)
         {
             return UTF8.GetString(mem.Span);
         }
@@ -17,6 +21,34 @@ namespace System
 
     public static class ExtensionsForReadOnlySequence
     {
+        public static void CopyToSafe(in this ReadOnlySequence<byte> seq, Span<byte> span)
+        {
+            int offset = 0;
+
+            foreach (var seg in seq)
+            {
+                seg.Span.CopyTo(span.Slice(offset, seg.Length));
+                offset += seg.Length;
+            }
+        }
+        public static string ToStringHex(in this ReadOnlySequence<byte> seq)
+        {
+            if (seq.Length == 0) return string.Empty;
+
+            Span<char> chars = stackalloc char[(int)seq.Length << 1];
+            int i = default;
+            foreach (var seg in seq)
+            {
+                var span = seg.Span;
+                for (int j = 0; j < span.Length; j++, i += 2)
+                {
+                    var p = ParseByte.ByteToHex(span[j]);
+                    chars[i] = p.Item1;
+                    chars[i + 1] = p.Item2;
+                }
+            }
+            return new string(chars);
+        }
         public static string ToStringUtf8(in this ReadOnlySequence<byte> seq)
         {
             return Encoding.UTF8.GetString(seq);
@@ -88,8 +120,21 @@ namespace System
     }
 
     public static class ExtensionsForSpan
-    {       
-        public static string ToStringUtf8(in this Span<byte> span)
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string ToStringHex(in this ReadOnlySpan<byte> span)
+        {
+            Span<char> chars = stackalloc char[span.Length << 1];
+            int k = default;
+            for (int i = 0; i < span.Length; i++, k += 2)
+            {
+                var v = ParseByte.ByteToHex(span[i]);
+                chars[k] = v.Item1;
+                chars[k + 1] = v.Item2;
+            }
+            return new string(chars);
+        }
+        public static string ToStringUtf8(in this ReadOnlySpan<byte> span)
         {
             return Encoding.UTF8.GetString(span);
         }
@@ -98,7 +143,7 @@ namespace System
         /// </summary>
         /// <param name="span"></param>
         /// <returns></returns>
-        public static int ParseToInt32(in this Span<byte> span)
+        public static int ParseToInt32(in this ReadOnlySpan<byte> span)
         {
             Span<char> chars = stackalloc char[span.Length];
             for (int i = 0; i < span.Length; i++)
@@ -107,7 +152,7 @@ namespace System
             }
             return int.Parse(chars);
         }
-        public static void CopyAsChar(in this Span<byte> span, ref Span<char> result)
+        public static void CopyAsChar(in this ReadOnlySpan<byte> span, ref Span<char> result)
         {
             if (span.Length != result.Length) throw new ArgumentException($"Spans must be same length");
             for (int i = 0; i < span.Length; i++)
@@ -219,7 +264,7 @@ namespace System
         /// <param name="src"></param>
         /// <param name="substring"></param>
         /// <returns></returns>
-        public static bool GotSubsequenceProbablyAtBackCI(in this Span<byte> src, ReadOnlySpan<char> substring)
+        public static bool GotSubsequenceProbablyAtBackCI(in this ReadOnlySpan<byte> src, ReadOnlySpan<char> substring)
         {
             if (src.Length < substring.Length) return false;
             int endItermediary = src.Length - substring.Length;
@@ -251,7 +296,7 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> FindSplit(in this Span<byte> span, byte byteChar, int index)
+        public static ReadOnlySpan<byte> FindSplit(in this ReadOnlySpan<byte> span, byte byteChar, int index)
         {
             int offset = 0;
             int count = 0;
@@ -278,7 +323,7 @@ namespace System
             return span;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryFindSplit(in this Span<byte> span, byte byteChar, ref int index, ref int offset, ref int length)
+        public static bool TryFindSplit(in this ReadOnlySpan<byte> span, byte byteChar, ref int index, ref int offset, ref int length)
         {
             for (int i = offset; i < span.Length; i++)
             {
@@ -296,7 +341,7 @@ namespace System
             return false;
         }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int EndOfSubstringCI(in this Span<byte> span, ReadOnlySpan<char> substring)
+        public static int EndOfSubstringCI(in this ReadOnlySpan<byte> span, ReadOnlySpan<char> substring)
         {
             int offset = default;
 

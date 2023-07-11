@@ -13,3 +13,4 @@ TcpDecodingProxy/bin/
 .vs/
 */bin/
 */obj/
+*.log

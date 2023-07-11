@@ -261,14 +261,14 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             httpObject.type = HttpLibConstants.TYPE_REQUEST;
             countRequest++;
             httpObject.sequnce = countRequest;
-            options.consumingProvider.consumeRequestMsg(dataSource, httpObject);
+            options.ProviderAs<ConsumingProvider>().consumeRequestMsg(dataSource, httpObject);
         }
         private void ConsumeResponse(HttpObject httpObject)
         {
             httpObject.type = HttpLibConstants.TYPE_RESPONSE;
             countResponses++;
             httpObject.sequnce = countResponses;
-            options.consumingProvider.consumeResponseMsg(dataSource, httpObject);
+            options.ProviderAs<ConsumingProvider>().consumeResponseMsg(dataSource, httpObject);
         }
         /// <summary>
         /// </summary>

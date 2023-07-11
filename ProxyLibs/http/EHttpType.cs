@@ -5,6 +5,15 @@ using System.Net;
 
 namespace HttpDecodingProxy.ForHttp
 {
+    public enum EHttpMethod
+    {
+        None,
+        GET,
+        POST,
+        PUT,
+        CONNECT,
+        NOT_IMPLEMENTED,
+    }
 
     /// <summary>
     /// <see cref="HttpVersion"/>
