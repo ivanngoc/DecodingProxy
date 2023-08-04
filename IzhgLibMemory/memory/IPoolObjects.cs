@@ -1,8 +1,15 @@
-﻿namespace IziHardGames.Libs.NonEngine.Memory
+﻿using System;
+
+namespace IziHardGames.Libs.NonEngine.Memory
 {
+    public interface IGuid
+    {
+        Guid Guid { get; }
+    }
+
     public interface IKey<T>
     {
-        T Key { get; }
+        T Key { get; set; }
     }
 
     public interface IPoolItem<T>
@@ -28,5 +35,9 @@
     public interface IPoolReturn<in T>
     {
         void Return(T item);
+    }
+    public interface IPoolBind<T>
+    {
+        void BindToPool(IPoolReturn<T> pool);
     }
 }

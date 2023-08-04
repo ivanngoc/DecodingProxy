@@ -1,6 +1,13 @@
 ﻿using IziHardGames.Proxy;
 using IziHardGames.Proxy.Http;
 using IziHardGames.Proxy.Recoreder;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+
+Console.OutputEncoding = System.Text.Encoding.Unicode;
+Console.InputEncoding = System.Text.Encoding.Unicode;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +18,15 @@ var builder = WebApplication.CreateBuilder(args);
 var grpcBuilder = builder.Services.AddGrpc();
 
 builder.Services.AddHostedService<ProxyService>();
-builder.Services.AddSingleton<DecodingProxyServerAPI>();
-builder.Services.AddSingleton((x) => ProxyFactory<HttpSpyProxy>.Create(EProxyBehaviour.MitmSpy, () => new HttpSpyProxy()));
+builder.Services.AddSingleton((x) => ProxyFactory<HttpSpyProxy>.Create(EProxyBehaviour.MitmSpy, () => new HttpSpyProxy(x.GetService<ILogger<HttpSpyProxy>>()!, x.GetService<MonitorForConnections>()!)));
+builder.Services.AddSingleton<MonitorForConnections>();
+builder.Services.AddSingleton<GrpcServiceServer>();
 builder.Services.AddSingleton<HttpRecoreder>();
+builder.Services.AddSingleton<GrpcProxyPublisherService>();
 
 var app = builder.Build();
 
+app.MapGrpcService<GrpcProxyPublisherService>(); //.RequireHost("*:7042");
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 // C:\Users\ngoc\Documents\[Projects] C#\IziHardGamesProxy\ProxyForDecoding\Properties\launchSettings.json
@@ -30,6 +40,5 @@ app.MapGet("/", () => "Communication with gRPC endpoints must be made through a 
 
 // необходимо обязательно устанавливать опцию         "Protocols": "Http2" так как по нему работает gRPC
 
-app.MapGrpcService<DecodingProxyServerAPI>(); //.RequireHost("*:7042");
 
 app.Run();

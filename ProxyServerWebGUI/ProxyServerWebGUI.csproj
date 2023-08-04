@@ -3,16 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.53.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.53.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.54.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.55.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.20" />
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
 
@@ -21,11 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\" />
+    <ProjectReference Include="..\HttpDecodingProxy\ProxyForDecodingHttp.csproj" />
+    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Libs.Tables.csproj" />
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
+    <Folder Include="Lib\" />
+    <Folder Include="Views\Shared\Components\ComponentRaw\" />
   </ItemGroup>
 
 

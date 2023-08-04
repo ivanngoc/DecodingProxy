@@ -3,10 +3,14 @@ using IziHardGames.Libs.Async;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.Streaming;
 using IziHardGames.Proxy.Consuming;
+using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.IO.Pipelines;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using HttpResult = HttpDecodingProxy.ForHttp.HttpObject;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
@@ -243,6 +247,11 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             }
             OUT:
             await Task.WhenAll(fillPipe, produceMsg).ConfigureAwait(false);
+        }
+
+        public void Write(object data, int v, object length)
+        {
+            throw new NotImplementedException();
         }
     }
 }

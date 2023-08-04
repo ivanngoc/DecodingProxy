@@ -1,4 +1,8 @@
-﻿namespace IziHardGames.Libs.DevTools
+﻿using System;
+using System.IO;
+using System.Threading;
+
+namespace IziHardGames.Libs.DevTools
 {
     public class SocketDebugger
     {

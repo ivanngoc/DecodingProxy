@@ -7,7 +7,11 @@ using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Http;
 using IziHardGames.Proxy.Recoreder;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using HttpRequest = HttpDecodingProxy.ForHttp.HttpRequest;
 
 namespace IziHardGames.Proxy
@@ -15,16 +19,13 @@ namespace IziHardGames.Proxy
     public class ProxyService : IHostedService
     {
         private readonly ILogger logger;
-        private DecodingProxyServerAPI grpcServer;
+        private GrpcServiceServer grpcServer;
         private HttpSpyProxy httpDecodingProxyServer;
         private readonly HttpRecoreder httpRecoreder;
         private readonly ConsumingProvider consumingProvider;
 
-        public ProxyService(ILogger<ProxyService> logger, DecodingProxyServerAPI grpcServer, HttpSpyProxy httpDecodingProxyServer, HttpRecoreder httpRecoreder)
+        public ProxyService(ILogger<ProxyService> logger, GrpcServiceServer grpcServer, HttpSpyProxy httpDecodingProxyServer, HttpRecoreder httpRecoreder)
         {
-            Console.OutputEncoding = System.Text.Encoding.Unicode;
-            Console.InputEncoding = System.Text.Encoding.Unicode;
-
             // Console.OutputEncoding = Encoding.UTF8;
             HttpFieldsV11.loggerShared = logger;
 
@@ -33,13 +34,10 @@ namespace IziHardGames.Proxy
             this.httpDecodingProxyServer = httpDecodingProxyServer;
             this.httpRecoreder = httpRecoreder;
             Logger.logger = logger;
-            logger.Log(LogLevel.Warning, "Created proxy sevice");
-            logger.Log(LogLevel.Information, "Log Information");
+            logger.Log(LogLevel.Information, $"Created {typeof(ProxyService).FullName}");
 
             consumingProvider = new ConsumingProvider()
             {
-                consumersRequest = new IBlockConsumer[] { httpRecoreder.requestRecorer },
-                consumersResponse = new IBlockConsumer[] { httpRecoreder.responseRecorder },
                 consumeRequest = httpRecoreder.RecieveRequest,
                 consumeResponse = httpRecoreder.RecieveResponse,
                 consumeRequestMsg = httpRecoreder.RecieveRequestMsg,
@@ -49,15 +47,17 @@ namespace IziHardGames.Proxy
             };
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            logger.Log(LogLevel.Warning, "Created proxy sevice");
-            await Task.Run(async () => await httpDecodingProxyServer.Run(logger, consumingProvider), cancellationToken).ConfigureAwait(false);
+            // do not await. it's caused blocking (for example gRPC might not start yet)
+            var task = Task.Run(async () => await httpDecodingProxyServer.Run(consumingProvider), cancellationToken).ConfigureAwait(false);
+            return Task.CompletedTask;
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-            httpDecodingProxyServer.Stop();
+            httpDecodingProxyServer.Break();
+            return Task.CompletedTask;
         }
     }
 }

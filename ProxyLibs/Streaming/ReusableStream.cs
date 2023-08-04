@@ -1,4 +1,5 @@
-﻿using IziHardGames.Libs.NonEngine.Memory;
+﻿using System;
+using System.IO;
 
 namespace IziHardGames.Libs.Streaming
 {

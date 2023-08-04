@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //SslTcpProxy.Test();
 
+using System;
 using System.Buffers;
 using System.Runtime.InteropServices;
 

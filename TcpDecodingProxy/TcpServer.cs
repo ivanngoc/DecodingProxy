@@ -1,106 +1,74 @@
-﻿using IziHardGames.Proxy.Tcp;
-using System.Net;
+﻿using IziHardGames.Libs.Networking.Contracts;
+using IziHardGames.Libs.Networking.Servers;
+using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Proxy.Tcp;
+using System;
 using System.Net.Sockets;
-using AcceptClient = System.Func<IziHardGames.Proxy.Tcp.TcpWrap, System.Threading.Tasks.Task<IziHardGames.Proxy.Tcp.TcpWrap>>;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.TcpDecoder
 {
-    public class TcpServer : IDisposable
+    public class TcpServer<T> : ServerBase<T> where T : TcpWrap, IPoolBind<T>
     {
-        public const int port = 49702;
-        public const int DEFAULT_PORT_SSL = 60121;
+        private IPoolObjects<T> pool;
 
-        private List<TcpWrap> clients = new List<TcpWrap>();
-        public event Action<TcpWrap> OnClientConnectEvent;
-        public event Action<TcpWrap> OnClientConnectSslEvent;
-
-        public List<TcpWrap> GetClients()
+        public TcpServer(int port, IPoolObjects<T> pool, IClientHandlerAsync<T> handler)
         {
-            return clients;
+            this.pool = pool;
+            listener = new AdapterServer(port, pool);
+            clientHandler = new AdapterClientTcp(handler);
         }
 
-        public void Start(CancellationToken token)
+        private class AdapterClientTcp : AdapterClient
         {
-            Console.WriteLine($"HTTP Server Initilizing...");
-
-            IPAddress iPAddress = IPAddress.Parse("127.0.0.1");
-            var tcpListener = new TcpListener(iPAddress, port);
-            tcpListener.Start();
-
-            var task = Task.Run(CheckAlive);
-
-            Console.WriteLine($"HTTP Server Started");
-
-            while (!token.IsCancellationRequested)
+            private IClientHandlerAsync<T> handler;
+            public AdapterClientTcp(IClientHandlerAsync<T> handler)
             {
-                var client = TcpWrap.Start(tcpListener.AcceptTcpClient());
-
-                lock (clients)
-                {
-                    clients.Add(client);
-                }
-                OnClientConnectEvent?.Invoke(client);
+                this.handler = handler;
             }
 
-            tcpListener.Stop();
-        }
-        public async Task StartSSL(AcceptClient handler, CancellationToken token)
-        {
-            Console.WriteLine($"HTTPS Server Initilizing...");
-
-            IPAddress iPAddress = IPAddress.Parse("127.0.0.1");
-            var tcpListener = new TcpListener(iPAddress, DEFAULT_PORT_SSL);
-            tcpListener.Start();
-            Console.WriteLine($"HTTPS Server Started");
-
-            List<Task<TcpWrap>> tasks = new List<Task<TcpWrap>>(128);
-
-            var t1 = Task.Run(async () =>
-                {
-                    while (true)
-                    {
-                        if (tasks.Count > 0)
-                        {
-                            var task = await Task.WhenAny(tasks).ConfigureAwait(false);
-
-                            lock (clients)
-                            {
-                                clients.Remove(task.Result);
-                                tasks.Remove(task);
-                            }
-                        }
-                        await Task.Delay(5000);
-                    }
-                });
-
-            while (!token.IsCancellationRequested)
+            public async override Task<T> HandleClientAsync(T client, CancellationToken token = default)
             {
-                var client = TcpWrap.Start(await tcpListener.AcceptTcpClientAsync().ConfigureAwait(false));
-                var task = handler(client);
-
-                lock (clients)
-                {
-                    tasks.Add(task);
-                    clients.Add(client);
-                }
+                await handler.HandleClientAsync(client);
+                return client;
             }
-            await Task.WhenAll(t1).ConfigureAwait(false);
-            tcpListener.Stop();
-        }
-        public void Dispose()
-        {
-            throw new NotImplementedException();
         }
 
-        private void CheckAlive()
+        private class AdapterServer : AdapterListener
         {
-            for (int i = 0; i < clients.Count; i++)
+            private TcpListener listener;
+            private int port;
+            private IPoolObjects<T> pool;
+
+            public AdapterServer(int port, IPoolObjects<T> pool)
             {
-                if (!clients[i].CheckAlive())
-                {
-                    clients.RemoveAt(i);
-                    i--;
-                }
+                this.pool = pool;
+                this.port = port;
+                this.listener = new TcpListener(port);
+            }
+
+            public async override Task<T> AcceptClientAsync(CancellationToken token = default)
+            {
+                var client = await listener.AcceptTcpClientAsync(token);
+                //System.Net.Sockets.SocketException: 'An attempt was made to access a socket in a way forbidden by its access permissions.' - порт занят?
+
+                var pool = this.pool;
+                var rent = pool.Rent();
+                rent.Wrap(client);
+                rent.Initilize("Client");
+                rent.BindToPool(pool);
+                return rent;
+            }
+
+            public override void Initilize()
+            {
+                listener.Start();
+            }
+
+            public override void Dispose()
+            {
+                throw new NotImplementedException();
             }
         }
     }

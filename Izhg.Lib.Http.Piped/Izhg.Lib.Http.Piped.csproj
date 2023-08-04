@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+    <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\IziHardGamesLibHttp\Izhg.Lib.Http.csproj" />
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+  </ItemGroup>
+
+</Project>

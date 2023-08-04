@@ -1,5 +1,7 @@
 ﻿using IziHardGames.Proxy.Sniffing.ForHttp;
+using System.IO;
 using System.Net.Security;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Libs.Streaming
 {

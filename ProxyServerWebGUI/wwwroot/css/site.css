@@ -31,7 +31,12 @@ th {
 td {
     border: solid black;
 }
-tr
-{
+
+tr {
     border: solid black;
+}
+
+.template {
+    visibility: hidden;
+    display: none;
 }

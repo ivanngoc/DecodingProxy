@@ -1,10 +1,12 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace IziHardGames.Libs.IO
+namespace IziHardGames.Libs.Cryptography.Certificates
 {
-
     public static class Cert
     {
         public static List<string> GetDomainsAsFilenames(X509Certificate2 cert)
@@ -43,7 +45,6 @@ namespace IziHardGames.Libs.IO
             }
             return domains;
         }
-
         private static List<string> GetSujectAlternativeName(X509Certificate2 cert)
         {
             var result = new List<string>();
@@ -79,6 +80,33 @@ namespace IziHardGames.Libs.IO
         internal static string CertToFilename(X509Certificate2 cert)
         {
             return GetDomainForFilename(cert);
+        }
+
+        public static bool CompareDates(X509Certificate2 left, X509Certificate2 right)
+        {
+            throw new NotImplementedException();
+        }
+        public static bool CompareCerts(X509Certificate2 left, X509Certificate2 right)
+        {
+            if (left.Thumbprint == right.Thumbprint) return true;
+            if (left.SerialNumber == right.SerialNumber) return true;
+            if (left == right) return true;
+            if (GetIssueDate(left) != GetIssueDate(right)) return false;
+            if (GetDateExpiration(left) != GetDateExpiration(right)) return false;
+            return true;
+        }
+
+        public static DateTime GetDateExpiration(X509Certificate2 cert)
+        {
+            throw new NotImplementedException();
+        }
+        public static DateTime GetIssueDate(X509Certificate2 cert)
+        {
+            throw new NotImplementedException();
+        }
+        public static string DomainToKey(string domain)
+        {
+            return GetDomainForFilename(domain);
         }
     }
 }

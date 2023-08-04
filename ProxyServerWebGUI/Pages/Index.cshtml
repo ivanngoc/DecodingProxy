@@ -4,6 +4,9 @@
     ViewData["Title"] = "Home page";
 }
 
+<script src="~/lib/signalr/signalr.js"></script>
+
+
 <div class="text-center">
     <h1 class="display-4">Welcome111sss1</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
@@ -14,28 +17,13 @@
     Refresh
 </button>
 </div>
-
 <div>
-<table>
-<thead>
-<tr>
-<th>Connection</th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-        @{
-            // TODO: Report Bug: Ctrl + K,D постоянно сдвигает тело цикла вправо на 1 tab
-            foreach (var item in Model.Connections)
-            {
-                <tr>
-                    <td>@item.Domain</td>
-                    <td>@item.Count</td>
-                    <td>2.3</td>
-                </tr>
-            }
-        }
-</table>
+    @await Component.InvokeAsync("ComponentTableDomains")
+</div>
+<br/>
+<ComponentTable Variable = "this is variable 2003"/>
+<div>
+    @await Component.InvokeAsync("ComponentTableConnections")
 </div>
 
 <script>

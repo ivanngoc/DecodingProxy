@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //SslTcpProxy.Test();
 
+using System;
 using System.Net;
 
 namespace IziHardGames.Networking.Helpers

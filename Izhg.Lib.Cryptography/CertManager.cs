@@ -1,13 +1,21 @@
-﻿using IziHardGames.Libs.IO;
+﻿using IziHardGames.Libs.Cryptography.Certificates;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Dic = System.Collections.Generic.Dictionary<string, System.Security.Cryptography.X509Certificates.X509Certificate2>;
+using System.Threading.Tasks;
+using Dic = System.Collections.Concurrent.ConcurrentDictionary<string, System.Security.Cryptography.X509Certificates.X509Certificate2>;
 
 namespace IziHardGames.Tls
 {
     public class CertManager
     {
+
         public static CertManager Shared;
         public readonly Dic cacheForged = new Dic();
         public readonly Dic cacheOriginal = new Dic();
@@ -216,11 +224,6 @@ namespace IziHardGames.Tls
             throw new System.NotImplementedException();
         }
 
-        public string DomainToKey(string host)
-        {
-            return host;
-        }
-
         public X509Certificate2 FindCertInStore(StoreName name, StoreLocation location, string subjectName)
         {
             X509Store store = new X509Store(name, location);
@@ -243,7 +246,7 @@ namespace IziHardGames.Tls
             return cert;
         }
 
-        public X509Certificate2 ForgedGetOrCreateCertFromCache(X509Certificate2 original, X509Certificate2 ca)
+        public async ValueTask<X509Certificate2> ForgedGetOrCreateCertFromCacheAsync(X509Certificate2 original, X509Certificate2 ca)
         {
             if (TryFindAppropriateCert(original, cacheForged, out var existed))
             {
@@ -258,7 +261,7 @@ namespace IziHardGames.Tls
             }
             else
             {
-                return ForgedCreateInCache(original, ca);
+                return await ForgedCreateInCache(original, ca).ConfigureAwait(false);
             }
         }
 
@@ -266,7 +269,7 @@ namespace IziHardGames.Tls
         {
             if (cacheOriginal.TryGetValue(key, out var existed))
             {
-                if (!CompareCerts(existed, cert))
+                if (!Cert.CompareCerts(existed, cert))
                 {
                     var ex = new ArgumentException($"Certs have same key but comparison is Failed");
                     Logger.LogException(ex);
@@ -275,19 +278,23 @@ namespace IziHardGames.Tls
             }
             else
             {
-                cacheOriginal.Add(key, cert);
+                if (!cacheOriginal.TryAdd(key, cert))
+                {
+                    throw new ArgumentException($"Key [{key}] is Already Exist");
+                }
             }
         }
 
-        public void OriginalSaveToCacheWithMultipleDomains(X509Certificate2 cert)
+        public async Task OriginalSaveToCacheAndFileWithMultipleDomainsAsync(X509Certificate2 cert)
         {
             var domains = Cert.GetDomainsAsFilenames(cert);
 
             foreach (var domain in domains)
             {
-                OriginalSaveToCacheSingle(domain, cert);
+                var key = Cert.DomainToKey(domain);
+                OriginalSaveToCacheSingle(key, cert);
             }
-            SaveCertToFile(PATH_TO_CERT_CACHE_ORIGINAL, cert);
+            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_ORIGINAL, cert).ConfigureAwait(false);
         }
 
         public bool OriginalTryGetCertFromCache(string hostAddress, out X509Certificate2 result)
@@ -334,17 +341,28 @@ namespace IziHardGames.Tls
             throw new System.NotImplementedException();
         }
 
-        public bool TryFindAppropriateCert(X509Certificate2 cert, Dic container, out X509Certificate2 result)
+        public bool TryFindAppropriateCert(X509Certificate2 cert, Dic container, out X509Certificate2? result)
         {
             string key = Cert.CertToKey(cert);
 
-            if (container.TryGetValue(key, out X509Certificate2 existed))
+            if (container.TryGetValue(key, out X509Certificate2? existed))
             {
                 result = existed;
                 return true;
             }
             else
             {
+                var domains = Cert.GetDomainsAsFilenames(cert);
+
+                foreach (var domain in domains)
+                {
+                    key = Cert.DomainToKey(domain);
+                    if (container.TryGetValue(key, out existed))
+                    {
+                        result = existed;
+                        return true;
+                    }
+                }
                 result = null;
                 return false;
             }
@@ -401,7 +419,7 @@ namespace IziHardGames.Tls
             return $"_{address.Substring(address.IndexOf('.'))}";
         }
 
-        private static void SaveCertToFile(string dir, X509Certificate2 cert)
+        private static async Task SaveOrOverrideCertToFile(string dir, X509Certificate2 cert)
         {
             string fileName = Cert.CertToFilename(cert);
 
@@ -411,9 +429,10 @@ namespace IziHardGames.Tls
 
             if (File.Exists(fullPath))
             {
-                throw new ArgumentException($"Certificate already exist: {fullPath}");
+                await File.WriteAllBytesAsync(fullPath, cert.RawData).ConfigureAwait(false);
+                return;
             }
-            File.WriteAllBytes(fullPath, cert.Export(X509ContentType.SerializedCert));
+            await File.WriteAllBytesAsync(fullPath, cert.Export(X509ContentType.SerializedCert)).ConfigureAwait(false);
         }
 
         // https://www.codeproject.com/Articles/5315010/How-to-Use-Certificates-in-ASP-NET-Core
@@ -476,23 +495,11 @@ namespace IziHardGames.Tls
             throw new NotImplementedException();
         }
 
-        private bool CompareCerts(X509Certificate2 left, X509Certificate2 right)
-        {
-            if (left == right)
-            {
-                return true;
-            }
-            if (left.SerialNumber != right.SerialNumber)
-            {
-                return false;
-            }
-            return true;
-        }
 
-        private X509Certificate2 ForgedCreateInCache(X509Certificate2 original, X509Certificate2 ca)
+        private async ValueTask<X509Certificate2> ForgedCreateInCache(X509Certificate2 original, X509Certificate2 ca)
         {
             var cert = GenerateCertEndpoint(original, ca, original.NotAfter);
-            ForgedSaveToCacheWithMultipleDomain(cert);
+            await ForgedSaveToCacheWithMultipleDomainAsync(cert).ConfigureAwait(false);
             return cert;
         }
 
@@ -500,26 +507,32 @@ namespace IziHardGames.Tls
         {
             try
             {
-                cacheForged.Add(key, cert);
-
+                if (!cacheForged.TryAdd(key, cert))
+                {
+                    throw new ArgumentException($"Key [{key}] is Already Exist");
+                }
             }
             catch (Exception ex)
             {
                 var existed = cacheForged[key];
-                CompareCerts(cert, existed);
-                throw;
+                Cert.CompareCerts(cert, existed);
+                throw ex;
             }
         }
 
-        private void ForgedSaveToCacheWithMultipleDomain(X509Certificate2 cert)
+        private async Task ForgedSaveToCacheWithMultipleDomainAsync(X509Certificate2 cert)
         {   // может быть ситуация с перекрестными доменами. 2 сертификата (wildcard и без) будут иметь 2 домена
             var domains = Cert.GetDomainsAsFilenames(cert);
 
             foreach (var domain in domains)
             {
-                ForgedSaveToCache(domain, cert);
+                var key = Cert.DomainToKey(domain);
+                if (!cacheForged.ContainsKey(key))
+                {
+                    ForgedSaveToCache(key, cert);
+                }
             }
-            SaveCertToFile(PATH_TO_CERT_CACHE_FORGED, cert);
+            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_FORGED, cert);
         }
 
         private void LoadCache()
@@ -550,9 +563,51 @@ namespace IziHardGames.Tls
             // possible overlaps?
             foreach (var item in domains)
             {
-                cache.Add(Cert.GetDomainForFilename(item), cert);
+                var key = Cert.DomainToKey(item);
+                if (!cache.TryAdd(key, cert))
+                {
+                    throw new ArgumentException($"Key [{key}] Is Already exist");
+                }
             }
             return cert;
+        }
+
+        public async Task<bool> OriginTryUpdateAsync(X509Certificate2 certOrigin)
+        {
+            if (TryFindAppropriateCert(certOrigin, cacheOriginal, out var existed))
+            {
+                if (Cert.CompareCerts(certOrigin, existed))
+                {
+                    return false;
+                }
+                else
+                {
+                    await OriginUpdateAsync(certOrigin, existed).ConfigureAwait(false);
+                    return true;
+                }
+            }
+            else
+            {
+                await OriginalSaveToCacheAndFileWithMultipleDomainsAsync(certOrigin); return true;
+            }
+        }
+        public async Task OriginUpdateAsync(X509Certificate2 cert, X509Certificate2 existed)
+        {
+            await UpdateAsync(cert, existed, cacheOriginal, PATH_TO_CERT_CACHE_ORIGINAL).ConfigureAwait(false);
+        }
+        public async Task UpdateAsync(X509Certificate2 newCert, X509Certificate2 oldCert, Dic cache, string dir)
+        {
+            var domains = Cert.GetDomainsAsFilenames(newCert);
+
+            foreach (var domain in domains)
+            {
+                var key = Cert.DomainToKey(domain);
+                if (!cache.TryUpdate(key, newCert, oldCert))
+                {
+                    throw new ArgumentException($"Key [{key}] is not presented");
+                }
+            }
+            await SaveOrOverrideCertToFile(dir, newCert).ConfigureAwait(false);
         }
     }
 }

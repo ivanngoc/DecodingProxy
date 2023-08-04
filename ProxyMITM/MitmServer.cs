@@ -4,6 +4,9 @@ using System.Net;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using IziHardGames.Networking.Helpers;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.MITM
 {

@@ -1,4 +1,6 @@
-﻿namespace IziHardGames.Libs.Utility
+﻿using System;
+
+namespace IziHardGames.Libs.Utility
 {
     public static class Compare
     {

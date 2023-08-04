@@ -1,4 +1,6 @@
-﻿namespace IziHardGames.Libs.IO
+﻿using System;
+
+namespace IziHardGames.Libs.IO
 {
     /// <summary>
     /// <see cref="ProxyLibs.Extensions.ExtensionsForStringBuilder"/>

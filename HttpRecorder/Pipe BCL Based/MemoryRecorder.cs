@@ -1,10 +1,13 @@
 ﻿using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Proxy.Consuming;
+using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.IO;
 using System.IO.Pipelines;
 using System.Text;
 using System.Text.Unicode;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.Recoreder.MemoryBased
 {

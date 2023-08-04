@@ -1,39 +1,41 @@
-﻿using IziHardGames.Libs.DevTools;
+﻿using IziHardGames.Core;
+using IziHardGames.Libs.DevTools;
+using IziHardGames.Libs.Networking.Clients;
+using IziHardGames.Libs.Networking.Contracts;
+using IziHardGames.Libs.Networking.Pipelines.Contracts;
+using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.Streaming;
 using ProxyLibs.Extensions;
+using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
 
-    public interface IPerfTracker
-    {
-        void ReportTime(string text);
-        void PutMsg<T>(T o) where T : ICloneable;
-
-    }
-
-    public interface IReader
-    {
-        ValueTask<ReadResult> ReadAsync(CancellationToken token = default);
-        void ReportConsume(SequencePosition position);
-    }
-
     /*
      Схема работы: FillPipe => ReadAsync => Parse => Apply Controls => Analyz Continuation => Break/Continue 
      */
-    public class PipedSocket : PipedStream, IReader, IDisposable, IPerfTracker
+    public class PipedSocket : PipedStream, IReader, IDisposable, IPerfTracker, IInitializable<string>, IConnectorTcp, IConnection, IConnectionData
     {
         public Stopwatch stopwatch = new Stopwatch();
+        public string Title => title;
         protected string title;
         protected int id;
         protected int generation;
         protected int deaths;
+        protected EConnectionState state = EConnectionState.None;
+        protected EConnectionFlags flags = EConnectionFlags.Reseted;
 
         protected Socket socket;
         protected IPEndPoint ipEndPoint;
@@ -66,6 +68,12 @@ namespace IziHardGames.Libs.Networking.Pipelines
         private int timeoutSendDefault;
         private int timeoutRecieveDefault;
         public bool IsConnected => socket?.Connected ?? false;
+        public string Host { get => host; set => host = value; }
+        public int Port { get => port; set => port = value; }
+        public int Id { get => id; set => id = value; }
+        public int Action { get; set; }
+        public string Version { get => $"GEN:{generation}. DEATH:{deaths}. TITLE:{Title}"; set => throw new System.NotImplementedException(); }
+        public string Status { get => state.ToString(); set => throw new System.NotImplementedException(); }
         public Task LoopWriter => loopWriter;
         private Task loopWriter;
         private Task loopReader;
@@ -81,17 +89,6 @@ namespace IziHardGames.Libs.Networking.Pipelines
 #if DEBUG
         private SocketDebugger debugger = new SocketDebugger();
 #endif
-        //public readonly PipeWriter writer;
-        //public readonly PipeReader reader;
-        //public readonly Pipe pipe;
-
-        public PipedSocket() : base()
-        {
-            //pipe = new Pipe();
-            //writer = pipe.Writer;
-            //reader = pipe.Reader;
-        }
-
         public override void Close()
         {
             ReportTime($"Dispose called. host:{host}, port:{port}");
@@ -103,6 +100,10 @@ namespace IziHardGames.Libs.Networking.Pipelines
             isDisposed = true;
             ReportTime($"Socket closed. lifetime:{lifetime} seconds. timeConnect:{timeConnect.ToString("yyyy.MM.dd HH:mm:ss.ffffff")}. timeDisconnectDetected:{timeDisconnectDetected}");
             if (socket.Connected) socket.Disconnect(false);
+
+            this.state = EConnectionState.Disposed;
+            this.flags = EConnectionFlags.Reseted;
+
             socket.Close();
             socket.Dispose();
             base.Close();
@@ -143,7 +144,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
             pipe.Reset();
             available = default;
         }
-        private void BindTitle(string title)
+        protected void BindTitle(string title)
         {
             this.title = title;
         }
@@ -151,7 +152,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
         {
             this.socket = socket;
         }
-        public void Init(string title)
+        public void Initilize(string title)
         {
             if (!isDisposed) throw new ObjectDisposedException($"Object must be disposed to be reused");
             isDisposed = false;
@@ -180,6 +181,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
         }
         public void ReportConsume(SequencePosition position)
         {
+            var reader = Reader;
             bufferCurrent = bufferCurrent.Slice(position);
             reader.AdvanceTo(position, position);
             int newPos = position.GetInteger();
@@ -190,13 +192,13 @@ namespace IziHardGames.Libs.Networking.Pipelines
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ReportConsume(long consumed)
+        protected void ReportConsume(long consumed)
         {
             ReportConsume((int)consumed);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ReportConsume(int consumed)
+        protected void ReportConsume(int consumed)
         {
             totalBytesConsumed += (uint)consumed;
             Interlocked.Add(ref available, -consumed);
@@ -209,6 +211,23 @@ namespace IziHardGames.Libs.Networking.Pipelines
             bufferCurrent = bufferCurrent.Slice(length);
             ReportConsume(slice.End);
             return ref slice;
+        }
+
+        public override void Flush()
+        {
+            // The Flush method implements the Stream.Flush method; however, because NetworkStream is not buffered, it has no effect on network streams
+            // https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.networkstream.flush?view=net-7.0
+        }
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            int sended = socket.Send(buffer, offset, count, SocketFlags.None);
+            //Console.WriteLine($"Wrte into tcpCLientPipedSsl. {Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}Value: {Encoding.UTF8.GetString(buffer, offset, count)}");
+        }
+        public override int Read(byte[] buffer, int offset, int count)
+        {   // 
+            int readed = socket.Receive(buffer, offset, count, SocketFlags.None);
+            Console.WriteLine($"{nameof(PipedSocket)}.{nameof(Read)}() Read. {Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}Value: {Encoding.UTF8.GetString(buffer, offset, readed)}");
+            return readed;
         }
 
         public void Send(byte[] bytes)
@@ -333,8 +352,9 @@ namespace IziHardGames.Libs.Networking.Pipelines
                     }
                     else
                     {
-                        ReportTime($"FillPipeAsync Zero Read. Break FillingPipeAsync");
-                        break;
+                        //ReportTime($"FillPipeAsync Zero Read. Break FillingPipeAsync");
+                        ReportTime($"FillPipeAsync Zero Read");
+                        //break;
                     }
                     //if (socket.Available == 0)
                     //{
@@ -366,8 +386,9 @@ namespace IziHardGames.Libs.Networking.Pipelines
             ReportTime($"FillPipeAsync End available: {available}. ReadSizeMin:{readSizeMin} ReadSizeMax:{readSizeMax}");
         }
 
-        public async ValueTask<ReadResult> ReadAsync(CancellationToken token = default)
+        public virtual async ValueTask<ReadResult> ReadAsync(CancellationToken token = default)
         {
+            var reader = Reader ?? throw new NullReferenceException();
             ReportTime($"ReadAsync Start: available:{available}");
             try
             {
@@ -388,7 +409,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
                     $"timeoutRecieveDefault:{timeoutRecieveDefault}, timeoutRecieve:{timeoutRecieve}. available:{available}");
             }
         }
-        public async ValueTask<ReadResult> ReadAsyncTimeout(CancellationToken token = default)
+        public virtual async ValueTask<ReadResult> ReadAsyncTimeout(CancellationToken token = default)
         {
             ReportTime($"ReadAsync Start: available:{available}");
             try
@@ -463,7 +484,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
 
         public void ReportTime(string text)
         {
-            string log = $"{DateTime.Now.ToString("HH:mm:ss.ffff")}   {id}:{title} {stopwatch.ElapsedMilliseconds} {text}. Thread:{Thread.CurrentThread.ManagedThreadId}";
+            string log = $"{DateTime.Now.ToString("HH:mm:ss.fffffff")}   {id}:{title} {stopwatch.ElapsedMilliseconds} {text}. Thread:{Thread.CurrentThread.ManagedThreadId}";
             logs.Add(log);
             //Console.WriteLine($"{id}:{title} {stopwatch.ElapsedMilliseconds} {text}");
             logsLast100.Enqueue(log);
@@ -471,7 +492,8 @@ namespace IziHardGames.Libs.Networking.Pipelines
             {
                 logsLast100.Dequeue();
             }
-            if (title == "Origin") Console.WriteLine(log);
+            //if (title == "Origin") 
+            Console.WriteLine(log);
         }
 
         public async Task LogsToFile()
@@ -521,5 +543,14 @@ namespace IziHardGames.Libs.Networking.Pipelines
             msgs.Add(o.ToString());
         }
 
+        public void SetState(EConnectionState state)
+        {
+            this.state = state;
+        }
+
+        public string ToInfoConnectionData()
+        {
+            return $"ConnectionData. GetType():{GetType().FullName}; host:{Host}; port:{Port}; id:{Id}; action:{Action}; status:{Status}; version:{Version}";
+        }
     }
 }

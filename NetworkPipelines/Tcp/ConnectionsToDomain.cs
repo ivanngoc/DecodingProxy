@@ -1,38 +1,66 @@
-﻿using IziHardGames.Libs.Networking.Pipelines;
+﻿using IziHardGames.Core;
+using IziHardGames.Libs.Networking.Clients;
+using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.NonEngine.Memory;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.Tcp
 {
+    public class ConnectionsToDomain : IDisposable
+    {
+        protected DateTime startTime;
+        protected DateTime checkTime;
+        protected string? host;
+        protected int port;
+        protected bool isDisposed = true;
+        /// <summary>
+        /// Value for upgrading/downgrading existed connection
+        /// </summary>
+        protected string version = string.Empty;
+        protected static uint counterForId;
+        protected uint countRevives;
+        public IChangeNotifier<IConnectionData> monitor;
+
+        public virtual void Dispose()
+        {
+            Console.WriteLine($"ConnectionToDomain {host}:{port} disposed");
+            if (isDisposed) throw new ObjectDisposedException($"Object is already disposed");
+            isDisposed = true;
+
+            version = string.Empty;
+
+            startTime = default;
+            checkTime = default;
+            host = null;
+            port = default;
+            countRevives = default;
+            monitor = default;
+        }
+    }
+
     /*
-     Сценарии завершения подключения:
-     1. Обмен сообщениями завершен. Подключение возвращается и помещается в свободный список
-     2. Помещенное в свободный список соединение истекает по таймауту. Соединение закрывается штатно и управляемо
-     3. Удаленный сервер закрывает соединение. Поток обмена сообщениями дожидается последний рид и далее пункт 1.
-     */
-    public class ConnectionsToDomain<T1> : IKey<string>, IDisposable
-        where T1 : TcpClientPiped
+Сценарии завершения подключения:
+1. Обмен сообщениями завершен. Подключение возвращается и помещается в свободный список
+2. Помещенное в свободный список соединение истекает по таймауту. Соединение закрывается штатно и управляемо
+3. Удаленный сервер закрывает соединение. Поток обмена сообщениями дожидается последний рид и далее пункт 1.
+*/
+    public class ConnectionsToDomain<T1> : ConnectionsToDomain, IKey<string>, IHub<T1>
+        where T1 : IInitializable<string>, IPoolBind<T1>, IClient, IConnectorTcp, IKey<uint>, IDisposable, IConnection, IConnectionData
     {
         private readonly ConcurrentDictionary<uint, T1> activeConnections = new ConcurrentDictionary<uint, T1>();
         private StalledData? head;
 
         private IPoolReturn<ConnectionsToDomain<T1>>? pool;
         public string Key { get; set; }
-        protected string host;
-        protected int port;
 
-        /// <summary>
-        /// Value for upgrading/downgrading existed connection
-        /// </summary>
-        private string version;
-        private uint counter;
         private const int timeoutDefault = 60000;
         private int timeoutSpecified;
-        private DateTime startTime;
-        private DateTime checkTime;
-        private bool isDisposed = true;
+
         private Action<ConnectionsToDomain<T1>> returnToManager;
         /// <summary>
         /// COunter for sync. In case of: manager have active CTD. thread A get that object. Meanwhile thread B executing Kill(). Thread A enter PullHead(). Thread B killed CTD. 
@@ -40,31 +68,33 @@ namespace IziHardGames.Proxy.Tcp
         /// </summary>
         private uint usage;
 
-        public virtual async ValueTask<T1> GetOrCreate(string title, IPoolObjects<T1> pool)
+        public virtual async ValueTask<T1> GetOrCreateAsync(string title, IPoolObjects<T1> pool)
         {
-            REPEAT:
-            var data = PullHead();
-            if (data != null)
+            if (!TryGet(out T1 result))
             {
-                var client = data.client;
-                if (TryRevive(data))
-                {
-                    client.ReportTime($"ConnectionsToDomain GetOrCreate completed with get stall");
-                    return client;
-                }
-                else
-                {
-                    goto REPEAT;
-                }
+                result = await CreateAsync(title, pool);
             }
-            var id = Interlocked.Increment(ref counter);
+            result.SetState(EConnectionState.Active);
+            monitor.OnUpdate(result);
+            return result;
+        }
+
+        protected async virtual ValueTask<T1> CreateAsync(string title, IPoolObjects<T1> pool)
+        {
+            var id = Interlocked.Increment(ref counterForId);
             var rent = pool.Rent();
             rent.BindToPool(pool);
-            rent.Init(title);
+            rent.Initilize(title);
             rent.Key = id;
-            while (!activeConnections.TryAdd(id, rent))
+#if DEBUG
+            if (activeConnections.ContainsKey(id))
             {
-                new SpinWait().SpinOnce();
+                throw new System.ArgumentException($"Key:{id} is alreaedy addeded");
+            }
+#endif
+            if (!activeConnections.TryAdd(id, rent))
+            {
+                throw new ArgumentException($"Key [{id}] is Already Exist");
             }
             // сначала добавить в список активных подключений и лишь затем подключаться.
             try
@@ -82,7 +112,28 @@ namespace IziHardGames.Proxy.Tcp
                 throw new NotImplementedException();
             }
             rent.ReportTime($"ConnectionsToDomain GetOrCreate completed with create id={id}");
+            monitor.OnAdd(rent);
             return rent;
+        }
+        protected virtual bool TryGet(out T1 client)
+        {
+            REPEAT:
+            var data = PullHead();
+            if (data != null)
+            {
+                client = data.client;
+                if (TryReviveOtherwiseKill(data))
+                {
+                    client.ReportTime($"ConnectionsToDomain GetOrCreate completed with get stall");
+                    return true;
+                }
+                else
+                {
+                    goto REPEAT;
+                }
+            }
+            client = default;
+            return false;
         }
         private StalledData PullHead()
         {
@@ -97,29 +148,34 @@ namespace IziHardGames.Proxy.Tcp
             return result;
         }
 
-        private bool TryRevive(StalledData stalledData)
+        private bool TryReviveOtherwiseKill(StalledData stalledData)
         {
             stalledData.client.ReportTime($"TryRevive Started:{host}:{port}");
             var client = stalledData.client;
+
             if (client.CheckConnect())
             {
                 stalledData.cts.Cancel();
 
-                while (!activeConnections.TryAdd(client.Key, client))
+                if (!activeConnections.TryAdd(client.Key, client))
                 {
-                    new SpinWait().SpinOnce();
+                    throw new ArgumentException($"Key [{client.Key}] is Already Exist");
                 }
                 stalledData.client.ReportTime($"TryRevive Succeded:{host}:{port}");
                 // stallData.cts was canceled. Need to reset cts              
                 stalledData.Dispose();
+                this.countRevives++;
+                monitor.OnUpdate(client);
                 return true;
             }
-            stalledData.client.ReportTime($"TryRevive Failed:{host}:{port}");
+            stalledData.client.ReportTime($"TryRevive Failed:{host}:{port}. Connection Killed");
+            Kill(client);
             return false;
         }
 
         private void Kill(T1 client)
         {
+            monitor.OnRemove(client);
             client.ReportTime($"Killing started {host}:{port}. clientID:{client.Key}");
             var task = client.StopWriteLoop();
             task.Wait();
@@ -129,6 +185,10 @@ namespace IziHardGames.Proxy.Tcp
             client.ReportTime($"ConnectionsToDomain: IsDisposed:{isDisposed}");
         }
 
+        protected virtual void ReturnToManager()
+        {
+            this.returnToManager(this);
+        }
         public void Return(T1 client)
         {
             Console.WriteLine($"ConnectionsToDomain: id:{client.Key} {host}:{port} Return active connection");
@@ -157,6 +217,8 @@ namespace IziHardGames.Proxy.Tcp
         private void MoveToStalled(T1 client)
         {
             client.ReportTime($"Moved to Stall: {host}:{port}");
+            client.SetState(EConnectionState.Stalled);
+
             int timeout;
 
             if (timeoutSpecified != default)
@@ -213,18 +275,12 @@ namespace IziHardGames.Proxy.Tcp
             this.timeoutSpecified = timeout;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            Console.WriteLine($"ConnectionToDomain {host}:{port} disposed");
-            if (isDisposed) throw new ObjectDisposedException($"Object is already disposed");
-            isDisposed = true;
-            startTime = default;
-            checkTime = default;
-            host = default;
-            port = default;
+            base.Dispose();
             pool!.Return(this);
             pool = default;
-            counter = default;
+
             //timeoutDefault = default;
             timeoutSpecified = default;
 
@@ -233,6 +289,7 @@ namespace IziHardGames.Proxy.Tcp
                 throw new NotImplementedException($"Connections must be properly closed");
             }
             Key = default;
+            this.returnToManager = default;
         }
 
         public void UpdateAddress(string host, int port)
@@ -258,7 +315,7 @@ namespace IziHardGames.Proxy.Tcp
             throw new System.NotImplementedException();
         }
 
-        public void Start()
+        public virtual void Start()
         {
             if (!isDisposed) throw new ObjectDisposedException($"Object must be disposed to reuse or used right after creation");
             isDisposed = false;
@@ -282,14 +339,14 @@ namespace IziHardGames.Proxy.Tcp
                 if (isDisposeNeeded)
                 {
                     Stop();
-                    this.returnToManager(this);
+                    ReturnToManager();
                 }
             }
         }
 
         public void RegistRuturnToManager(Action<ConnectionsToDomain<T1>> returnToManager)
         {
-            this.returnToManager = returnToManager;
+            this.returnToManager = returnToManager!;
         }
 
         public void Use()

@@ -1,4 +1,6 @@
 ﻿using IziHardGames.Libs.NonEngine.Memory;
+using System;
+using System.Threading;
 
 namespace HttpDecodingProxy.ForHttp
 {

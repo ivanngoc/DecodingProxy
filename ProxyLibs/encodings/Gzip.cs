@@ -1,9 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
-//SslTcpProxy.Test();
-
-using System;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
-using System.Net.Security;
 
 namespace IziHardGames.Libs.Encodings
 {

@@ -6,9 +6,13 @@ using IziHardGames.Libs.NonEngine.Collections;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.Streaming;
 using ProxyLibs.Extensions;
+using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using static HttpDecodingProxy.ForHttp.HttpLibConstants;
 using Query = IziHardGames.Libs.ForHttp.Streaming.HttpQuery<IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder>;
 using Wrap = IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder;
@@ -38,7 +42,6 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         private readonly BufferReader[] readers;
         private int currentReadAction;
 
-        private HttpMappedObject mappedMsg;
         private SubstringMatchQueue substringQueue = new SubstringMatchQueue("\r\n\r\n");
 
         #region Header

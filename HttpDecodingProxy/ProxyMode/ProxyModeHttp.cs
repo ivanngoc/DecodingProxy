@@ -4,7 +4,9 @@ using IziHardGames.Proxy.Sniffing.ForHttp;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
+using System.IO;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.Http

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,9 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Threading.csproj" />
-    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForObject.csproj" />
+    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
     <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
   </ItemGroup>
 

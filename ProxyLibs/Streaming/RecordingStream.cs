@@ -1,4 +1,7 @@
-﻿namespace IziHardGames.Proxy.Sniffing.ForHttp
+﻿using System;
+using System.IO;
+
+namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
     public class RecordingStream : Stream
     {

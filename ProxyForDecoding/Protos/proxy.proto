@@ -6,20 +6,33 @@ package proxy;
 
 
 service ProxyPublisher {
-  rpc GetHubs (Request) returns (Reply);
+  rpc GetHubs (ProtobufRequest) returns (ProtobufReply);
+  rpc Push (ProtobufDataConnection) returns (ProtobufEmpty);
+  rpc MaintainConnection (stream ProtobufRequest) returns (stream ProtobufReply);
 }
 
-message Request {
+message ProtobufRequest {
   string name = 1;
 }
 
-message Reply {
+message ProtobufReply {
   string message = 1;
-  repeated DataConnection connection = 2;
+  ProtobufDataConnection connection = 2;
+  repeated ProtobufDataConnection connections = 3;
 }
 
-message DataConnection
+message ProtobufDataConnection
 {
-	string domain = 1;
-	int32 count = 2;
+	int32 id = 1;
+	string host = 2;
+	int32 port = 3;
+	int32 typeCrud = 4;
+	string status = 5;
+	string version = 6;
+	int32 action = 7;
+}
+
+message ProtobufEmpty
+{
+
 }

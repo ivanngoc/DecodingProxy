@@ -1,4 +1,16 @@
-﻿using HttpDecodingProxy.ForHttp;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using HttpDecodingProxy.ForHttp;
+using IziHardGames.Core;
+using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Proxy.Consuming;
@@ -8,15 +20,9 @@ using IziHardGames.Proxy.Tcp.Tls;
 using IziHardGames.Proxy.TcpDecoder;
 using IziHardGames.Tls;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json;
 using ConnectionsToDomain = IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>;
-using ManagerConnectionsToDomain = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>>;
-using ManagerConnectionsToDomainSsl = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls>;
+using ManagerConnectionsToDomain = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>, (string, int)>;
+using ManagerConnectionsToDomainSsl = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainSsl<IziHardGames.Libs.Networking.Pipelines.TcpWrapSsl>, (string, int)>;
 
 namespace IziHardGames.Proxy.Http
 {
@@ -24,76 +30,60 @@ namespace IziHardGames.Proxy.Http
     {
         private X509Certificate2 caRootCert;
         public X509Certificate2 CaRootCert => caRootCert;
-        private readonly TcpServer tcpServer = new TcpServer();
 
         public GlobalProxySettings settings = new GlobalProxySettings();
-        public readonly ManagerForHttpClientForIntercepting managerForHttpClientForIntercepting = new ManagerForHttpClientForIntercepting();
-        public readonly ManagerForHttpMessages managerForHttpMessages = new ManagerForHttpMessages();
-        public readonly ManagerForConnectionToAgent managerForConnectionsToAgent = new ManagerForConnectionToAgent();
+
         public readonly ManagerConnectionsToDomain manager;
         public readonly ManagerConnectionsToDomainSsl managerSsl;
-        public readonly ManagerForConnectionsToDomain managerForConnectionsToDomain = new ManagerForConnectionsToDomain();
 
         private object lockList = new object();
         public CertManager certManager;
         private static List<string> sniffList = new List<string>();
         public ulong ticks;
         private ConsumingProvider consumingProvider;
-        private IBlockConsumer[] consumersRequest;
-        private IBlockConsumer[] consumersResponse;
         private CancellationTokenSource cts = new CancellationTokenSource();
         private ILogger logger;
 
-        public HttpSpyProxy()
+        private ClientHandlerPipedHttp clientHandlerPipedHttp;
+        private ClientHandlerPipedHttpsV2 handlerPipedHttpsV2;
+        private IChangeNotifier<IConnectionData>? monitorForConnections;
+
+        public HttpSpyProxy(ILogger<HttpSpyProxy> logger, IChangeNotifier<IConnectionData> monitorForConnections)
         {
-            manager = new ManagerConnectionsToDomain((key) =>
+            this.logger = logger;
+            this.monitorForConnections = monitorForConnections!;
+
+            manager = new ManagerConnectionsToDomain((key, address) =>
             {
                 var pool = PoolObjectsConcurent<ConnectionsToDomain>.Shared;
                 var rent = pool.Rent();
                 rent.BindToPool(pool);
                 rent.Key = key;
+                rent.UpdateAddress(address.Item1, address.Item2);
                 rent.Start();
                 rent.RegistRuturnToManager(manager!.Return);
+                rent.monitor = monitorForConnections;
                 return rent;
             });
 
-            managerSsl = new ManagerConnectionsToDomainSsl((key) =>
+            managerSsl = new ManagerConnectionsToDomainSsl((key, options) =>
             {
-                var pool = PoolObjectsConcurent<ConnectionsToDomainTls>.Shared;
+                var pool = PoolObjectsConcurent<ConnectionsToDomainSsl<TcpWrapSsl>>.Shared;
                 var rent = pool.Rent();
                 rent.Key = key;
+                rent.UpdateAddress(options.Item1, options.Item2);
                 rent.BindToPool(pool);
                 rent.RegistRuturnToManager(managerSsl!.Return);
                 rent.Start();
+                rent.monitor = monitorForConnections;
                 return rent;
             });
         }
 
-        private void Init(ILogger logger, CertManager certManager, ConsumingProvider consumingProvider)
+        private void Init(CertManager certManager, ConsumingProvider consumingProvider)
         {
             Console.WriteLine($"это на русском языке");
-            this.logger = logger;
             this.certManager = certManager;
-            this.consumersRequest = consumingProvider.consumersRequest;
-            this.consumersResponse = consumingProvider.consumersResponse;
-
-            managerForHttpClientForIntercepting.Init(managerForConnectionsToDomain, managerForConnectionsToAgent, managerForHttpMessages);
-        }
-
-        public async Task Run(CancellationToken token)
-        {
-            try
-            {
-                caRootCert = CertManager.LoadPemFromFile(ConfigJson.path_ca_cert, ConfigJson.path_ca_key);
-            }
-            catch (Exception ex)
-            {
-                Stop();
-                Logger.LogException(ex);
-                throw ex;
-            }
-            //tcpServer.OnClientConnectEvent += AcceptClient;
-            //tcpServer.OnClientConnectSslEvent += AcceptClientSsl;
 
             Settings.IsLogToFile = false;
 
@@ -104,186 +94,40 @@ namespace IziHardGames.Proxy.Http
                 Logger.SetFilter(host);
             }
 
-            //tcpServer.Start(token);
-            var task = Task.Run(async () => await RunWithPipedTcp(token), token);
-            var taskSsl = Task.Run(async () => await tcpServer.StartSSL(AcceptClientSsl, token), token);
-            await Task.WhenAll(task, taskSsl).ConfigureAwait(false);
-            //await task.ConfigureAwait(false);
+            try
+            {
+                caRootCert = CertManager.LoadPemFromFile(ConfigJson.path_ca_cert, ConfigJson.path_ca_key);
+            }
+            catch (Exception ex)
+            {
+                Break();
+                Logger.LogException(ex);
+                throw ex;
+            }
+            clientHandlerPipedHttp = new ClientHandlerPipedHttp(consumingProvider, monitorForConnections!, manager);
+            handlerPipedHttpsV2 = new ClientHandlerPipedHttpsV2(consumingProvider, monitorForConnections!, managerSsl, caRootCert, certManager);
         }
 
-        private async Task RunWithPipedTcp(CancellationToken token)
+        private async Task RunWithPipedTcp(CancellationToken token, int port)
         {
-            using (TcpServerPiped pipedTcpServer = new TcpServerPiped())
+            using (TcpServerSocketBased<TcpClientPiped> server = new())
             {
-                await pipedTcpServer.Run("localhost", TcpServer.port, logger, AcceptClient, token).ConfigureAwait(false);
+                logger.LogInformation($"Begin http spy proxy port:{port}");
+                await server.Run("localhost", port, logger, clientHandlerPipedHttp, PoolObjectsConcurent<TcpClientPiped>.Shared, token).ConfigureAwait(false);
             }
         }
-        private async Task<TcpClientPiped> AcceptClient(TcpClientPiped agent, CancellationToken token)
+        private async Task RunWithPipedTcpAndDetectionSsl(CancellationToken token, int port)
         {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            var pool = PoolObjectsConcurent<HttpPipedIntermediary>.Shared;
-            using (HttpPipedIntermediary parserRequest = pool.Rent().Init(consumingProvider, manager, pool))
-            {
-                await parserRequest.Run(agent, cts).ConfigureAwait(false);
-            }
-            Console.WriteLine($"{nameof(HttpSpyProxy)} AcceptClient loop ended");
-            return agent;
+            // if Method CONNECT is called than upgrade connection.
+            throw new System.NotImplementedException();
+        }
+        private async Task RunWithPipedTcpSslV2(CancellationToken token, int port)
+        {
+            logger.LogInformation($"Begin https spy proxy port:{port}");
+            TcpServer<TcpWrapSsl> server = new(port, PoolObjectsConcurent<TcpWrapSsl>.Shared, handlerPipedHttpsV2);
+            await server.Run(logger, token);
         }
 
-        private async Task<TcpWrap> AcceptClientSsl(TcpWrap obj)
-        {
-            Logger.LogLine($"HTTPS Client Accepted");
-
-            var task = Task.Run(async () =>
-                    {
-                        await AcceptWithTwoWayModeSsl(obj).ConfigureAwait(false);
-                    }, cts.Token);
-
-            MonitorForTasks.Watch(task);
-
-            await Task.WhenAll(task);
-            return obj;
-        }
-
-        [Obsolete]
-        private async Task<ProxyBridge> CreateBridge(TcpWrap tcpDecodingClient)
-        {
-            var client = tcpDecodingClient.Client;
-            var stream = client.GetStream();
-
-            var initMsg = managerForHttpMessages.ReadFirstRequest(stream);
-            var startOptions = initMsg.ToStartOptions();
-            startOptions.cts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-            startOptions.consumingProvider = consumingProvider;
-
-            SelectProtocol(initMsg);
-
-            string host = startOptions.Host;
-            Logger.LogLine($"Init Msg:{host}. Method:{initMsg.request.fields.Method}{Environment.NewLine}{initMsg.request.fields.ToStringInfo()}", ConsoleColor.Yellow);
-
-            initMsg.Dispose();
-
-            ConnectionsToDomainTls ctd = managerForConnectionsToDomain.GetOrCreate(startOptions, caRootCert);
-            ProxyBridge proxyBridge = await managerForHttpClientForIntercepting.CreateBridge(this, ctd, tcpDecodingClient, startOptions).ConfigureAwait(false);
-
-            Logger.LogLine($"Connection to {host} allocated");
-            return proxyBridge;
-        }
-        private async Task MaintainSslSession(TcpClientPiped tcpClientPiped, CancellationTokenSource cts)
-        {
-
-
-
-
-            //var client = tcpDecodingClient.Client;
-            //var stream = client.GetStream();
-
-            //var initMsg = managerForHttpMessages.ReadFirstRequest(stream);
-            //var startOptions = initMsg.ToStartOptions();
-            //startOptions.cts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
-            //startOptions.consumingProvider = consumingProvider;
-
-            //SelectProtocol(initMsg);
-
-            //string host = startOptions.Host;
-            //Logger.LogLine($"Init Msg:{host}. Method:{initMsg.request.fields.Method}{Environment.NewLine}{initMsg.request.fields.ToStringInfo()}", ConsoleColor.Yellow);
-
-            //initMsg.Dispose();
-
-            //ConnectionsToDomainTls ctd = managerForConnectionsToDomain.GetOrCreate(startOptions, caRootCert);
-            //ProxyBridge proxyBridge = await managerForHttpClientForIntercepting.CreateBridge(this, ctd, tcpDecodingClient, startOptions).ConfigureAwait(false);
-
-            //Logger.LogLine($"Connection to {host} allocated");
-            //return proxyBridge;
-
-
-        }
-
-        private void SelectProtocol(HttpProxyMessage initMsg)
-        {
-            var version = initMsg.request.fields.Version;
-            if (version != HttpLibConstants.version11.ToLowerInvariant()) throw new NotSupportedException($"Protocol Other Than HTTP/1.1 is not implemented yet");
-        }
-        [Obsolete]
-        private async Task AcceptWithTwoWayModeSsl(TcpWrap wrap)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(this.cts.Token);
-            var ns = wrap.Client.GetStream();
-            ns.ReadTimeout = 15000;
-
-            var bridge = await CreateBridge(wrap).ConfigureAwait(false);
-            StartOptions options = bridge.startOptions;
-
-            if (options.ValidateHttps())
-            {
-                await bridge.RunTwoWayMode(options, wrap, consumersRequest, consumersResponse).ConfigureAwait(false);
-                managerForHttpClientForIntercepting.Remove(bridge);
-                CloseConnection(bridge);
-                Logger.LogLine($"Connection closed ssl", ConsoleColor.Cyan);
-            }
-            else
-            {
-                Stop();
-                throw new NotImplementedException();
-            }
-            options.Dispose();
-        }
-        private async Task AcceptPipedSsl(TcpClientPiped agent)
-        {
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(this.cts.Token);
-
-            var pool = PoolObjectsConcurent<HttpPipedIntermediary>.Shared;
-            var pool2 = PoolObjectsConcurent<TcpClientPipedSsl>.Shared;
-
-            var taskFill = agent.StopWriteLoop();
-
-            using (HttpPipedIntermediary parserRequest = pool.Rent().Init(consumingProvider, manager, pool))
-            {
-                using (var initMsg = await parserRequest.AwaitMsg(HttpLibConstants.TYPE_REQUEST, agent, cts, PoolObjectsConcurent<HttpBinary>.Shared).ConfigureAwait(false))
-                {
-                    if (initMsg.FindMethod() == EHttpMethod.CONNECT)
-                    {
-                        var pair = initMsg.FindHostAndPortFromField();
-                        var hub = managerSsl.GetOrCreate($"{pair.Item1}:{pair.Item2}");
-                        hub.UpdateAddress(pair.Item1, pair.Item2);
-                        var t1 = hub.GetOrCreate("Origin Ssl", pool2);
-                        var t2 = agent.SendAsync(HttpProxyMessage.response200, cts.Token);
-
-                        SslStream agentSsl = new SslStream(agent);
-
-                        await t1.ConfigureAwait(false);
-                        await t2.ConfigureAwait(false);
-                        //await Task.WhenAll(t1, t2).ConfigureAwait(false);
-
-                        var origin = t1.Result;
-
-                        SslStream originSsl = new SslStream(agent);
-
-                    }
-                    else
-                    {
-                        // need maintain connection without CONNECT
-                        throw new NotImplementedException($"On accepting client with SSL port there must be CONNECT method first if this app behave as proxy (NOT MITM)");
-                    }
-                    await MaintainSslSession(agent, cts).ConfigureAwait(false);
-                }
-            }
-            await Task.WhenAll(taskFill).ConfigureAwait(false);
-
-            Console.WriteLine($"{nameof(HttpSpyProxy)} AcceptClient loop ended");
-        }
-
-        private void CloseConnection(ProxyBridge item)
-        {
-            item.wrap.Close();
-            item.Dispose();
-        }
-
-        private void StartTunnelMode(TcpWrap tcpDecodingClient)
-        {
-            InterceptorHttp interceptor = new InterceptorHttp(tcpDecodingClient, managerForHttpClientForIntercepting, managerForHttpMessages, this);
-            MonitorForTasks.Watch(Task.Run(interceptor.Start));
-        }
         public void Dispose()
         {
             if (!cts.TryReset())
@@ -303,18 +147,28 @@ namespace IziHardGames.Proxy.Http
             return sniffList.Contains(hostname);
         }
 
-        public async Task Run(ILogger logger, ConsumingProvider consumingProvider)
+        public async Task Run(ConsumingProvider consumingProvider)
         {
             Logger.LogLine($"STart Proxy decoding");
             this.consumingProvider = consumingProvider;
             ConfigJson.EnsureConfigExist();
             UpdateSettings();
             CertManager.CreateDefault(ConfigJson.PathCertForged, ConfigJson.PathCertOriginal);
-            Init(logger, CertManager.Shared, consumingProvider);
-            await Run(cts.Token).ConfigureAwait(false);
+            Init(CertManager.Shared, consumingProvider);
+            var token = cts.Token;
+
+            var task1 = Task.Run(async () => await RunWithPipedTcp(token, 49702), token);
+            var task2 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 60121), token);
+
+            //var task3 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 60122), token);
+            //var task4 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 443), token);
+            //var task5 = Task.Run(async () => await RunWithPipedTcp(token, 80), token);
+
+            await Task.WhenAll(task1, task2).ConfigureAwait(false);
+            //await Task.WhenAll(task3, task4, task5).ConfigureAwait(false);
         }
 
-        public async Task Stop()
+        public async Task Break()
         {
             cts.Cancel();
             Logger.LogException(new ApplicationException($"{nameof(HttpSpyProxy)} Has Stopped"));
@@ -339,15 +193,17 @@ namespace IziHardGames.Proxy.Http
             }
         }
 
-        public static void Test()
+#if DEBUG
+        public static async Task Test()
         {
-            TcpListener tcpListener = new TcpListener(TcpServer.DEFAULT_PORT_SSL);
+            TcpListener tcpListener = new TcpListener(60121);
             tcpListener.Start();
 
             while (true)
             {
                 var agent = tcpListener.AcceptTcpClient();
-                TcpWrap tdc = new TcpWrap(agent);
+                TcpWrap tdc = new TcpWrap();
+                tdc.Wrap(agent);
 
                 HttpProxyMessage msg = new HttpProxyMessage();
                 var streamToAgent = agent.GetStream();
@@ -386,7 +242,7 @@ namespace IziHardGames.Proxy.Http
 
                     var serverCert = sslToServer.RemoteCertificate;
                     var caCert = CertManager.LoadPemFromFile(ConfigJson.path_ca_cert, ConfigJson.path_ca_key);
-                    var cert = CertManager.Shared.ForgedGetOrCreateCertFromCache((X509Certificate2)serverCert, caCert);
+                    var cert = await CertManager.Shared.ForgedGetOrCreateCertFromCacheAsync((X509Certificate2)serverCert, caCert).ConfigureAwait(false);
                     Logger.LogLine("Forged SSL");
 
                     SslStream sslToAgent = new SslStream(streamToAgent);
@@ -424,5 +280,6 @@ namespace IziHardGames.Proxy.Http
                 agent.Dispose();
             }
         }
+#endif
     }
 }

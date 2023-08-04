@@ -1,4 +1,7 @@
-﻿namespace IziHardGames.Libs.IO
+﻿using System;
+using System.IO;
+
+namespace IziHardGames.Libs.IO
 {
     public static class HelperForStream
     {

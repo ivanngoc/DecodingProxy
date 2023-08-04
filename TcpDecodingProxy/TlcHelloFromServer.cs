@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using IziHardGames.Libs.Buffers.Vectors;
 
 namespace IziHardGames.Proxy.TcpDecoder
 {

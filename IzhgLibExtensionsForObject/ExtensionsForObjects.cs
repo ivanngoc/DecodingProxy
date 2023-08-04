@@ -1,6 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-//SslTcpProxy.Test();
-
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ProxyLibs.Extensions

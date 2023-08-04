@@ -2,11 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
     <ProjectReference Include="..\IzhgLibLogging\Izhg.Lib.Logging.csproj" />
   </ItemGroup>
 

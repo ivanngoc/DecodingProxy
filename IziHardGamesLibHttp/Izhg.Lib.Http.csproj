@@ -1,8 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Clients\" />
+    <Folder Include="http 1.1\" />
+    <Folder Include="http 3\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Text\Izhg.Lib.Text.csproj" />
+    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
+    <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
+  </ItemGroup>
 
 </Project>

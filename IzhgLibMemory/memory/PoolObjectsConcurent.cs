@@ -1,4 +1,6 @@
-﻿namespace IziHardGames.Libs.NonEngine.Memory
+﻿using System;
+
+namespace IziHardGames.Libs.NonEngine.Memory
 {
     public class PoolObjectsConcurent<T>
         where T : class, new()
