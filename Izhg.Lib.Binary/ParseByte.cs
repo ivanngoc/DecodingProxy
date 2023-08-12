@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Buffers;
+using System.Collections.Generic;
 
 namespace System
 {
@@ -60,15 +61,40 @@ namespace System
             return (charsPerBytes[first], charsPerBytes[second]);
         }
 
-        public  static string ToHexStringFormated(ReadOnlySpan<byte> type)
+        public static string ToHexStringFormated(ReadOnlySequence<byte> seq)
         {
-            int size = type.Length;
+            int size = (int)seq.Length;
+            // 0x[char0][char1][SPACE]
+            Span<char> chars = stackalloc char[(size << 2) + size];
+            int k = default;
+            foreach (var seg in seq)
+            {
+                var data = seg.Span;
+                for (int i = 0; i < size; i++, k += 5)
+                {
+                    var pair = ByteToHex(data[i]);
+                    chars[k] = '0';
+                    chars[k + 1] = 'x';
+                    chars[k + 2] = pair.Item1;
+                    chars[k + 3] = pair.Item2;
+                    chars[k + 4] = ' ';
+                }
+            }
+            return new string(chars);
+        }
+        public static string ToHexStringFormated(ReadOnlyMemory<byte> bytes)
+        {
+            return ToHexStringFormated(bytes.Span);
+        }
+        public static string ToHexStringFormated(ReadOnlySpan<byte> data)
+        {
+            int size = data.Length;
             // 0x[char0][char1][SPACE]
             Span<char> chars = stackalloc char[(size << 2) + size];
             int k = default;
             for (int i = 0; i < size; i++, k += 5)
             {
-                var pair = ByteToHex(type[i]);
+                var pair = ByteToHex(data[i]);
                 chars[k] = '0';
                 chars[k + 1] = 'x';
                 chars[k + 2] = pair.Item1;

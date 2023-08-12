@@ -13,7 +13,8 @@ using System.Threading.Tasks;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
-    public class TcpClientPipedSsl : TcpClientPiped, IPoolBind<TcpClientPipedSsl>, ISslEndpoint
+    [Obsolete]
+    public class TcpClientPipedSsl : TcpClientPiped, IPoolBind<TcpClientPipedSsl>
     {
         private SslStream sslStream;
         private PipeReader readerSsl;
@@ -133,6 +134,11 @@ namespace IziHardGames.Libs.Networking.Pipelines
         public void BindToPool(IPoolReturn<TcpClientPipedSsl> poolObjects)
         {
             this.pool = poolObjects ?? throw new NullReferenceException();
+        }
+
+        public TcpClientPipedSsl UpgradeTls()
+        {
+            throw new NotImplementedException();
         }
     }
 }

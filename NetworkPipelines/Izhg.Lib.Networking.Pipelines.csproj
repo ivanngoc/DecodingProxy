@@ -11,11 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Streams.Piped\Izhg.Lib.Streams.Piped.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Threading.csproj" />
     <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
     <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />

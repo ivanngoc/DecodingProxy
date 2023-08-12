@@ -2,10 +2,12 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using IziHardGames.Core.Buffers;
 using static System.Text.Encoding;
 
 namespace System
 {
+
     public static class ExtensionsForMemory
     {
         public static string ToStringHex(in this ReadOnlyMemory<byte> mem)

@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
     <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Threading.csproj" />
@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Clients\" />
     <Folder Include="TcpBinaryExchanger\" />
   </ItemGroup>
 

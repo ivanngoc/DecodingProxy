@@ -1,19 +1,20 @@
-﻿using HttpDecodingProxy.ForHttp;
+﻿using System;
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
 using IziHardGames.Libs.Async;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
+using IziHardGames.Libs.Networking.SocketLevel;
+using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
-using System;
-using System.Buffers;
-using System.IO.Pipelines;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Callback = System.Func<IziHardGames.Proxy.Consuming.DataSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
@@ -24,7 +25,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
     /// </summary>       
     public class HttpPipedIntermediary<THub, TClient> : IDisposable
         where THub : IHub<TClient>
-        where TClient : class, IClient, IReader, new()
+        where TClient : class, IClient<SocketReader, SocketWriter>, IReader, new()  // piped client
     {
         public readonly DataSource source = new DataSource(typeof(HttpPipedIntermediary<THub, TClient>).Name);
 
@@ -53,33 +54,36 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         }
         public async Task Run(TClient agent, CancellationTokenSource cts)
         {
-            var fillTask = agent.RunWriterLoop();
-            agent.ReportTime($"Awaiting First Msg Begin");
+            IPerfTracker logger = agent.Logger as IPerfTracker ?? throw new NullReferenceException();
+
+            var pipedClient = agent as IClientPiped<SocketReader, SocketWriter>;
+            Task fillTask = pipedClient?.RunWriterLoop() ?? Task.CompletedTask;
+
+            logger.ReportTime($"Awaiting First Msg Begin");
             using (var req = await this.AwaitMsg(HttpLibConstants.TYPE_REQUEST, agent, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared))
             {
-                agent.ReportTime($"Awaiting First Msg End");
+                logger.ReportTime($"Awaiting First Msg End");
                 var address = req.FindHostAndPortFromField();
                 string addressString = $"{address.Item1}:{address.Item2}";
                 var hub = manager.GetOrCreate(addressString, address);
                 hub.Use();
                 hub.SetVersion(req.GetVersionString());
                 consumingProvider!.consumeBinaryRequest(this.source, req);
-                var taskGetOrigin = hub.GetOrCreateAsync("Origin", PoolObjectsConcurent<TClient>.Shared);
+                var taskGetOrigin = hub.GetOrCreateAsync(EConnectionFlags.None, "Origin", PoolObjectsConcurent<TClient>.Shared);
                 var origin = await taskGetOrigin.ConfigureAwait(false);
-                agent.ReportTime($"MaintainProxyConnection awaited origin");
-                origin.ReportTime($"MaintainProxyConnection awaited origin");
+                logger.ReportTime($"MaintainProxyConnection awaited origin");
                 var handleTask = this.MaintainProxyConnection(agent, origin, req, cts);
                 try
                 {
                     await Task.WhenAll(handleTask).ConfigureAwait(false);
-                    agent.ReportTime($"handleTask finished. Status:{handleTask.Status}. Exception:{handleTask.Exception?.Message ?? "OK"}");
+                    logger.ReportTime($"handleTask finished. Status:{handleTask.Status}. Exception:{handleTask.Exception?.Message ?? "OK"}");
                 }
                 catch (TimeoutException ex)
                 {
-                    agent.ReportTime($"handleTask finished with exception:{ex.Message}. Trace:{Environment.NewLine}{ex.StackTrace}.{Environment.NewLine}Status:{handleTask.Status}. Exception:{handleTask.Exception?.Message ?? "OK"}");
+                    logger.ReportTime($"handleTask finished with exception:{ex.Message}. Trace:{Environment.NewLine}{ex.StackTrace}.{Environment.NewLine}Status:{handleTask.Status}. Exception:{handleTask.Exception?.Message ?? "OK"}");
                 }
                 cts.Cancel();
-                agent.StopWriteLoop();
+                pipedClient?.StopWriteLoop();
                 await fillTask;
                 hub.Unuse();
                 hub.Return(origin);
@@ -87,8 +91,9 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         }
         public async Task MaintainProxyConnection(TClient agent, TClient origin, HttpBinaryMapped firstMsg, CancellationTokenSource cts)
         {
-            agent.ReportTime($"MaintainProxyConnection start");
-            origin.ReportTime($"MaintainProxyConnection start");
+            IPerfTracker logger = agent.Logger as IPerfTracker ?? throw new NullReferenceException();
+            logger.ReportTime($"MaintainProxyConnection start");
+            logger.ReportTime($"MaintainProxyConnection start");
             var pool = PoolObjectsConcurent<TClient>.Shared;
             CancellationToken token = cts.Token;
             {
@@ -111,28 +116,24 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 //var bb = Encoding.UTF8.GetBytes(getstring);
                 //var sendTask = origin.SendAsync(bb);
                 //origin.Send(bb);
-                var sendTask = origin.SendAsync(firstMsg.GetMemory(), cts.Token);
+                var sendTask = origin.Writer.SendAsync(firstMsg.GetMemory(), cts.Token);
                 await sendTask.ConfigureAwait(false);
-                agent.ReportTime($"MaintainProxyConnection Agent Sended to Origin");
-                origin.ReportTime($"MaintainProxyConnection Agent Sended to Origin");
+                logger.ReportTime($"MaintainProxyConnection Agent Sended to Origin");
 
                 using (var response = await AwaitMsg(HttpLibConstants.TYPE_RESPONSE, origin, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared).ConfigureAwait(false))
                 {
-                    agent.ReportTime($"MaintainProxyConnection Recived from origin");
-                    origin.ReportTime($"MaintainProxyConnection Recived from origin");
-                    var t1 = agent.SendAsync(response.GetMemory(), cts.Token);
+                    logger.ReportTime($"MaintainProxyConnection Recived from origin");
+                    var t1 = agent.Writer.SendAsync(response.GetMemory(), cts.Token);
                     consumingProvider.consumeBinaryResponse(source, response);
                     await t1.ConfigureAwait(false);
-                    agent.ReportTime($"MaintainProxyConnection Sended to agent");
-                    origin.ReportTime($"MaintainProxyConnection Sended to agent");
-                    agent.ReportTime($"MaintainProxyConnection Ended Message exchange first.");
-                    origin.ReportTime($"MaintainProxyConnection Ended Message exchange first.");
+                    logger.ReportTime($"MaintainProxyConnection Sended to agent");
+                    logger.ReportTime($"MaintainProxyConnection Ended Message exchange first.");
 
                     // check if there next msg
                     if (response.IsCloseRequired)
                     {
                         if (!cts.IsCancellationRequested) cts.Cancel();
-                        agent.ReportTime($"MaintainProxyConnection IsCloseRequired");
+                        logger.ReportTime($"MaintainProxyConnection IsCloseRequired");
                         goto END;
                     }
                     else
@@ -142,24 +143,24 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                             var t2 = MaintainMessagingV2(HttpLibConstants.TYPE_REQUEST, agent, origin, cts, consumingProvider.consumeBinaryRequest);
                             var t3 = MaintainMessagingV2(HttpLibConstants.TYPE_RESPONSE, origin, agent, cts, consumingProvider.consumeBinaryResponse);
                             await Task.WhenAll(t2, t3).ConfigureAwait(false);
-                            agent.ReportTime($"MaintainProxyConnection End MaintainMessagingV2");
+                            logger.ReportTime($"MaintainProxyConnection End MaintainMessagingV2");
                         }
                         else
                         {
-                            agent.ReportTime($"MaintainProxyConnection Closing Agent");
+                            logger.ReportTime($"MaintainProxyConnection Closing Agent");
                             goto END;
                         }
                     }
                 }
             }
             END:
-            agent.ReportTime($"MaintainProxyConnection End");
-            origin.ReportTime($"MaintainProxyConnection End");
+            logger.ReportTime($"MaintainProxyConnection End");
         }
 
         public async Task<HttpBinaryMapped> AwaitMsg(int type, TClient client, CancellationTokenSource cts, IPoolObjects<HttpBinaryMapped> pool)
         {
-            client.ReportTime($"AwaitMsg Start");
+            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+            logger.ReportTime($"AwaitMsg Start");
             HttpBinaryMapped item = pool.Rent().Init();
             item.BindToPool(pool, type);
 
@@ -181,21 +182,22 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     }
                 }
             }
-            client.PutMsg(item);
-            client.ReportTime($"AwaitMsg End");
+            logger.PutMsg(item);
+            logger.ReportTime($"AwaitMsg End");
             return item;
         }
 
         public async Task AwaitFeilds(HttpBinaryMapped item, TClient client, CancellationToken token)
         {
-            client.ReportTime($"AwaitFeilds Begin");
+            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+            logger.ReportTime($"AwaitFeilds Begin");
             var reader = client;
             item.FieldsStart();
             int offset = 0;
             bool isEnd = default;
             do
             {
-                ReadResult result = await reader.ReadAsync(token).ConfigureAwait(false);
+                ReadResult result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
                 var buffer = result.Buffer;
                 if (buffer.Length > 0)
                 {
@@ -208,7 +210,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 }
                 reader.ReportConsume(buffer.Start);
             } while (!isEnd);
-            client.ReportTime($"AwaitFeilds End");
+            logger.ReportTime($"AwaitFeilds End");
         }
 
         // исхлдим их того что строка короткая поэтому если к уже считанному сегменту прибавится еще сегмент
@@ -264,10 +266,12 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         /// <param name="client"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task AwaitBody<T>(HttpBinaryMapped item, T client, CancellationToken token) where T : IReader, IPerfTracker
+        public async Task AwaitBody<T>(HttpBinaryMapped item, T client, CancellationToken token) where T : IReader, IGetLogger
         {
+            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+
             item.BodyStart();
-            client.ReportTime($"Await Body Begin");
+            logger.ReportTime($"Await Body Begin");
             int length = item.GetBodyLength();
             var reader = client;
             //ReadResult resultD = await reader.ReadAsync().ConfigureAwait(false);
@@ -280,7 +284,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
                 while (length > 0)
                 {
-                    ReadResult result = await reader.ReadAsync(token).ConfigureAwait(false);
+                    ReadResult result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
 
                     var buffer = result.Buffer;
 
@@ -313,7 +317,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 goto END;
             }
             END:
-            client.ReportTime($"Await Body End");
+            logger.ReportTime($"Await Body End");
         }
 
         /// <summary>
@@ -341,7 +345,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
             while (true)
             {
-                var result = await reader.ReadAsync(token).ConfigureAwait(false);
+                var result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
                 var buffer = result.Buffer;
                 int lengthLoop = buffer.Length < lengthLeft ? (int)buffer.Length : lengthLeft;
                 if (isReadingControl)
@@ -448,7 +452,9 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
         public async Task MaintainMessagingSequentially(int type, TClient from, TClient to, CancellationTokenSource cts, Action<DataSource, HttpBinaryMapped> consumer)
         {
-            from.ReportTime($"MaintainMessaging Begin");
+            IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
+
+            logger.ReportTime($"MaintainMessaging Begin");
             int messages = default;
             while (!cts.IsCancellationRequested)
             {
@@ -456,30 +462,30 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 var msg = await t1.ConfigureAwait(false);
                 messages++;
                 if (t1.IsCanceled) goto END;
-                from.ReportTime($"Message #{messages} recived");
+                logger.ReportTime($"Message #{messages} recived");
 
                 if (type == HttpLibConstants.TYPE_RESPONSE)
                 {
                     from.ConsumeLife();
                     if (msg.IsCloseRequired)
                     {
-                        from.ReportTime($"MaintainMessaging is Close required");
+                        logger.ReportTime($"MaintainMessaging is Close required");
                         cts.Cancel();
                         goto END;
                     }
                 }
                 else
                 {
-                    to.ReportTime($"Message #{messages} recived");
+                    logger.ReportTime($"Message #{messages} recived");
                 }
                 consumer(source, msg);
-                var t2 = to.SendAsync(msg.GetMemory(), cts.Token);
+                var t2 = to.Writer.SendAsync(msg.GetMemory(), cts.Token);
                 await t2;
-                from.ReportTime($"Message #{messages} sended");
+                logger.ReportTime($"Message #{messages} sended");
                 ReportMessageEnd(type, from, to, cts);
             }
             END:
-            from.ReportTime($"MaintainMessaging End");
+            logger.ReportTime($"MaintainMessaging End");
         }
 
         /// <summary>
@@ -493,6 +499,8 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         /// <returns></returns>
         public async Task MaintainMessagingV2(int type, TClient from, TClient to, CancellationTokenSource cts, Action<DataSource, HttpBinaryMapped> consumer)
         {
+            IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
+
             var sync = this.sync;
             AsyncAutoResetEvent<HttpBinaryMapped> are = PoolObjectsConcurent<AsyncAutoResetEvent<HttpBinaryMapped>>.Shared.Rent();
             //возможно сервер отправляет данные до поступления запроса на него по принципу детерминированности
@@ -504,7 +512,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     if (!from.CheckConnectIndirectly() && !to.CheckConnectIndirectly())
                     {
                         are.Cancel();
-                        from.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. CheckConnectIndirectly() is False. Finish Task");
+                        logger.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. CheckConnectIndirectly() is False. Finish Task");
                         return;
                     }
                     do
@@ -515,7 +523,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 #endif
                         var msg = await AwaitMsg(type, from, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared).ConfigureAwait(false);
                         counter++;
-                        from.ReportTime($"MaintainMessagingV2.Type:{type}. From:{from.Title} TO:{to.Title} recived #{counter}. Available:{from.Available}");
+                        logger.ReportTime($"MaintainMessagingV2.Type:{type}. From:{from.Title} TO:{to.Title} recived #{counter}. Available:{from.Available}");
                         // check for next request
                         if (type == HttpLibConstants.TYPE_REQUEST)
                         {
@@ -548,7 +556,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     }
                     while (from.CheckConnectIndirectly());
                     END:
-                    from.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. read task ended");
+                    logger.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. read task ended");
                 }
                 catch (TimeoutException)
                 {
@@ -569,10 +577,10 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 #endif
                         var res = await are.WaitAsync(cts.Token).ConfigureAwait(false);
                         counter++;
-                        var task = to.SendAsync(res.GetMemory(), cts.Token);
+                        var task = to.Writer.SendAsync(res.GetMemory(), cts.Token);
                         consumer(source, res);
                         await task.ConfigureAwait(false);
-                        from.ReportTime($"MaintainMessagingV2 sended. From:{from.Title} TO:{to.Title} #{counter}. Available:{from.Available}");
+                        logger.ReportTime($"MaintainMessagingV2 sended. From:{from.Title} TO:{to.Title} #{counter}. Available:{from.Available}");
 
                         if (type == HttpLibConstants.TYPE_REQUEST)
                         {
@@ -606,7 +614,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                         }
                         if (res.IsCloseRequired)
                         {
-                            from.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. sending task ended by required closing connection. CTS.Cancel()");
+                            logger.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. sending task ended by required closing connection. CTS.Cancel()");
                             cts.Cancel();
                             return;
                         }
@@ -614,21 +622,23 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 }
                 catch (TaskCanceledException ex)
                 {
-                    from.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. send task canceled exception: Trace:{Environment.NewLine}{ex.StackTrace}.{Environment.NewLine}ExceptionMessage:{ex.Message}");
+                    logger.ReportTime($"MaintainMessagingV2. From:{from.Title} TO:{to.Title}. send task canceled exception: Trace:{Environment.NewLine}{ex.StackTrace}.{Environment.NewLine}ExceptionMessage:{ex.Message}");
                 }
             });
             await Task.WhenAll(read, send).ConfigureAwait(false);
-            from.ReportTime($"MaintainMessagingV2 Ended. From:{from.Title} TO:{to.Title}");
+            logger.ReportTime($"MaintainMessagingV2 Ended. From:{from.Title} TO:{to.Title}");
             are.Reset();
             PoolObjectsConcurent<AsyncAutoResetEvent<HttpBinaryMapped>>.Shared.Return(are);
         }
         private void ReportMessageEnd(int type, TClient from, TClient to, CancellationTokenSource cts)
         {
+            IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
+
             if (type == HttpLibConstants.TYPE_RESPONSE)
             {
                 if (from.Available == 0)
                 {
-                    from.ReportTime($"ReportMessageEnd TYPE_RESPONSE available=0");
+                    logger.ReportTime($"ReportMessageEnd TYPE_RESPONSE available=0");
                     cts.Cancel();
                 }
             }

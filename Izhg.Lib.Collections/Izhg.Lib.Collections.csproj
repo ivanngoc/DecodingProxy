@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
   </ItemGroup>
 

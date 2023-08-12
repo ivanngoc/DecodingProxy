@@ -3,7 +3,6 @@
 
 namespace System
 {
-
     public static class ExtensionsForArray
     {
         public static void ClearReferences<T>(this T[] arr) where T : class

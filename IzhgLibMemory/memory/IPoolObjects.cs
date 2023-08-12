@@ -17,11 +17,32 @@ namespace IziHardGames.Libs.NonEngine.Memory
         IPoolObjects<T> PoolObjects { get; set; }
     }
 
-    public interface IPoolObjects<T> : IPoolRent<T>, IPoolReturn<T>
+    public interface IPoolObjects
     {
 
     }
 
+    /// <summary>
+    /// Rent/Return System.Object
+    /// </summary>
+    public interface IPoolObjectsNoTyped : IPoolObjects, IPoolRent, IPoolReturn
+    {
+
+    }
+
+    public interface IPoolObjects<T> : IPoolRent<T>, IPoolReturn<T>, IPoolObjects
+    {
+
+    }
+
+    public interface IPoolRent
+    {
+        public object Rent();
+    }
+    public interface IPoolReturn
+    {
+        public void Return(object o);
+    }
 
     // Covariance permits a method to have a more derived return type than that defined by the generic type parameter of the interface.
     // IEnumerable<Object> = IEnumerable<String>;
@@ -30,12 +51,18 @@ namespace IziHardGames.Libs.NonEngine.Memory
         T Rent();
     }
 
+
     // Contravariance permits a method to have argument types that are less derived than that specified by the generic parameter of the interface.
     // IEqualityComparer<DerivedClass> = IEqualityComparer<BaseClass>;
     public interface IPoolReturn<in T>
     {
         void Return(T item);
     }
+    public interface IPoolBind
+    {
+        void Bind(IPoolObjects pool);
+    }
+
     public interface IPoolBind<T>
     {
         void BindToPool(IPoolReturn<T> pool);

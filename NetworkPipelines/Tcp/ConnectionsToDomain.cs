@@ -1,13 +1,14 @@
-﻿using IziHardGames.Core;
-using IziHardGames.Libs.Networking.Clients;
-using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using IziHardGames.Core;
+using IziHardGames.Libs.Networking.Contracts;
+using IziHardGames.Libs.Networking.SocketLevel;
+using IziHardGames.Libs.Networking.States;
+using IziHardGames.Libs.NonEngine.Memory;
 
 namespace IziHardGames.Proxy.Tcp
 {
@@ -50,7 +51,7 @@ namespace IziHardGames.Proxy.Tcp
 3. Удаленный сервер закрывает соединение. Поток обмена сообщениями дожидается последний рид и далее пункт 1.
 */
     public class ConnectionsToDomain<T1> : ConnectionsToDomain, IKey<string>, IHub<T1>
-        where T1 : IInitializable<string>, IPoolBind<T1>, IClient, IConnectorTcp, IKey<uint>, IDisposable, IConnection, IConnectionData
+        where T1 : IInitializable<string>, IPoolBind<T1>, IClient<SocketReader, SocketWriter>, IConnectorTcp, IKey<uint>, IDisposable, IConnection<ConnectionDataPoolable>, IGetConnectionData<ConnectionDataPoolable>
     {
         private readonly ConcurrentDictionary<uint, T1> activeConnections = new ConcurrentDictionary<uint, T1>();
         private StalledData? head;
@@ -68,24 +69,26 @@ namespace IziHardGames.Proxy.Tcp
         /// </summary>
         private uint usage;
 
-        public virtual async ValueTask<T1> GetOrCreateAsync(string title, IPoolObjects<T1> pool)
+        public virtual async ValueTask<T1> GetOrCreateAsync(EConnectionFlags filter, string title, IPoolObjects<T1> pool)
         {
-            if (!TryGet(out T1 result))
+            if (!TryGet(filter, out T1 result))
             {
-                result = await CreateAsync(title, pool);
+                result = await CreateAsync(filter, title, pool);
             }
             result.SetState(EConnectionState.Active);
-            monitor.OnUpdate(result);
+            monitor.OnUpdate(result.ConnectionData);
             return result;
         }
 
-        protected async virtual ValueTask<T1> CreateAsync(string title, IPoolObjects<T1> pool)
+        protected async virtual ValueTask<T1> CreateAsync(EConnectionFlags filter, string title, IPoolObjects<T1> pool)
         {
+
             var id = Interlocked.Increment(ref counterForId);
             var rent = pool.Rent();
             rent.BindToPool(pool);
             rent.Initilize(title);
             rent.Key = id;
+            IPerfTracker logger = rent.Logger as IPerfTracker ?? throw new NullReferenceException();
 #if DEBUG
             if (activeConnections.ContainsKey(id))
             {
@@ -100,7 +103,7 @@ namespace IziHardGames.Proxy.Tcp
             try
             {
                 await rent.ConnectAsyncTcp(host, port).ConfigureAwait(false);
-                rent.RunWriterLoop();
+                if (rent is IClientPiped<SocketReader, SocketWriter> pipe) pipe.RunWriterLoop();
             }
             catch (SocketException)
             {
@@ -111,20 +114,20 @@ namespace IziHardGames.Proxy.Tcp
                 rent.Dispose();
                 throw new NotImplementedException();
             }
-            rent.ReportTime($"ConnectionsToDomain GetOrCreate completed with create id={id}");
-            monitor.OnAdd(rent);
+            logger.ReportTime($"ConnectionsToDomain GetOrCreate completed with create id={id}");
+            monitor.OnAdd(rent.ConnectionData);
             return rent;
         }
-        protected virtual bool TryGet(out T1 client)
+        protected virtual bool TryGet(EConnectionFlags filter, out T1 client)
         {
             REPEAT:
-            var data = PullHead();
+            var data = FindHead();
             if (data != null)
             {
                 client = data.client;
                 if (TryReviveOtherwiseKill(data))
                 {
-                    client.ReportTime($"ConnectionsToDomain GetOrCreate completed with get stall");
+                    (client.Logger as IPerfTracker)!.ReportTime($"ConnectionsToDomain GetOrCreate completed with get stall");
                     return true;
                 }
                 else
@@ -135,7 +138,7 @@ namespace IziHardGames.Proxy.Tcp
             client = default;
             return false;
         }
-        private StalledData PullHead()
+        private StalledData FindHead()
         {
             if (head == null) return default;
             StalledData result;
@@ -150,7 +153,8 @@ namespace IziHardGames.Proxy.Tcp
 
         private bool TryReviveOtherwiseKill(StalledData stalledData)
         {
-            stalledData.client.ReportTime($"TryRevive Started:{host}:{port}");
+            var logger = stalledData.client.Logger as IPerfTracker ?? throw new NullReferenceException();
+            logger.ReportTime($"TryRevive Started:{host}:{port}");
             var client = stalledData.client;
 
             if (client.CheckConnect())
@@ -161,38 +165,46 @@ namespace IziHardGames.Proxy.Tcp
                 {
                     throw new ArgumentException($"Key [{client.Key}] is Already Exist");
                 }
-                stalledData.client.ReportTime($"TryRevive Succeded:{host}:{port}");
+                logger.ReportTime($"TryRevive Succeded:{host}:{port}");
                 // stallData.cts was canceled. Need to reset cts              
                 stalledData.Dispose();
                 this.countRevives++;
-                monitor.OnUpdate(client);
+                monitor.OnUpdate(client.ConnectionData);
                 return true;
             }
-            stalledData.client.ReportTime($"TryRevive Failed:{host}:{port}. Connection Killed");
+            logger.ReportTime($"TryRevive Failed:{host}:{port}. Connection Killed");
             Kill(client);
             return false;
         }
 
-        private void Kill(T1 client)
+        private async Task Kill(T1 client)
         {
-            monitor.OnRemove(client);
-            client.ReportTime($"Killing started {host}:{port}. clientID:{client.Key}");
-            var task = client.StopWriteLoop();
-            task.Wait();
-            client.ReportTime($"ConnectionsToDomain: Connection Killed. host {host}:{port}. clientID:{client.Key}");
+            var logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+
+            monitor.OnRemove(client.ConnectionData);
+            logger.ReportTime($"Killing started {host}:{port}. clientID:{client.Key}");
+            var pipedClient = client as IClientPiped<SocketReader, SocketWriter>;
+            if (pipedClient != null)
+            {
+                var task = pipedClient.StopWriteLoop();
+                await task.ConfigureAwait(false);
+            }
+            logger.ReportTime($"ConnectionsToDomain: Connection Killed. host {host}:{port}. clientID:{client.Key}");
             client.Dispose();
             CheckDispose();
-            client.ReportTime($"ConnectionsToDomain: IsDisposed:{isDisposed}");
+            logger.ReportTime($"ConnectionsToDomain: IsDisposed:{isDisposed}");
         }
 
         protected virtual void ReturnToManager()
         {
             this.returnToManager(this);
         }
-        public void Return(T1 client)
+        public async Task Return(T1 client)
         {
+            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+
             Console.WriteLine($"ConnectionsToDomain: id:{client.Key} {host}:{port} Return active connection");
-            client.ReportTime($"ConnectionsToDomain: id:{client.Key} {host}:{port} Return active connection");
+            logger.ReportTime($"ConnectionsToDomain: id:{client.Key} {host}:{port} Return active connection");
 
             if (!activeConnections.ContainsKey(client.Key))
             {
@@ -202,7 +214,7 @@ namespace IziHardGames.Proxy.Tcp
             {
                 new SpinWait().SpinOnce();
             }
-            client.ReportTime($"ConnectionsToDomain: Removed from active connections");
+            logger.ReportTime($"ConnectionsToDomain: Removed from active connections");
 
             if (client.CheckConnect())
             {
@@ -210,13 +222,15 @@ namespace IziHardGames.Proxy.Tcp
             }
             else
             {
-                Kill(client);
+                await Kill(client).ConfigureAwait(false);
             }
         }
 
         private void MoveToStalled(T1 client)
         {
-            client.ReportTime($"Moved to Stall: {host}:{port}");
+            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
+
+            logger.ReportTime($"Moved to Stall: {host}:{port}");
             client.SetState(EConnectionState.Stalled);
 
             int timeout;
@@ -235,15 +249,15 @@ namespace IziHardGames.Proxy.Tcp
               {
                   try
                   {
-                      client.ReportTime($"ConnectionToDomain:{host}:{port}. Death Timer is Started:timeout:{timeout}. TokenCanceled:{stallData.cts.Token.IsCancellationRequested}");
+                      logger.ReportTime($"ConnectionToDomain:{host}:{port}. Death Timer is Started:timeout:{timeout}. TokenCanceled:{stallData.cts.Token.IsCancellationRequested}");
                       await Task.Delay(timeout, stallData.cts.Token);
                   }
                   catch (TaskCanceledException)
                   {
-                      client.ReportTime($"Stalled connection {host}:{port} Death Timer is Stopped");
+                      logger.ReportTime($"Stalled connection {host}:{port} Death Timer is Stopped");
                       return;
                   }
-                  client.ReportTime($"Stalled connection is out of time: {host}:{port}");
+                  logger.ReportTime($"Stalled connection is out of time: {host}:{port}");
                   stallData.RemoveFromChain();
                   // stallData.cts.token is not used no need to stallData.Reset()
                   stallData.Dispose();
@@ -358,6 +372,7 @@ namespace IziHardGames.Proxy.Tcp
             Interlocked.Decrement(ref usage);
         }
 
+
         /// <summary>
         /// Двусвязный список
         /// </summary>
@@ -414,7 +429,8 @@ namespace IziHardGames.Proxy.Tcp
 
             internal void RemoveFromChain()
             {
-                client.ReportTime("Removed from chain of stalled connections");
+                var logger = client.Logger;
+                (logger as IPerfTracker)!.ReportTime("Removed from chain of stalled connections");
 
                 lock (ctd)
                 {
@@ -441,5 +457,6 @@ namespace IziHardGames.Proxy.Tcp
                 this.previous = prev;
             }
         }
+
     }
 }

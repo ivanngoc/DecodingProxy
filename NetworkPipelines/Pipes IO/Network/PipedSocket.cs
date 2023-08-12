@@ -1,12 +1,4 @@
-﻿using IziHardGames.Core;
-using IziHardGames.Libs.DevTools;
-using IziHardGames.Libs.Networking.Clients;
-using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.Networking.Pipelines.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Libs.Streaming;
-using ProxyLibs.Extensions;
-using System;
+﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,14 +11,19 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using IziHardGames.Libs.DevTools;
+using IziHardGames.Libs.Networking.States;
+using IziHardGames.Libs.Streaming;
+using ProxyLibs.Extensions;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
 
     /*
-     Схема работы: FillPipe => ReadAsync => Parse => Apply Controls => Analyz Continuation => Break/Continue 
-     */
-    public class PipedSocket : PipedStream, IReader, IDisposable, IPerfTracker, IInitializable<string>, IConnectorTcp, IConnection, IConnectionData
+Схема работы: FillPipe => ReadAsync => Parse => Apply Controls => Analyz Continuation => Break/Continue 
+*/
+    [Obsolete]
+    public class PipedSocket : PipedStream
     {
         public Stopwatch stopwatch = new Stopwatch();
         public string Title => title;
@@ -80,6 +77,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
 
         private CancellationTokenSource ctsWrite;
         private CancellationTokenSource ctsRead;
+        public readonly NetworkLogger logger = new NetworkLogger();
 
         public DateTime timeConnect;
         public DateTime timeConnectCheck;
@@ -99,15 +97,15 @@ namespace IziHardGames.Libs.Networking.Pipelines
             if (isDisposed) throw new ObjectDisposedException($"This object is already Disposed");
             isDisposed = true;
             ReportTime($"Socket closed. lifetime:{lifetime} seconds. timeConnect:{timeConnect.ToString("yyyy.MM.dd HH:mm:ss.ffffff")}. timeDisconnectDetected:{timeDisconnectDetected}");
-            if (socket.Connected) socket.Disconnect(false);
+            if (socket.Connected) socket.Disconnect(true);
 
             this.state = EConnectionState.Disposed;
             this.flags = EConnectionFlags.Reseted;
 
-            socket.Close();
-            socket.Dispose();
+            socket.Close(); // dispose called inside
             base.Close();
             ResetPipes();
+
             ipEndPoint = default;
             port = default;
             host = default;
@@ -498,6 +496,8 @@ namespace IziHardGames.Libs.Networking.Pipelines
 
         public async Task LogsToFile()
         {
+            return;
+
             if (logs.Count > 0)
             {
                 string log = $"{id}.{title}.G_{generation}{Environment.NewLine}{logs.Aggregate((x, y) => x + Environment.NewLine + y)}";

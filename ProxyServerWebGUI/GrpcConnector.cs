@@ -65,8 +65,8 @@ namespace IziHardGames.Proxy.WebGUI
                     if (isGot)
                     {
                         var reply = reader.Current;
-                        var pool = PoolObjectsConcurent<DefaultConnectionData>.Shared;
-                        DefaultConnectionData dcd = pool.Rent();
+                        var pool = PoolObjectsConcurent<ConnectionDataPoolable>.Shared;
+                        ConnectionDataPoolable dcd = pool.Rent();
                         dcd.BindToPool(pool);
                         var data = reply.Connection;
                         dcd.Id = data.Id;
@@ -104,8 +104,9 @@ namespace IziHardGames.Proxy.WebGUI
             return Enumerable.Empty<IDomainData>();
         }
 
-        public void RecieveConnection(IConnection data)
+        public void RecieveConnection(IConnection<ConnectionDataPoolable> connection)
         {
+            var data = connection.ConnectionData;
             logger.LogInformation($"{typeof(GrpcConnector).FullName} gRPC is callling {nameof(RecieveConnection)}");
             var temp = PoolObjectsConcurent<DataConnection>.Shared.Rent();
             temp.Host = data.Host;

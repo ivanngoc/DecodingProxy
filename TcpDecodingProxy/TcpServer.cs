@@ -1,7 +1,7 @@
 ﻿using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Servers;
+using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Proxy.Tcp;
 using System;
 using System.Net.Sockets;
 using System.Threading;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace IziHardGames.Proxy.TcpDecoder
 {
-    public class TcpServer<T> : ServerBase<T> where T : TcpWrap, IPoolBind<T>
+    public class TcpServer<T> : ServerBase<T> where T : SocketWrap, IPoolBind<T>
     {
         private IPoolObjects<T> pool;
 
@@ -50,12 +50,12 @@ namespace IziHardGames.Proxy.TcpDecoder
 
             public async override Task<T> AcceptClientAsync(CancellationToken token = default)
             {
-                var client = await listener.AcceptTcpClientAsync(token);
+                var client = await listener.AcceptSocketAsync(token);
                 //System.Net.Sockets.SocketException: 'An attempt was made to access a socket in a way forbidden by its access permissions.' - порт занят?
 
                 var pool = this.pool;
                 var rent = pool.Rent();
-                rent.Wrap(client);
+                rent.Wrap(client, false, false);
                 rent.Initilize("Client");
                 rent.BindToPool(pool);
                 return rent;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -19,6 +20,13 @@ namespace IziHardGames.Libs.ForHttp20
         [FieldOffset(5)] public ulong streamIdentifier;
         public static HttpFrame Settings => new HttpFrame() { type = 0x04 };
 
+        public unsafe void WriteThisTo(Stream stream)
+        {
+            var copy = this;
+            Span<HttpFrame> span = new Span<HttpFrame>(&copy, 1);
+            Span<byte> bytes = MemoryMarshal.Cast<HttpFrame, byte>(span);
+            stream.Write(bytes);
+        }
         public unsafe void WriteThisTo(NetworkStream stream)
         {
             var copy = this;

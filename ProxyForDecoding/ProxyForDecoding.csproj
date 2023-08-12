@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HttpDecodingProxy\ProxyForDecodingHttp.csproj" />
     <ProjectReference Include="..\HttpRecorder\ProxyForRecording.csproj" />
-    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
     <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />

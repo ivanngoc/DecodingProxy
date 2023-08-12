@@ -10,6 +10,7 @@
     <Folder Include="Clients\" />
     <Folder Include="http 1.1\" />
     <Folder Include="http 3\" />
+    <Folder Include="Exampes\" />
   </ItemGroup>
 
   <ItemGroup>

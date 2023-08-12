@@ -8,7 +8,7 @@ namespace IziHardGames.Libs.Networking.Pipelines.Contracts
 
     public interface IReader
     {
-        ValueTask<ReadResult> ReadAsync(CancellationToken token = default);
+        ValueTask<ReadResult> ReadPipeAsync(CancellationToken token = default);
         void ReportConsume(SequencePosition position);
     }
 }

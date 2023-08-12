@@ -6,7 +6,13 @@ using Test;
 
 //TlcHelloFromClient.Test12();
 //Console.ReadLine();
-await TestHttp2.RunHttp2();
+//await TestHttp2.RunTlsParse();
+//await TestHttp2.ShowIp();
+await TestHttp2.UpgradeConnect();
+//await TestHttp2.RunProxy();
+//await TestHttp2.RunProxySsl();
+//await TestHttp2.RunHttp2Ssl();
+//await TestHttp2.RunHttp2();
 await DoAsync();
 
 async Task DoAsync()

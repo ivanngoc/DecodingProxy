@@ -393,7 +393,7 @@ namespace HttpDecodingProxy.ForHttp
         {
             while (client.CheckConnectIndirectly())
             {
-                var result = await client.ReadAsync();
+                var result = await client.ReadPipeAsync();
                 AddBodyForSure(result.Buffer);
                 client.ReportConsume(result.Buffer.End);
             }

@@ -1,6 +1,7 @@
 ﻿using IziHardGames.Core;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.NonEngine.Memory;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
 using System.Diagnostics;
@@ -13,10 +14,13 @@ using Tuple = System.ValueTuple<System.Net.Sockets.Socket, System.Net.IPEndPoint
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
-    public class TcpClientPiped : PipedSocket, IKey<uint>, IApplyControl, ICheckConnection, IInitializable<Tuple>, IPoolBind<TcpClientPiped>, IClient
+    [Obsolete]
+    public class TcpClientPiped : PipedSocket
     {
         private IPoolReturn<TcpClientPiped>? pool;
         public uint Key { get; set; }
+        public ILogger Logger { get => base.logger; }
+
         /// <summary>
         /// Counter of something. when rich 0 connection must be closed
         /// </summary>
@@ -74,5 +78,6 @@ namespace IziHardGames.Libs.Networking.Pipelines
         {
             throw new System.NotImplementedException();
         }
+
     }
 }

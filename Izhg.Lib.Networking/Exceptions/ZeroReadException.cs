@@ -14,6 +14,11 @@ namespace IziHardGames.Lib.Networking.Exceptions
         public static readonly StalledConnection shared = new StalledConnection();
     }
 
+    public class ZeroWriteException : Exception
+    {
+        public static readonly ZeroWriteException shared = new ZeroWriteException();
+    }
+
     public class ZeroReadException : Exception
     {
         public static readonly ZeroReadException shared = new ZeroReadException();

@@ -21,7 +21,7 @@ using Wrap = IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
-    internal delegate void BufferReader(byte[] buffer, ref int start, ref int length);
+    internal delegate void HandlerForBufferReader(byte[] buffer, ref int start, ref int length);
 
     /// <summary>
     /// Stream для записи данных в массив байтов и интерпретации данных по стандарту http
@@ -39,7 +39,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         private const int ACTION_READ_BODY = 1;
         private const int ACTION_READ_CHUNK = 2;
 
-        private readonly BufferReader[] readers;
+        private readonly HandlerForBufferReader[] readers;
         private int currentReadAction;
 
         private SubstringMatchQueue substringQueue = new SubstringMatchQueue("\r\n\r\n");
@@ -96,7 +96,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
         public HttpObjectStream() : base()
         {
-            readers = new BufferReader[]
+            readers = new HandlerForBufferReader[]
           {
                 ReadHeaders,
                 ReadBody,

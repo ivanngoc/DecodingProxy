@@ -13,89 +13,177 @@ using System.Threading.Tasks;
 using System.Threading;
 using IziHardGames.Proxy.TcpDecoder;
 using IziHardGames.Libs.IO;
+using IziHardGames.Libs.Networking.Pipelines.Wraps;
+using IziHardGames.Libs.Networking.SocketLevel;
+using System;
+using System.Text;
+using Enumerator = IziHardGames.Libs.Cryptography.Tls12.TlsHelloFromClientExtensionsEnumerator;
+using System.IO.Pipelines;
+using System.Buffers;
+using IziHardGames.Libs.ForHttp.Piped;
+using IziHardGames.Libs.Binary.Readers;
+using System.Security.Authentication;
+using IziHardGames.Libs.Networking.States;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
-    public class ClientHandlerPipedHttpsForDirrectConnect : IClientHandlerAsync<TcpWrapSsl>
+    public class ClientHandlerPipedHttpsForDirrectConnect : IClientHandlerAsync<SocketWrap>
     {
         private ConsumingProvider consumingProvider;
         private X509Certificate2 caRootCert;
         private CertManager certManager;
-        private ManagerBase<string, ConnectionsToDomainSsl<TcpWrapSsl>, (string, int)> managerSsl;
+        private ManagerBase<string, ConnectionsToDomainTls<SocketWrap>, (string, int)> managerSsl;
         private DataSource dataSource;
         private readonly IChangeNotifier<IConnectionData> monitor;
 
-        public ClientHandlerPipedHttpsForDirrectConnect(ConsumingProvider consumingProvider, Core.IChangeNotifier<IConnectionData> monitorForConnections, Libs.ObjectsManagment.ManagerBase<string, ConnectionsToDomainSsl<TcpWrapSsl>, (string, int)> managerSsl, System.Security.Cryptography.X509Certificates.X509Certificate2 caRootCert, Tls.CertManager certManager)
-        {
-            this.consumingProvider = consumingProvider;
-            this.monitor = monitorForConnections;
-            this.caRootCert = caRootCert;
-            this.certManager = certManager;
-            this.managerSsl = managerSsl;
-            this.dataSource = new DataSource($"{nameof(ClientHandlerPipedHttpsV2)}");
-        }
 
-        public async Task<TcpWrapSsl> HandleClientAsync(TcpWrapSsl client, CancellationToken token = default)
+        //public ClientHandlerPipedHttpsForDirrectConnect(ConsumingProvider consumingProvider, Core.IChangeNotifier<IConnectionData> monitorForConnections, Libs.ObjectsManagment.ManagerBase<string, ConnectionsToDomainSsl<TcpWrapPiped>, (string, int)> managerSsl, System.Security.Cryptography.X509Certificates.X509Certificate2 caRootCert, Tls.CertManager certManager)
+        //{
+        //    this.consumingProvider = consumingProvider;
+        //    this.monitor = monitorForConnections;
+        //    this.caRootCert = caRootCert;
+        //    this.certManager = certManager;
+        //    //this.managerSsl = managerSsl;
+        //    this.dataSource = new DataSource($"{nameof(ClientHandlerPipedHttpsV2)}");
+        //}
+
+        public async Task<SocketWrap> HandleClientAsync(SocketWrap wrap, CancellationToken token = default)
         {
-            TlsReader12 reader = new TlsReader12();
-            while (true)
+            wrap.AddModifier(PoolObjectsConcurent<SocketModifierReaderPiped>.Shared);
+            wrap.AddModifier(PoolObjectsConcurent<SocketModifierWriterDefault>.Shared);
+
+            var reader = wrap.Reader as SocketReaderPiped;
+            var writer = wrap.Writer as SocketWriterDefault;
+
+            var t1 = reader.RunWriter(token);
+            var data = await DetectIncomeType(reader, token).ConfigureAwait(false);
+            var type = data.negotioanions;
+
+            switch (type)
             {
-                await reader.TryAnalyzeTlsFrameAsync(client.Client.GetStream());
+                case ENegotioanions.None: break;
+                case ENegotioanions.Connect:
+                    {
+                        await writer!.SendAsync(HttpLibConstants.Responses.bytesOk11).ConfigureAwait(false);
+                        var httpVersion = await HandShakeAnalyz(reader).ConfigureAwait(false); // highest support version
+                        var hub = managerSsl.GetOrCreate($"{data.connectionKey}", (data.Host, data.Port));
+                        var t2 = hub.GetOrCreateAsync(BuildFilter(data, httpVersion), "Client", PoolObjectsConcurent<SocketWrap>.Shared);
+                        break;
+                    }
+                case ENegotioanions.Direct:
+                    break;
+                case ENegotioanions.Handshake:
+                    break;
+                default:
+                    break;
             }
 
-            //var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            //token = cts.Token;
+            throw new System.NotImplementedException();
+        }
 
-            //var pool = PoolObjectsConcurent<HttpPipedIntermediary<ConnectionsToDomainSsl<TcpWrapSsl>, TcpWrapSsl>>.Shared;
-            //var pool2 = PoolObjectsConcurent<HttpBinaryMapped>.Shared;
-            //var pool3 = PoolObjectsConcurent<TcpWrapSsl>.Shared;
+        private EConnectionFlags BuildFilter(ConnectionDataPoolable data, EHttpVersion httpVersion)
+        {
+            EConnectionFlags result = EConnectionFlags.None;
+            if (httpVersion == EHttpVersion.Version30)
+            {
+                result |= EConnectionFlags.HTTP3 | EConnectionFlags.TLS13 | EConnectionFlags.Ssl;
+            }
+            else
+            if (httpVersion == EHttpVersion.Version20)
+            {
+                result |= EConnectionFlags.HTTP2 | EConnectionFlags.TLS12 | EConnectionFlags.Ssl;
+            }
+            else
+            if (httpVersion == EHttpVersion.Version11)
+            {
+                result |= EConnectionFlags.HTTP11 | EConnectionFlags.TLS12 | EConnectionFlags.Ssl;
+            }
+            return result;
+        }
 
-            //client.CreateDefaultPipe();
+        private async Task<ConnectionDataPoolable> DetectIncomeType(SocketReaderPiped reader, CancellationToken token)
+        {
+            var connect = "CONNECT ";
+            var pool = PoolObjectsConcurent<ConnectionDataPoolable>.Shared;
+            ConnectionDataPoolable data = pool.Rent();
+            data.BindToPool(pool);
 
-            //using (HttpPipedIntermediary<ConnectionsToDomainSsl<TcpWrapSsl>, TcpWrapSsl> processor = pool.Rent().Init(consumingProvider, managerSsl, pool, monitor))
-            //{
-            //    var t3 = client.AuthAsServerAsync(certForged, certOrigin, caRootCert);
+            while (!token.IsCancellationRequested)
+            {
+                var result = await reader.ReadPipeAsync();
 
-            //    using (var msg = await processor.AwaitMsg(HttpLibConstants.TYPE_REQUEST, client, cts, pool2).ConfigureAwait(false))
-            //    {
-            //        var pair = msg.FindHostAndPortFromField();
-            //        var hub = managerSsl.GetOrCreate($"{pair.Item1}:{pair.Item2}", pair);
-            //        var t2 = hub.GetOrCreateAsync("Origin", pool3);
-            //        try
-            //        {
-            //            using (var origin = await t2.ConfigureAwait(false))
-            //            {
-            //                try
-            //                {
-            //                    monitor.OnUpdate(origin);
-            //                    var certOrigin = origin.GetRemoteCert();
-            //                    await certManager.OriginTryUpdateAsync(certOrigin).ConfigureAwait(false);
-            //                    var certForged = await certManager.ForgedGetOrCreateCertFromCacheAsync(certOrigin, caRootCert).ConfigureAwait(false);
-            //                    await t1.ConfigureAwait(false);
-            //                    await t3.ConfigureAwait(false);
-            //                    // at least 1 msg must be proceeded
-            //                    var t4 = processor.MaintainMessagingV2(HttpLibConstants.TYPE_REQUEST, client, origin, cts, consumingProvider.consumeBinaryRequest);
-            //                    var t5 = processor.MaintainMessagingV2(HttpLibConstants.TYPE_RESPONSE, origin, client, cts, consumingProvider.consumeBinaryResponse);
-            //                    await Task.WhenAll(t4, t5).ConfigureAwait(false);
-            //                }
-            //                catch (SuddenBreakException)
-            //                {
+                Console.WriteLine(Encoding.UTF8.GetString(result.Buffer));
+                var buffer = result.Buffer;
 
-            //                }
-            //                finally
-            //                {
-            //                    if (!origin.Flags.HasFlag(Libs.Networking.Clients.EConnectionFlags.AuthenticatedSslClient)) throw new System.NotImplementedException("Can't be reused in domain's pool");
-            //                    hub.Return(origin);
-            //                }
-            //            }
-            //        }
-            //        catch (StalledConnection ex)
-            //        {
-            //            throw ex;
-            //        }
-            //    }
-            //}
-            //return client;
+                if (connect.Length <= result.Buffer.Length)
+                {
+                    if (buffer.IsStartWithSingleSize(connect))
+                    {
+                        var pos = result.Buffer.FindPosAfterEndOfHeaders();
+                        reader.AdvanceTo(pos);
+                        data.Version += ENegotioanions.Connect;
+                        return data;
+                    }
+                }
+                reader.AdvanceTo(result.Buffer.Start);
+            }
+            data.Version = $"ENegotioanions.None";
+            return data;
+        }
+
+        private async Task<EHttpVersion> HandShakeAnalyz(SocketReaderPiped reader, CancellationToken token = default)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var result = await reader.ReadPipeAsync();
+
+                if (TryAnalyzTlsHello(result.Buffer, out var httpVersion))
+                {   // only peek data
+                    reader.AdvanceTo(result.Buffer.Start);
+                    return httpVersion;
+                }
+                else
+                {
+                    throw new System.NotImplementedException();
+                }
+            }
+            throw new System.NotImplementedException();
+        }
+        private bool TryAnalyzTlsHello(ReadOnlySequence<byte> buffer, out EHttpVersion httpVersion)
+        {
+            Enumerator num = new Enumerator(buffer);
+            while (num.MoveNext())
+            {
+                var extension = num.Current;
+                Console.WriteLine($"DEBUG: {(ETlsExtensions)extension.type}. Length:{extension.length}. DataAsString: {Encoding.UTF8.GetString(extension.data)}. Data Raw:{ParseByte.ToHexStringFormated(extension.data)}");
+
+                if (extension.type == (ushort)(ETlsExtensions.APPLICATION_LAYER_PROTOCOL_NEGOTIATION))
+                {
+                    //h3 - HTTP/3 0x68 0x33
+                    if (extension.data.ContainSequence(ConstantsTls.ALPN.h3))
+                    {
+                        httpVersion = EHttpVersion.Version30;
+                        return true;
+                    }
+                    // https://www.rfc-editor.org/rfc/rfc7301.html#section-6
+                    // 0x00 0x0C 0x02
+                    // 0x68 0x32 - "h2". The string is serialized into an ALPN protocol identifier as the two-octet sequence: 0x68, 0x32. https://httpwg.org/specs/rfc9113.html#versioning
+                    // 0x08 - горизонтальная табуляция
+                    // 0x68 0x74 0x74 0x70 0x2f 0x31 0x2e 0x31 = "http/1.1"
+                    if (extension.data.ContainSequence(ConstantsTls.ALPN.h2))
+                    {
+                        httpVersion = EHttpVersion.Version20;
+                        return true;
+                    }
+                    if (extension.data.ContainSequence(ConstantsTls.ALPN.http11))
+                    {
+                        httpVersion = EHttpVersion.Version11;
+                        return true;
+                    }
+                    throw new System.NotImplementedException();
+                }
+            }
+            throw new System.NotImplementedException();
         }
     }
 }

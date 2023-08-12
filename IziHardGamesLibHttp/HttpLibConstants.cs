@@ -89,11 +89,16 @@ namespace HttpDecodingProxy.ForHttp
         public class Responses
         {
             public const string SwitchProtocols = "HTTP/1.1 101 Connection Established\r\nConnection: upgrade\r\nUpgrade: HTTP/2.0\r\n\r\n";
-            //public const string OK11 = "HTTP/1.1 200 Connection Established\r\nConnection: close\r\n\r\n";
-            public const string OK11 = "HTTP/2 200 Connection Established\r\nConnection: upgrade\r\nUpgrade: HTTP/2.0\r\n\r\n";
+            public const string OK11 = "HTTP/1.1 200 Connection Established\r\nConnection: close\r\n\r\n";
+            //public const string OK11 = "HTTP/2 200 Connection Established\r\nConnection: upgrade\r\nUpgrade: HTTP/2.0\r\n\r\n";
             public const string OK2 = "HTTP/2 200 Connection Established\r\nConnection: close\r\n\r\n";
 
             public static byte[] bytesOk11 = Encoding.UTF8.GetBytes(OK11);
+        }
+
+        public static class Methods
+        {
+            public const string CONNECET = "CONNECT";
         }
     }
 }

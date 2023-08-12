@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>
 

@@ -2,6 +2,7 @@
 
 namespace IziHardGames.Libs.Buffers.Vectors
 {
+
     [StructLayout(LayoutKind.Explicit, Size = 3)]
     public struct Bytes3
     {

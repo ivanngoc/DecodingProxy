@@ -5,6 +5,32 @@ namespace System
 {
     public static class ExtensionsForReadOnlySequence
     {
+        public static bool ContainSequence<T1>(in this ReadOnlySequence<T1> seq, ReadOnlySpan<T1> ethalon) where T1 : IEquatable<T1>
+        {
+            int index = default;
+            foreach (var seg in seq)
+            {
+                var span = seg.Span;
+                for (int i = 0; i < span.Length; i++)
+                {
+                    if (!span[i].Equals(ethalon[index]))
+                    {
+                        index = default; if (span[i].Equals(ethalon[index])) index++;
+                    }
+                    else
+                    {
+                        index++;
+                        if (index == ethalon.Length) return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public static ReadOnlySequence<TTo> CastAs<TFrom, TTo>(in this ReadOnlySequence<TFrom> seq) => throw new System.NotImplementedException();
+        public static T GetItemAt<T>(in this ReadOnlySequence<T> seq, int index)
+        {
+            return seq.Slice(index).FirstSpan[0];
+        }
         public static void CopyToSafe(in this ReadOnlySequence<byte> seq, Span<byte> span)
         {
             int offset = 0;

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace IziHardGames.Libs.Binary.Readers
 {
-    public static partial class BufferReader
+    public static class BufferReader
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining), LittleEndian]
         public static int ConcatToInt32(byte v1, byte v2, byte v3)
@@ -56,6 +56,8 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[1] = bytes[0];
             return result;
         }
+
+       
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public static T ToStruct<T>(byte[] buffer, int offset, int length) where T : unmanaged

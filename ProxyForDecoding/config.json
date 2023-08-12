@@ -5,8 +5,8 @@
   "path_cert_cache_forged": "C:\\Users\\ngoc\\Documents\\Builds\\cert cache forged",
   "path_cert_cache_original": "C:\\Users\\ngoc\\Documents\\Builds\\cert cache original",
 
-  "path_ca_key": "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem",
-  "path_ca_cert": "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem",
+  "path_ca_key": "..\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem",
+  "path_ca_cert": "..\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem",
 
   "rules": [
     {

@@ -3,14 +3,19 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Core\Izhg.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
     <ProjectReference Include="..\IzhgLibLogging\Izhg.Lib.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tls Shared\" />
   </ItemGroup>
 
 </Project>

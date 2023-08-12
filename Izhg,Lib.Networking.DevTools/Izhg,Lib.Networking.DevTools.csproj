@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>IziHardGames.Libs.Networking.DevTools</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -22,7 +22,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class TcpServerSocketBased<T> : IDisposable
-        where T : IPerfTracker, IPoolBind<T>, IKey<uint>, IGuid, IInitializable<Tuple>, IDisposable
+        where T : IPoolBind<T>, IKey<uint>, IGuid, IInitializable<Tuple>, IDisposable, IGetLogger
     {
         private readonly AsyncAutoResetCounter asyncCounter = new AsyncAutoResetCounter();
         public ConcurrentDictionary<uint, T> clients = new ConcurrentDictionary<uint, T>();
@@ -77,6 +77,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
 
             item.BindToPool(poolObjects);
             item.Initilize((clientSocket, ipEndPoint, "Client"));
+            var clientLogger = item.Logger as IPerfTracker ?? throw new NullReferenceException();
 
             var run = Task.Run(async () =>
             {
@@ -93,7 +94,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
                 await run;
                 var item = run.Result;
                 logger.LogInformation($"Taks Completed: id:{run.Id} status:{run.Status} exception:{run.Exception?.Message ?? "OK"}");
-                item.ReportTime($"AcceptClientAsync finished task with status:{run.Status} exception:{run.Exception?.Message ?? "OK"}");
+                clientLogger.ReportTime($"AcceptClientAsync finished task with status:{run.Status} exception:{run.Exception?.Message ?? "OK"}");
                 while (!clients.TryRemove(item.Key, out item))
                 {
                     new SpinWait().SpinOnce();
@@ -105,7 +106,7 @@ namespace IziHardGames.Libs.Networking.Pipelines
                 item.Dispose();
                 logger.LogInformation($"Client guid:{item.Guid} disposed. Left clients:{clients.Count}. Tasks:{tasks.Count}");
                 asyncCounter.Decrement();
-                item.ReportTime($"AcceptClientAsync Disposed");
+                clientLogger.ReportTime($"AcceptClientAsync Disposed");
             });
             logger.LogInformation($"Task started: {run.Id} status:{run.Status}");
             await remove;

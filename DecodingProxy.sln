@@ -39,21 +39,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Cryptography", "Iz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Binary", "Izhg.Lib.Binary\Izhg.Lib.Binary.csproj", "{ED8EA0E3-3097-43E5-B635-2DE71DBD3906}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Core", "Izhg.Core\Izhg.Core.csproj", "{93503716-E5F4-45F4-BDDD-5359F612DC83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.NetStandart21.Core", "Izhg.Core\Izhg.NetStandart21.Core.csproj", "{93503716-E5F4-45F4-BDDD-5359F612DC83}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecoding", "ProxyForDecoding\ProxyForDecoding.csproj", "{C3FD5F87-A38D-40F3-BFE0-6916F5864F96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Libs.Tables", "Izhg.Libs.Tables\Izhg.Libs.Tables.csproj", "{7093B221-B2EA-4609-A6A3-50E898AA6717}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Libs.Tables", "Izhg.Libs.Tables\Izhg.Libs.Tables.csproj", "{7093B221-B2EA-4609-A6A3-50E898AA6717}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Tables.Web", "Izhg.Lib.Tables.Web\Izhg.Lib.Tables.Web.csproj", "{28A3DC63-E849-4FAC-BEB8-AE14F49FD2DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Tables.Web", "Izhg.Lib.Tables.Web\Izhg.Lib.Tables.Web.csproj", "{28A3DC63-E849-4FAC-BEB8-AE14F49FD2DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Buffers", "Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj", "{CFEFA2E1-D31B-4796-9EEF-87343408CDF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Buffers", "Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj", "{CFEFA2E1-D31B-4796-9EEF-87343408CDF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Http.Piped", "Izhg.Lib.Http.Piped\Izhg.Lib.Http.Piped.csproj", "{C2D711D1-6D2C-4D90-AFB6-A205B44CF146}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Piped", "Izhg.Lib.Http.Piped\Izhg.Lib.Http.Piped.csproj", "{C2D711D1-6D2C-4D90-AFB6-A205B44CF146}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Text", "Izhg.Lib.Text\Izhg.Lib.Text.csproj", "{ADE5286B-73D2-4FAE-B055-4DDC136BFBCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Text", "Izhg.Lib.Text\Izhg.Lib.Text.csproj", "{ADE5286B-73D2-4FAE-B055-4DDC136BFBCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Collections", "Izhg.Lib.Collections\Izhg.Lib.Collections.csproj", "{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Collections", "Izhg.Lib.Collections\Izhg.Lib.Collections.csproj", "{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg,Lib.Networking.DevTools", "Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj", "{BABDAFAB-1179-445A-B75B-02669266A698}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Streams", "Izhg.Lib.Streams\Izhg.Lib.Streams.csproj", "{C7952C83-5DB8-4303-96A6-B329F17DCDC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Streams.Piped", "Izhg.Lib.Streams.Piped\Izhg.Lib.Streams.Piped.csproj", "{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Pipelines", "Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj", "{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -165,6 +173,22 @@ Global
 		{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BABDAFAB-1179-445A-B75B-02669266A698}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BABDAFAB-1179-445A-B75B-02669266A698}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BABDAFAB-1179-445A-B75B-02669266A698}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BABDAFAB-1179-445A-B75B-02669266A698}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7952C83-5DB8-4303-96A6-B329F17DCDC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7952C83-5DB8-4303-96A6-B329F17DCDC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7952C83-5DB8-4303-96A6-B329F17DCDC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7952C83-5DB8-4303-96A6-B329F17DCDC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
