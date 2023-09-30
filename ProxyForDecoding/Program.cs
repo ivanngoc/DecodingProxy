@@ -1,10 +1,13 @@
-﻿using IziHardGames.Proxy;
+﻿using System;
+using IziHardGames;
+using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.gRPC.Services;
+using IziHardGames.Proxy;
 using IziHardGames.Proxy.Http;
 using IziHardGames.Proxy.Recoreder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 
 Console.OutputEncoding = System.Text.Encoding.Unicode;
 Console.InputEncoding = System.Text.Encoding.Unicode;
@@ -18,14 +21,35 @@ var builder = WebApplication.CreateBuilder(args);
 var grpcBuilder = builder.Services.AddGrpc();
 
 builder.Services.AddHostedService<ProxyService>();
-builder.Services.AddSingleton((x) => ProxyFactory<HttpSpyProxy>.Create(EProxyBehaviour.MitmSpy, () => new HttpSpyProxy(x.GetService<ILogger<HttpSpyProxy>>()!, x.GetService<MonitorForConnections>()!)));
-builder.Services.AddSingleton<MonitorForConnections>();
-builder.Services.AddSingleton<GrpcServiceServer>();
+
+builder.Services.AddSingleton<GrpcHubService>();
+builder.Services.AddSingleton<HttpEventPublisherGrpc>();
 builder.Services.AddSingleton<HttpRecoreder>();
-builder.Services.AddSingleton<GrpcProxyPublisherService>();
+builder.Services.AddSingleton((x) =>
+{
+    return ProxyFactory<HttpSpyProxy>.Create(
+        EProxyBehaviour.MitmSpy,
+        () => new HttpSpyProxy(
+            x.GetService<ILogger<HttpSpyProxy>>()!,
+            x.GetService<MonitorForConnectionsGrpc>()!,
+            x.GetService<HttpRecoreder>()!,
+            x.GetService<GrpcHubService>()!,
+            x.GetService<HttpEventPublisherGrpc>()!
+            ));
+});
+
+//gRPC
+builder.Services.AddSingleton<MonitorForConnectionsGrpc>();
+builder.Services.AddSingleton<GrpcProxyPublisherService>((x) =>
+{
+    GrpcProxyPublisherService service = new GrpcProxyPublisherService(x.GetRequiredService<ILogger<GrpcProxyPublisherService>>());
+    GrpcProxyPublisherService.singleton = service;
+    return service;
+});
 
 var app = builder.Build();
 
+app.MapGrpcService<GrpcHubService>(); //.RequireHost("*:7042");
 app.MapGrpcService<GrpcProxyPublisherService>(); //.RequireHost("*:7042");
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 

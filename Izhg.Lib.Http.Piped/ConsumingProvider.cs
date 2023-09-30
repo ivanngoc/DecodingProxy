@@ -1,6 +1,6 @@
 ﻿using HttpDecodingProxy.ForHttp;
 using System;
-using Callback = System.Func<IziHardGames.Proxy.Consuming.DataSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;
+using Callback = System.Func<IziHardGames.Proxy.Consuming.HttpSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;
 
 namespace IziHardGames.Proxy.Consuming
 {
@@ -9,10 +9,10 @@ namespace IziHardGames.Proxy.Consuming
         public Callback consumeRequest;
         public Callback consumeResponse;
 
-        public Action<DataSource, HttpObject> consumeRequestMsg;
-        public Action<DataSource, HttpObject> consumeResponseMsg;
+        public Action<HttpSource, HttpObject> consumeRequestMsg;
+        public Action<HttpSource, HttpObject> consumeResponseMsg;
 
-        public Action<DataSource, HttpBinaryMapped> consumeBinaryRequest;
-        public Action<DataSource, HttpBinaryMapped> consumeBinaryResponse;
+        public Action<HttpSource, HttpBinaryMapped> consumeBinaryRequest;
+        public Action<HttpSource, HttpBinaryMapped> consumeBinaryResponse;
     }
 }

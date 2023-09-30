@@ -15,12 +15,14 @@ namespace IziHardGames.Tls
 {
     public class CertManager
     {
-
+        private static readonly object lockShared = new object();
         public static CertManager Shared;
         public readonly Dic cacheForged = new Dic();
         public readonly Dic cacheOriginal = new Dic();
         private string PATH_TO_CERT_CACHE_FORGED = @"C:\Users\ngoc\Documents\Builds\cert cache forged";
         private string PATH_TO_CERT_CACHE_ORIGINAL = @"C:\Users\ngoc\Documents\Builds\cert cache original";
+        public static X509Certificate2 SharedCa => sharedCa;
+        private static X509Certificate2 sharedCa;
 
         public CertManager(string pathForged, string pathOriginal)
         {
@@ -149,8 +151,12 @@ namespace IziHardGames.Tls
             throw new System.NotImplementedException();
         }
 
-        public static void CreateDefault(string pathForged, string pathOriginal)
+        public static void CreateShared(string pathForged, string pathOriginal)
         {
+            var pathCert = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem";
+            var pathKey = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem";
+            X509Certificate2 caCert = Cert.FromFile(pathCert, pathKey);
+            sharedCa = caCert;
             Shared = new CertManager(pathForged, pathOriginal);
         }
 
@@ -166,29 +172,33 @@ namespace IziHardGames.Tls
             return caCert;
         }
 
-        public static X509Certificate2 GenerateCertEndpoint(X509Certificate2 donor, X509Certificate2 caCert, DateTimeOffset expirate)
+        public static X509Certificate2 GenerateCertEndpoint(X509Certificate2 donor, X509Certificate2 caCert)
         {
             string subject = donor.Subject;
 
             var clientKey = RSA.Create(2048);
             var clientReq = new CertificateRequest(subject, clientKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            //clientReq.set
 
             foreach (var extension in donor.Extensions)
             {
                 clientReq.CertificateExtensions.Add(extension);
             }
-
+            //byte[] serialNumber = Encoding.ASCII.GetBytes(donor.SerialNumber); // or GetBytes From ASCII string
             byte[] serialNumber = BitConverter.GetBytes(DateTime.Now.ToBinary());
-            var clientCert = clientReq.Create(caCert, DateTimeOffset.Now, expirate, serialNumber);
+            //byte[] serialNumberDonor = donor.GetSerialNumber();
+            //var st0 = Encoding.UTF8.GetString(serialNumber);
+            //var st1 = Encoding.UTF8.GetString(serialNumberDonor);
+            var clientCert = clientReq.Create(caCert, DateTimeOffset.Now, caCert.NotAfter, serialNumber);
             var certWithKey = clientCert.CopyWithPrivateKey(clientKey);
             return new X509Certificate2(certWithKey.Export(X509ContentType.Pkcs12));
         }
 
-        public static X509Certificate2 LoadPemFromFile(string certPath, string keyPath)
+        public static X509Certificate2 LoadPemFromFile(string pathCert, string pathKey)
         {
             try
             {
-                X509Certificate2 cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+                X509Certificate2 cert = X509Certificate2.CreateFromPemFile(pathCert, pathKey);
                 return cert;
             }
             catch (Exception ex)
@@ -248,21 +258,24 @@ namespace IziHardGames.Tls
 
         public async ValueTask<X509Certificate2> ForgedGetOrCreateCertFromCacheAsync(X509Certificate2 original, X509Certificate2 ca)
         {
-            if (TryFindAppropriateCert(original, cacheForged, out var existed))
+            ValueTask<X509Certificate2> t2 = ValueTask.FromResult<X509Certificate2>(null!);
+            X509Certificate2 forged = default;
+
+            if (TryFindAppropriateCert(original, cacheForged, out forged))
             {
-                if (Check(original, existed))
+                if (!Check(original, forged))
                 {
-                    return existed;
-                }
-                else
-                {
-                    return ForgedUpdateCache(original, ca);
+                    forged = ForgedUpdateCache(original, ca);
                 }
             }
             else
             {
-                return await ForgedCreateInCache(original, ca).ConfigureAwait(false);
+                t2 = ForgedCreateInCache(original, ca);
+                forged = await t2.ConfigureAwait(false);
             }
+            var t1 = OriginTryUpdateAsync(forged, original);
+            await t1.ConfigureAwait(false);
+            return forged;
         }
 
         public void OriginalSaveToCacheSingle(string key, X509Certificate2 cert)
@@ -285,16 +298,16 @@ namespace IziHardGames.Tls
             }
         }
 
-        public async Task OriginalSaveToCacheAndFileWithMultipleDomainsAsync(X509Certificate2 cert)
+        public async Task OriginalSaveToCacheAndFileWithMultipleDomainsAsync(X509Certificate2 forged, X509Certificate2 original)
         {
-            var domains = Cert.GetDomainsAsFilenames(cert);
+            //var domains = Cert.GetDomainsAsFilenames(cert);
 
-            foreach (var domain in domains)
-            {
-                var key = Cert.DomainToKey(domain);
-                OriginalSaveToCacheSingle(key, cert);
-            }
-            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_ORIGINAL, cert).ConfigureAwait(false);
+            //foreach (var domain in domains)
+            //{
+            var key = Cert.CertToKey(forged, original);
+            OriginalSaveToCacheSingle(key, original);
+            //}
+            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_ORIGINAL, forged, original).ConfigureAwait(false);
         }
 
         public bool OriginalTryGetCertFromCache(string hostAddress, out X509Certificate2 result)
@@ -341,29 +354,16 @@ namespace IziHardGames.Tls
             throw new System.NotImplementedException();
         }
 
-        public bool TryFindAppropriateCert(X509Certificate2 cert, Dic container, out X509Certificate2? result)
+        public bool TryFindAppropriateCert(X509Certificate2 origin, Dic container, out X509Certificate2? result)
         {
-            string key = Cert.CertToKey(cert);
+            string key = Cert.CertToKey(origin);
 
-            if (container.TryGetValue(key, out X509Certificate2? existed))
+            if (container.TryGetValue(key, out result))
             {
-                result = existed;
                 return true;
             }
             else
             {
-                var domains = Cert.GetDomainsAsFilenames(cert);
-
-                foreach (var domain in domains)
-                {
-                    key = Cert.DomainToKey(domain);
-                    if (container.TryGetValue(key, out existed))
-                    {
-                        result = existed;
-                        return true;
-                    }
-                }
-                result = null;
                 return false;
             }
         }
@@ -419,20 +419,19 @@ namespace IziHardGames.Tls
             return $"_{address.Substring(address.IndexOf('.'))}";
         }
 
-        private static async Task SaveOrOverrideCertToFile(string dir, X509Certificate2 cert)
+        private static async Task SaveOrOverrideCertToFile(string dir, X509Certificate2 forged, X509Certificate2 origin)
         {
-            string fileName = Cert.CertToFilename(cert);
-
+            string fileName = Cert.CertToFilename(origin);
             string fullPath = Path.Combine(dir, fileName);
 
             EnsureDirectory(dir);
 
             if (File.Exists(fullPath))
             {
-                await File.WriteAllBytesAsync(fullPath, cert.RawData).ConfigureAwait(false);
+                await File.WriteAllBytesAsync(fullPath, forged.RawData).ConfigureAwait(false);
                 return;
             }
-            await File.WriteAllBytesAsync(fullPath, cert.Export(X509ContentType.SerializedCert)).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(fullPath, forged.Export(X509ContentType.SerializedCert)).ConfigureAwait(false);
         }
 
         // https://www.codeproject.com/Articles/5315010/How-to-Use-Certificates-in-ASP-NET-Core
@@ -498,9 +497,9 @@ namespace IziHardGames.Tls
 
         private async ValueTask<X509Certificate2> ForgedCreateInCache(X509Certificate2 original, X509Certificate2 ca)
         {
-            var cert = GenerateCertEndpoint(original, ca, original.NotAfter);
-            await ForgedSaveToCacheWithMultipleDomainAsync(cert).ConfigureAwait(false);
-            return cert;
+            var forged = GenerateCertEndpoint(original, ca);
+            await ForgedSaveToCacheWithMultipleDomainAsync(forged, original).ConfigureAwait(false);
+            return forged;
         }
 
         private void ForgedSaveToCache(string key, X509Certificate2 cert)
@@ -520,19 +519,19 @@ namespace IziHardGames.Tls
             }
         }
 
-        private async Task ForgedSaveToCacheWithMultipleDomainAsync(X509Certificate2 cert)
+        private async Task ForgedSaveToCacheWithMultipleDomainAsync(X509Certificate2 forged, X509Certificate2 origin)
         {   // может быть ситуация с перекрестными доменами. 2 сертификата (wildcard и без) будут иметь 2 домена
-            var domains = Cert.GetDomainsAsFilenames(cert);
+            var domains = Cert.GetDomainsAsFilenames(forged);
 
             foreach (var domain in domains)
             {
-                var key = Cert.DomainToKey(domain);
+                var key = Cert.CertToKey(forged, origin);
                 if (!cacheForged.ContainsKey(key))
                 {
-                    ForgedSaveToCache(key, cert);
+                    ForgedSaveToCache(key, forged);
                 }
             }
-            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_FORGED, cert);
+            await SaveOrOverrideCertToFile(PATH_TO_CERT_CACHE_FORGED, forged, origin);
         }
 
         private void LoadCache()
@@ -559,20 +558,15 @@ namespace IziHardGames.Tls
         {
             string path = Path.Combine(dir, fileName);
             X509Certificate2 cert = new X509Certificate2(path);
-            var domains = Cert.GetDomainsAsFilenames(cert);
-            // possible overlaps?
-            foreach (var item in domains)
+            var key = fileName;
+            if (!cache.TryAdd(key, cert))
             {
-                var key = Cert.DomainToKey(item);
-                if (!cache.TryAdd(key, cert))
-                {
-                    throw new ArgumentException($"Key [{key}] Is Already exist");
-                }
+                throw new ArgumentException($"Key [{key}] Is Already exist");
             }
             return cert;
         }
 
-        public async Task<bool> OriginTryUpdateAsync(X509Certificate2 certOrigin)
+        public async Task<bool> OriginTryUpdateAsync(X509Certificate2 forged, X509Certificate2 certOrigin)
         {
             if (TryFindAppropriateCert(certOrigin, cacheOriginal, out var existed))
             {
@@ -582,32 +576,52 @@ namespace IziHardGames.Tls
                 }
                 else
                 {
-                    await OriginUpdateAsync(certOrigin, existed).ConfigureAwait(false);
+                    await OriginUpdateAsync(forged, certOrigin, existed).ConfigureAwait(false);
                     return true;
                 }
             }
             else
             {
-                await OriginalSaveToCacheAndFileWithMultipleDomainsAsync(certOrigin); return true;
+                await OriginalSaveToCacheAndFileWithMultipleDomainsAsync(forged, certOrigin); return true;
             }
         }
-        public async Task OriginUpdateAsync(X509Certificate2 cert, X509Certificate2 existed)
+        public async Task OriginUpdateAsync(X509Certificate2 forged, X509Certificate2 cert, X509Certificate2 existed)
         {
-            await UpdateAsync(cert, existed, cacheOriginal, PATH_TO_CERT_CACHE_ORIGINAL).ConfigureAwait(false);
+            await UpdateAsync(forged, cert, existed, cacheOriginal, PATH_TO_CERT_CACHE_ORIGINAL).ConfigureAwait(false);
         }
-        public async Task UpdateAsync(X509Certificate2 newCert, X509Certificate2 oldCert, Dic cache, string dir)
+        public async Task UpdateAsync(X509Certificate2 forged, X509Certificate2 newOrigin, X509Certificate2 oldOrigin, Dic cache, string dir)
         {
-            var domains = Cert.GetDomainsAsFilenames(newCert);
+            var domains = Cert.GetDomainsAsFilenames(newOrigin);
 
-            foreach (var domain in domains)
+            //foreach (var domain in domains)
+            //{
+            var key = Cert.CertToKey(forged, oldOrigin);
+            if (!cache.TryUpdate(key, newOrigin, oldOrigin))
             {
-                var key = Cert.DomainToKey(domain);
-                if (!cache.TryUpdate(key, newCert, oldCert))
+                throw new ArgumentException($"Key [{key}] is not presented");
+            }
+            //}
+            await SaveOrOverrideCertToFile(dir, forged, newOrigin).ConfigureAwait(false);
+        }
+
+        public static CertManager GetOrCreateShared()
+        {
+            if (Shared == null)
+            {
+                lock (lockShared)
                 {
-                    throw new ArgumentException($"Key [{key}] is not presented");
+                    if (Shared == null)
+                    {
+                        CertManager.CreateShared(@"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original");
+                    }
                 }
             }
-            await SaveOrOverrideCertToFile(dir, newCert).ConfigureAwait(false);
+            return Shared;
+        }
+
+        public void Test(X509Certificate2 certOrigin)
+        {
+            GenerateCertEndpoint(certOrigin, sharedCa);
         }
     }
 }

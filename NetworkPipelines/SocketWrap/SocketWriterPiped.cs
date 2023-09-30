@@ -1,9 +1,12 @@
-﻿using IziHardGames.Libs.Networking.SocketLevel;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.NonEngine.Memory;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
-    public class SocketWriterPiped : SocketReader, IPoolBind<SocketWriterPiped>
+    public class SocketWriterPiped : SocketWriter, IPoolBind<SocketWriterPiped>
     {
         protected IPoolReturn<SocketWriterPiped>? pool;
 

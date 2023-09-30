@@ -1,6 +1,8 @@
-﻿using IziHardGames.Libs.Networking.SocketLevel;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using IziHardGames.Libs.Networking.Pipelines.Contracts;
+using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Proxy.Tcp;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {
@@ -8,6 +10,9 @@ namespace IziHardGames.Libs.Networking.Pipelines
     {
         protected SocketReaderPiped? reader;
         protected IPoolReturn<SocketModifierReaderPiped>? pool;
+        public IReader Reader => reader!;
+        private Task? taskWriterLoop;
+        private CancellationTokenSource? ctsWriter;
 
         public override void Initilize(SocketWrap wrap)
         {
@@ -15,13 +20,29 @@ namespace IziHardGames.Libs.Networking.Pipelines
             var pool = PoolObjectsConcurent<SocketReaderPiped>.Shared;
             SocketReaderPiped reader = pool.Rent();
             reader.BindToPool(pool);
-            wrap.SetReader(reader);
-            reader.Initilize(wrap.Socket);
+            this.reader = reader;
+            reader.Initilize(wrap);
+        }
+
+        public override void InitilizeReverse()
+        {
+            base.InitilizeReverse();
+            reader!.Dispose();
+            reader = default;
+            if (taskWriterLoop!.Status != TaskStatus.RanToCompletion) ctsWriter!.Cancel();
+            ctsWriter = default;
+            taskWriterLoop = default;
         }
 
         public void BindToPool(IPoolReturn<SocketModifierReaderPiped> pool)
         {
             this.pool = pool;
+        }
+        public async Task RunWriter(CancellationToken ct = default)
+        {
+            ctsWriter = new CancellationTokenSource();
+            taskWriterLoop = reader!.RunWriter(ctsWriter.Token);
+            await taskWriterLoop.ConfigureAwait(false);
         }
         public override void Dispose()
         {

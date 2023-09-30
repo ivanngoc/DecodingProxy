@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Threading;
@@ -31,6 +32,8 @@ namespace IziHardGames.Libs.Networking.SocketLevel
         public ConnectionDataPoolable ConnectionData => connectionData;
         public SocketReader Reader => reader;
         public SocketWriter Writer => writer;
+        public SockerReaderRawStackable ReaderRaw => readerRaw;
+        public SocketWriterRaw WriterRaw => writerRaw;
         public string InfoPrefix => $"{DateTime.Now.ToString("HH:mm:ss.ffffff")} GEN:{generation}. Deaths:{deaths}. GUID:{Guid}. Title:{Title}. ";
 
         protected int life;
@@ -48,23 +51,41 @@ namespace IziHardGames.Libs.Networking.SocketLevel
         public readonly List<SocketWrapUpgrade> upgrades = new List<SocketWrapUpgrade>();
         public readonly Dictionary<Type, SocketWrapModifier> modifiers = new Dictionary<Type, SocketWrapModifier>();
 
+        /// <summary>
+        /// Modify incoming data. Pipeline example: <br/>
+        /// interceptor[0] - Only reading (Debug) => <br/>
+        /// interceptor[1] - Interpret And Create Objects => <br/>
+        /// interceptor[2] - Modify Data => <br/>
+        /// interceptor[3] - ReadOnly (Debug) => Copy Data To Another Socket<br/>
+        /// </summary>
+        public readonly IEnumerable<object> interceptors = Enumerable.Empty<object>();
+
+
         public readonly SocketWrapLogger logger;
 
         private SocketReader reader;
         private SocketWriter writer;
+
+        private readonly SockerReaderRawStackable readerRaw = new SockerReaderRawStackable();
+        private readonly SocketWriterRaw writerRaw = new SocketWriterRaw();
+
         private ConnectionDataPoolable connectionData;
 
         public SocketWrap()
         {
             guid = Guid.NewGuid();
             logger = new SocketWrapLogger(this);
+            SetReader(readerRaw);
+            SetWriter(writerRaw);
         }
 
         public void Wrap(Socket socket, bool isDefaultReader = true, bool isDefaultWriter = true)
         {
             Socket = socket;
-            if (isDefaultReader) reader = SocketReaderDefault.Rent();
-            if (isDefaultWriter) writer = SocketWriterDefault.Rent();
+            readerRaw.Initilize(this);
+            writerRaw.Initilize(this);
+            if (isDefaultReader) { AddModifier<SocketModifierReaderDefault>(PoolObjectsConcurent<SocketModifierReaderDefault>.Shared); }
+            if (isDefaultWriter) { AddModifier<SocketModifierWriterDefault>(PoolObjectsConcurent<SocketModifierWriterDefault>.Shared); }
         }
         public void Initilize(string title)
         {
@@ -125,6 +146,8 @@ namespace IziHardGames.Libs.Networking.SocketLevel
                 item.Dispose();
             }
             modifiers.Clear();
+            readerRaw.Dispose();
+            writerRaw.Dispose();
         }
 
         public void BindToPool(IPoolReturn<SocketWrap> pool)
@@ -209,15 +232,23 @@ namespace IziHardGames.Libs.Networking.SocketLevel
             upgrades.Add(upgrade);
             upgrade.ApplyTo(this);
         }
-        public Task SendAsync(ReadOnlyMemory<byte> mem, CancellationToken token)
+        public T AddModifier<T>() where T : SocketWrapModifier, new()
         {
-            throw new NotImplementedException();
+            return AddModifier(PoolObjectsConcurent<T>.Shared);
         }
-        public void AddModifier<T>(IPoolObjects<T> pool) where T : SocketWrapModifier
+        public T AddModifier<T>(IPoolObjects<T> pool) where T : SocketWrapModifier
         {
             var mod = pool.Rent();
             if (mod is IPoolBind<T> bindable) bindable.BindToPool(pool);
             mod.Initilize(this);
+            return mod;
+        }
+        public T RemoveModifier<T>() where T : SocketWrapModifier
+        {
+            var mod = modifiers[typeof(T)];
+            mod.InitilizeReverse();
+            mod.Dispose();
+            return mod as T ?? throw new NullReferenceException();
         }
 
         public void SetWriter(SocketWriter writer)
@@ -232,5 +263,6 @@ namespace IziHardGames.Libs.Networking.SocketLevel
         {
             throw new NotImplementedException();
         }
+
     }
 }

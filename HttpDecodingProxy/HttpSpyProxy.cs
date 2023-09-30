@@ -1,29 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Security;
+using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
+using IziHardGames.Libs.Concurrency;
+using IziHardGames.Libs.ForHttp;
+using IziHardGames.Libs.ForHttp.Common;
+using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.gRPC.Services;
 using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.Networking.Pipelines;
-using IziHardGames.Libs.Networking.SocketLevel;
-using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Proxy.Consuming;
-using IziHardGames.Proxy.Sniffing.ForHttp;
-using IziHardGames.Proxy.Tcp.Tls;
-using IziHardGames.Proxy.TcpDecoder;
 using IziHardGames.Tls;
 using Microsoft.Extensions.Logging;
-//using ConnectionsToDomain = IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>;
-//using CtdTls = IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls<IziHardGames.Proxy.Tcp.SocketWrap, IziHardGames.Libs.Networking.Pipelines.SocketWrapUpgradeTls>;
-//using ManagerConnectionsToDomain = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.ConnectionsToDomain<IziHardGames.Libs.Networking.Pipelines.TcpClientPiped>, (string, int)>;
-//using ManagerConnectionsToDomainSsl = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls<IziHardGames.Proxy.Tcp.SocketWrap, IziHardGames.Libs.Networking.Pipelines.SocketWrapUpgradeTls>, (string, int)>;
 
 namespace IziHardGames.Proxy.Http
 {
@@ -33,56 +25,25 @@ namespace IziHardGames.Proxy.Http
         public X509Certificate2 CaRootCert => caRootCert;
 
         public GlobalProxySettings settings = new GlobalProxySettings();
-
-        //public readonly ManagerConnectionsToDomain manager;
-        //public readonly ManagerConnectionsToDomainSsl managerSsl;
-
-        private object lockList = new object();
         public CertManager certManager;
-        private static List<string> sniffList = new List<string>();
+
+        private readonly ILogger<HttpSpyProxy> logger;
+        private readonly IChangeNotifier<IConnectionData>? monitorForConnections;
+        private readonly HttpConsumer consumer;
+
+
         public ulong ticks;
-        private ConsumingProvider consumingProvider;
         private CancellationTokenSource cts = new CancellationTokenSource();
-        private ILogger logger;
+        private static List<string> sniffList = new List<string>();
+        private ConsumingProvider consumingProvider;
 
-        private ClientHandlerPipedHttp clientHandlerPipedHttp;
-        private ClientHandlerPipedHttpsV2 handlerPipedHttpsV2;
-        private ClientHandlerPipedHttpsForDirrectConnect handlerDirect = new ClientHandlerPipedHttpsForDirrectConnect();
-
-        private IChangeNotifier<IConnectionData>? monitorForConnections;
-
-        public HttpSpyProxy(ILogger<HttpSpyProxy> logger, IChangeNotifier<IConnectionData> monitorForConnections)
+        public HttpSpyProxy(ILogger<HttpSpyProxy> logger, IChangeNotifier<IConnectionData> monitorForConnections, HttpConsumer consumer, GrpcHubService grpcHubService, HttpEventPublisherGrpc publisher)
         {
             this.logger = logger;
             this.monitorForConnections = monitorForConnections!;
-
-            //manager = new ManagerConnectionsToDomain((key, address) =>
-            //{
-            //    var pool = PoolObjectsConcurent<ConnectionsToDomain>.Shared;
-            //    var rent = pool.Rent();
-            //    rent.BindToPool(pool);
-            //    rent.Key = key;
-            //    rent.UpdateAddress(address.Item1, address.Item2);
-            //    rent.Start();
-            //    rent.RegistRuturnToManager(manager!.Return);
-            //    rent.monitor = monitorForConnections;
-            //    return rent;
-            //});
-
-            //managerSsl = new ManagerConnectionsToDomainSsl((key, options) =>
-            //{
-            //    var pool = PoolObjectsConcurent<CtdTls>.Shared;
-            //    var rent = pool.Rent();
-            //    rent.Key = key;
-            //    rent.UpdateAddress(options.Item1, options.Item2);
-            //    rent.BindToPool(pool);
-            //    rent.RegistRuturnToManager(managerSsl!.Return);
-            //    rent.Start();
-            //    rent.monitor = monitorForConnections;
-            //    return rent;
-            //});
+            this.consumer = consumer;
+            HttpEventCenter.SetEventConsumer(publisher);
         }
-
         private void Init(CertManager certManager, ConsumingProvider consumingProvider)
         {
             Console.WriteLine($"это на русском языке");
@@ -107,30 +68,6 @@ namespace IziHardGames.Proxy.Http
                 Logger.LogException(ex);
                 throw ex;
             }
-            //clientHandlerPipedHttp = new ClientHandlerPipedHttp(consumingProvider, monitorForConnections!, manager);
-            //handlerPipedHttpsV2 = new ClientHandlerPipedHttpsV2(consumingProvider, monitorForConnections!, managerSsl, caRootCert, certManager);
-        }
-
-        private async Task RunWithPipedTcp(CancellationToken token, int port)
-        {
-            throw new System.NotImplementedException();
-            //using (TcpServerSocketBased<TcpClientPiped> server = new())
-            //{
-            //    logger.LogInformation($"Begin http spy proxy port:{port}");
-            //    await server.Run("localhost", port, logger, clientHandlerPipedHttp, PoolObjectsConcurent<TcpClientPiped>.Shared, token).ConfigureAwait(false);
-            //}
-        }
-        private async Task RunWithPipedTcpAndDetectionSsl(CancellationToken token, int port)
-        {
-            // if Method CONNECT is called than upgrade connection.
-            TcpServer<SocketWrap> server = new(port, PoolObjectsConcurent<SocketWrap>.Shared, handlerDirect);
-            await server.Run(logger, token);
-        }
-        private async Task RunWithPipedTcpSslV2(CancellationToken token, int port)
-        {
-            logger.LogInformation($"Begin https spy proxy port:{port}");
-            TcpServer<SocketWrap> server = new(port, PoolObjectsConcurent<SocketWrap>.Shared, handlerPipedHttpsV2);
-            await server.Run(logger, token);
         }
 
         public void Dispose()
@@ -154,26 +91,46 @@ namespace IziHardGames.Proxy.Http
 
         public async Task Run(ConsumingProvider consumingProvider)
         {
-            Logger.LogLine($"STart Proxy decoding");
+            Logger.LogLine($"Start Proxy decoding");
             this.consumingProvider = consumingProvider;
             ConfigJson.EnsureConfigExist();
             UpdateSettings();
-            CertManager.CreateDefault(ConfigJson.PathCertForged, ConfigJson.PathCertOriginal);
+            CertManager.CreateShared(ConfigJson.PathCertForged, ConfigJson.PathCertOriginal);
             Init(CertManager.Shared, consumingProvider);
             var token = cts.Token;
 
-            //var task1 = Task.Run(async () => await RunWithPipedTcp(token, 49702), token);
-            //var task2 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 60121), token);
-            var task3 = Task.Run(async () => await RunWithPipedTcpAndDetectionSsl(token, 60121), token);
-            await task3.ConfigureAwait(false);
-            //var task3 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 60122), token);
-            //var task4 = Task.Run(async () => await RunWithPipedTcpSslV2(token, 443), token);
-            //var task5 = Task.Run(async () => await RunWithPipedTcp(token, 80), token);
+            var task1 = Task.Run(async () => await RunHttp(49702, token), token);
+            var task2 = Task.Run(async () => await RunHttps(60121, token), token);
 
-            //await Task.WhenAll(task1, task2).ConfigureAwait(false);
-            //await Task.WhenAll(task3, task4, task5).ConfigureAwait(false);
+            await task1.ConfigureAwait(false);
+            await task2.ConfigureAwait(false);
         }
+        private async Task RunHttp(int port, CancellationToken ct = default)
+        {
+            MonitorForTasks monitor = new MonitorForTasks(logger);
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
+            listener.Start();
 
+            while (!ct.IsCancellationRequested)
+            {
+                var socket = await listener.AcceptSocketAsync(ct).ConfigureAwait(false);
+                Task task = HttpProxyProcessor.HandleSocket(consumer, socket);
+                monitor.Watch(task);
+            }
+        }
+        private async Task RunHttps(int port, CancellationToken ct = default)
+        {
+            MonitorForTasks monitor = new MonitorForTasks(logger);
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
+            listener.Start();
+
+            while (!ct.IsCancellationRequested)
+            {
+                var socket = await listener.AcceptSocketAsync(ct).ConfigureAwait(false);
+                Task task = HttpProxyProcessor.HandleSocket(consumer, socket);
+                monitor.Watch(task);
+            }
+        }
         public async Task Break()
         {
             cts.Cancel();

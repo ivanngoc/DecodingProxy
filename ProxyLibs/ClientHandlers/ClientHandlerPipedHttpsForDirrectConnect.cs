@@ -1,29 +1,24 @@
-﻿using HttpDecodingProxy.ForHttp;
+﻿using System;
+using System.Buffers;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
-using IziHardGames.Lib.Networking.Exceptions;
+using IziHardGames.Libs.ForHttp.Piped;
+using IziHardGames.Libs.IO;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
+using IziHardGames.Libs.Networking.SocketLevel;
+using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Tcp.Tls;
-using IziHardGames.Tls;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using System.Threading;
 using IziHardGames.Proxy.TcpDecoder;
-using IziHardGames.Libs.IO;
-using IziHardGames.Libs.Networking.Pipelines.Wraps;
-using IziHardGames.Libs.Networking.SocketLevel;
-using System;
-using System.Text;
-using Enumerator = IziHardGames.Libs.Cryptography.Tls12.TlsHelloFromClientExtensionsEnumerator;
-using System.IO.Pipelines;
-using System.Buffers;
-using IziHardGames.Libs.ForHttp.Piped;
-using IziHardGames.Libs.Binary.Readers;
-using System.Security.Authentication;
-using IziHardGames.Libs.Networking.States;
+using IziHardGames.Tls;
+using Enumerator = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromClientExtensionsEnumerator;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
@@ -33,7 +28,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         private X509Certificate2 caRootCert;
         private CertManager certManager;
         private ManagerBase<string, ConnectionsToDomainTls<SocketWrap>, (string, int)> managerSsl;
-        private DataSource dataSource;
+        private HttpSource dataSource;
         private readonly IChangeNotifier<IConnectionData> monitor;
 
 
@@ -64,7 +59,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 case ENegotioanions.None: break;
                 case ENegotioanions.Connect:
                     {
-                        await writer!.SendAsync(HttpLibConstants.Responses.bytesOk11).ConfigureAwait(false);
+                        await writer!.WriteAsync(ConstantsForHttp.Responses.bytesOk11).ConfigureAwait(false);
                         var httpVersion = await HandShakeAnalyz(reader).ConfigureAwait(false); // highest support version
                         var hub = managerSsl.GetOrCreate($"{data.connectionKey}", (data.Host, data.Port));
                         var t2 = hub.GetOrCreateAsync(BuildFilter(data, httpVersion), "Client", PoolObjectsConcurent<SocketWrap>.Shared);
@@ -80,8 +75,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 
             throw new System.NotImplementedException();
         }
-
-        private EConnectionFlags BuildFilter(ConnectionDataPoolable data, EHttpVersion httpVersion)
+        private static EConnectionFlags BuildFilter(ConnectionDataPoolable data, EHttpVersion httpVersion)
         {
             EConnectionFlags result = EConnectionFlags.None;
             if (httpVersion == EHttpVersion.Version30)
@@ -100,8 +94,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             }
             return result;
         }
-
-        private async Task<ConnectionDataPoolable> DetectIncomeType(SocketReaderPiped reader, CancellationToken token)
+        private static async Task<ConnectionDataPoolable> DetectIncomeType(SocketReaderPiped reader, CancellationToken token)
         {
             var connect = "CONNECT ";
             var pool = PoolObjectsConcurent<ConnectionDataPoolable>.Shared;
@@ -130,8 +123,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             data.Version = $"ENegotioanions.None";
             return data;
         }
-
-        private async Task<EHttpVersion> HandShakeAnalyz(SocketReaderPiped reader, CancellationToken token = default)
+        private static async Task<EHttpVersion> HandShakeAnalyz(SocketReaderPiped reader, CancellationToken token = default)
         {
             while (!token.IsCancellationRequested)
             {
@@ -149,7 +141,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             }
             throw new System.NotImplementedException();
         }
-        private bool TryAnalyzTlsHello(ReadOnlySequence<byte> buffer, out EHttpVersion httpVersion)
+        private static bool TryAnalyzTlsHello(ReadOnlySequence<byte> buffer, out EHttpVersion httpVersion)
         {
             Enumerator num = new Enumerator(buffer);
             while (num.MoveNext())

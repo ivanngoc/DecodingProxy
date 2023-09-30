@@ -20,18 +20,18 @@ namespace IziHardGames.Libs.Cryptography.Tls12
             ushort protocolVersion = frame.ToUshort(i);
             i += 2;
             ushort lengthHandshakeMessage = frame.ToUshort(i);
-            i += 2;
+            i += 2; //5
 
             byte handshakeMessageType = frame[i];
-            i++;
+            i++;    //6
             int lengthServerHello = BufferReader.ToInt32(frame[i], frame[i + 1], frame[i + 2]);
-            i += 3;
+            i += 3; //9
             ushort serverVersion = frame.ToUshort(i);
-            i += 2;
+            i += 2; //11
             Bytes32 serverRandom = BufferReader.ToStruct<Bytes32>(frame.GetSpan(i, 32));
-            i += 32;
+            i += 32;//43
             byte sessionIDLength = frame[i];
-            i++;
+            i++;    //44
             ReadOnlySpan<byte> sessionId = frame.GetSpan(i, sessionIDLength);
             i += sessionIDLength;
             ushort cipherSuite = frame.ToUshort(i);

@@ -104,7 +104,7 @@ namespace IziHardGames.Proxy.Http
 
                 if (httpStreamRequest.TryAdvance(out HttpObject obj))
                 {
-                    if (obj.fields.valuePerFieldName.TryGetValue(HttpLibConstants.FieldNames.NAME_CONNECTION, out var value))
+                    if (obj.fields.valuePerFieldName.TryGetValue(ConstantsForHttp.FieldNames.NAME_CONNECTION, out var value))
                     {
                         if (value.Contains("Close", StringComparison.InvariantCultureIgnoreCase))
                         {

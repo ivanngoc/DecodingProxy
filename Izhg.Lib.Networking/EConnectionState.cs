@@ -2,7 +2,6 @@
 
 namespace IziHardGames.Libs.Networking.States
 {
-
     public enum EUpgradingType
     {
         None,
@@ -31,25 +30,25 @@ namespace IziHardGames.Libs.Networking.States
     {
         Reseted = -1,
         None = 0,
-        Ssl,
-        AuthenticatedSslClient,
-        AuthenticatedSslServer,
-        AuthenticatedConnection,
-        TimeoutPresented,
-        LifePresented,
+        Ssl = 1 << 0,
+        AuthenticatedSslClient = 1 << 1,
+        AuthenticatedSslServer = 1 << 2,
+        AuthenticatedConnection = 1 << 3,
+        TimeoutPresented = 1 << 4,
+        LifePresented = 1 << 5,
         /// <summary>
         /// Connection support multiple protocols on the same port and server
         /// </summary>
-        Multiprotocol,
+        Multiprotocol = 1 << 6,
 
-        TLS1,
-        TLS12,
-        TLS13,
+        TLS1 = 1 << 7,
+        TLS12 = 1 << 8,
+        TLS13 = 1 << 9,
 
-        HTTP1,
-        HTTP11,
-        HTTP2,
-        HTTP3,
+        HTTP1 = 1 << 10,
+        HTTP11 = 1 << 11,
+        HTTP2 = 1 << 12,
+        HTTP3 = 1 << 13,
     }
 
     /// <summary>
@@ -61,5 +60,22 @@ namespace IziHardGames.Libs.Networking.States
         Connect,
         Direct,
         Handshake,
+    }
+
+    [Flags]
+    public enum ENetworkProtocols
+    {
+        All = -1,
+        None = 0,
+
+        HTTP1 = 1 << 1,
+        HTTP11 = 1 << 2,
+        HTTP2 = 1 << 3,
+        HTTP3 = 1 << 4,
+
+        Tls = 1 << 5,
+        Tls11 = 1 << 6,
+        Tls12 = 1 << 7,
+        Tls13 = 1 << 8,
     }
 }

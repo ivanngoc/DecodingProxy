@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecodingHttp", "HttpDecodingProxy\ProxyForDecodingHttp.csproj", "{629E7E70-608C-44BD-9C89-EED26A2C6546}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Recording", "HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj", "{629E7E70-608C-44BD-9C89-EED26A2C6546}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecodingTcp", "TcpDecodingProxy\ProxyForDecodingTcp.csproj", "{E327BA1B-BC69-4B11-8213-249E66D5EC27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyMITM", "ProxyMITM\ProxyMITM.csproj", "{5CF74B81-1A15-4233-A9DA-44EF897EB3E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.MITM", "ProxyMITM\Izhg.Lib.MITM.csproj", "{5CF74B81-1A15-4233-A9DA-44EF897EB3E2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Proxy", "ProxyLibs\Izhg.Lib.Proxy.csproj", "{E09BF8D2-01F8-4368-BD28-CD0C336385E0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForRecording", "HttpRecorder\ProxyForRecording.csproj", "{778B8D77-4A3D-47CD-A94E-968192A90B24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForRecording", "ProxyForRecording\ProxyForRecording.csproj", "{778B8D77-4A3D-47CD-A94E-968192A90B24}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyServerWebGUI", "ProxyServerWebGUI\ProxyServerWebGUI.csproj", "{D14A5661-DA0D-42F5-88C2-F27543929FCE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http", "IziHardGamesLibHttp\Izhg.Lib.Http.csproj", "{EB5C11DB-CD25-4324-8F35-99108F4F3889}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http", "Izhg.Lib.Http\Izhg.Lib.Http.csproj", "{EB5C11DB-CD25-4324-8F35-99108F4F3889}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{3D6E7536-6330-4F54-B617-784145A5645A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Networking.Pipelines", "NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj", "{91A324CF-7936-4D97-8A0A-FF2973DEFCDC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Memory", "IzhgLibMemory\Izhg.Lib.Memory.csproj", "{35BA41DB-0A4E-4B46-B47F-03E6FA1B67E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Memory", "Izhg.Lib.Memory\Izhg.Lib.Memory.csproj", "{35BA41DB-0A4E-4B46-B47F-03E6FA1B67E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Logging", "IzhgLibLogging\Izhg.Lib.Logging.csproj", "{B7311202-9CF9-489B-A14E-32B7D43C58FC}"
 EndProject
@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.ExtensionsForBcl",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.DevTools.Profiling", "Izhg.Lib.DevTools.Profiling\Izhg.Lib.DevTools.Profiling.csproj", "{57710A96-DA10-4D7C-A7A3-258A9D1606B8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Threading", "Izhg.Lib.Threading\Izhg.Lib.Threading.csproj", "{0D0FF786-5366-4281-807B-9834204F24AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Concurrency", "Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj", "{0D0FF786-5366-4281-807B-9834204F24AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Networking", "Izhg.Lib.Networking\Izhg.Lib.Networking.csproj", "{D788E221-9A75-408B-BD4A-C29815D34A35}"
 EndProject
@@ -57,11 +57,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Collections", "Izh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg,Lib.Networking.DevTools", "Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj", "{BABDAFAB-1179-445A-B75B-02669266A698}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Streams", "Izhg.Lib.Streams\Izhg.Lib.Streams.csproj", "{C7952C83-5DB8-4303-96A6-B329F17DCDC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Streams", "Izhg.Lib.Streams\Izhg.Lib.Streams.csproj", "{C7952C83-5DB8-4303-96A6-B329F17DCDC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Streams.Piped", "Izhg.Lib.Streams.Piped\Izhg.Lib.Streams.Piped.csproj", "{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Streams.Piped", "Izhg.Lib.Streams.Piped\Izhg.Lib.Streams.Piped.csproj", "{738B185A-D8B7-4D66-90E2-1ADA7B00F7F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Pipelines", "Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj", "{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Pipelines", "Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj", "{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpRecorder", "HttpRecorder\HttpRecorder.csproj", "{CF5C9A88-7E9A-453A-B72D-224E71615D57}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.gRPC.Servers", "Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj", "{39A7B90C-3519-49AE-BBC0-AC442311A5B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.gRPC.Clients", "Izhg.Lib.gRPC.Clients\Izhg.Lib.gRPC.Clients.csproj", "{C769E847-31D4-46AD-A22F-08E87AC583CC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Monitoring", "Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj", "{B09807FC-95AE-4081-84BF-6CCFDA3811B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -189,6 +197,22 @@ Global
 		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF5C9A88-7E9A-453A-B72D-224E71615D57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF5C9A88-7E9A-453A-B72D-224E71615D57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF5C9A88-7E9A-453A-B72D-224E71615D57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF5C9A88-7E9A-453A-B72D-224E71615D57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39A7B90C-3519-49AE-BBC0-AC442311A5B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39A7B90C-3519-49AE-BBC0-AC442311A5B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39A7B90C-3519-49AE-BBC0-AC442311A5B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39A7B90C-3519-49AE-BBC0-AC442311A5B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C769E847-31D4-46AD-A22F-08E87AC583CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C769E847-31D4-46AD-A22F-08E87AC583CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C769E847-31D4-46AD-A22F-08E87AC583CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C769E847-31D4-46AD-A22F-08E87AC583CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

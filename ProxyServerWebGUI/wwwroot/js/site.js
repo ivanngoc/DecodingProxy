@@ -82,5 +82,6 @@ function start() {
     var promise = connection.start();
     promise.then((x) => {
         connection.invoke(`NotifyStart`, `this is string from client sended after begin`);
+        connection.invoke(`SubscribeConnectionsAdd`, ``);
     });
 }

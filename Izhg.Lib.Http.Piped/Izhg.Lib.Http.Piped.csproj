@@ -7,10 +7,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
-    <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\IziHardGamesLibHttp\Izhg.Lib.Http.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
     <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="HTTP30\" />
+    <Folder Include="Shared\" />
   </ItemGroup>
 
 </Project>

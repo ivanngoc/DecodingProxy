@@ -1,12 +1,8 @@
-﻿using HttpDecodingProxy.ForHttp;
-using IziHardGames.Lib.Networking.Exceptions;
-using IziHardGames.Libs.Cryptography.Tls12;
-using IziHardGames.Libs.ForHttp20;
-using IziHardGames.Libs.ForHttp20.Https.Extensions;
-using IziHardGames.Libs.Networking.DevTools;
-using IziHardGames.Proxy.TcpDecoder;
-using System;
+﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -15,9 +11,33 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HttpDecodingProxy.ForHttp;
+using IziHardGames.Lib.Networking.Exceptions;
+using IziHardGames.Libs.Cryptography.Certificates;
+using IziHardGames.Libs.Cryptography.Tls12;
+using IziHardGames.Libs.ForHttp;
+using IziHardGames.Libs.ForHttp.Common;
+using IziHardGames.Libs.ForHttp.Http11;
+using IziHardGames.Libs.ForHttp.Http20;
+using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.ForHttp11;
+using IziHardGames.Libs.ForHttp20;
+using IziHardGames.Libs.IO;
+using IziHardGames.Libs.Networking.DevTools;
+using IziHardGames.Libs.Networking.Pipelines;
+using IziHardGames.Libs.Networking.SocketLevel;
+using IziHardGames.Libs.Networking.States;
+using IziHardGames.Libs.Networking.Tls;
+using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Libs.Streams;
+using IziHardGames.Proxy.Consuming;
+using IziHardGames.Proxy.Recoreder;
+using IziHardGames.Proxy.TcpDecoder;
+using IziHardGames.Tls;
 
 namespace Test
 {
+
     internal class TestHttp2
     {
         public static string hostIpCheck = $"www.http2demo.io";
@@ -98,10 +118,10 @@ namespace Test
                 }
             });
 
-            var t3 = sslStream.WriteAsync(ConstantsHttp20.clientPrefaceBytes);
+            var t3 = sslStream.WriteAsync(ConstantsForHttp20.clientPrefaceBytes);
             await t3.ConfigureAwait(false);
             Console.WriteLine("Preface sended for Http2 SSL");
-            HttpFrame frame = HttpFrame.Settings;
+            FrameHttp20 frame = FrameHttp20.Settings;
             frame.streamIdentifier = 1;
             frame.WriteThisTo(sslStream);
             Console.WriteLine("Settings after preface sended for Http2 SSL");
@@ -157,9 +177,9 @@ namespace Test
                 }
             });
 
-            var t3 = stream.WriteAsync(ConstantsHttp20.clientPrefaceBytes);
+            var t3 = stream.WriteAsync(ConstantsForHttp20.clientPrefaceBytes);
             await t3.ConfigureAwait(false);
-            HttpFrame frame = HttpFrame.Settings;
+            FrameHttp20 frame = FrameHttp20.Settings;
             frame.streamIdentifier = 1;
             frame.WriteThisTo(stream);
 
@@ -315,6 +335,175 @@ namespace Test
                 await t1;
             }
         }
+
+        public static async Task UpgradeConnect2()
+        {
+            var pathCert = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem";
+            var pathKey = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem";
+            X509Certificate2 caCert = Cert.FromFile(pathCert, pathKey);
+            HttpConsumer consumer = HttpRecoreder.GetOrCreateShared();
+            TcpListener listener = new TcpListener(IPAddress.Any, 60121);
+            listener.Start();
+            HttpEventCenter.SetEventConsumer(new HttpEventPublisherGrpc(null));
+            InfoProviderWithGrpc infoProviderWithGrpc = new InfoProviderWithGrpc(HttpEventPublisherGrpc.connections);
+            await infoProviderWithGrpc.Run().ConfigureAwait(false);
+
+            while (true)
+            {
+                var socket = await listener.AcceptSocketAsync();
+                HttpProxyProcessor.HandleSocket(consumer, socket, default);
+            }
+        }
+        private async Task TestHandleClient(Socket socket)
+        {
+            Console.WriteLine($"Begin Handle Client. Remote Endpoint:{socket.RemoteEndPoint}. Local EndPoint:{socket.LocalEndPoint}");
+            CertManager.CreateShared(@"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original");
+            var certManager = CertManager.Shared;
+            var caCert = CertManager.SharedCa;
+
+            var poolItems = PoolObjectsConcurent<HttpBinaryMapped>.Shared;
+            var cts = new CancellationTokenSource();
+            var ct = cts.Token;
+            SocketWrap wrapClient = new SocketWrap();
+            wrapClient.Wrap(socket, false, false);
+            var modBufferClient = wrapClient.AddModifier<SocketModifierBufferDefault>();
+            var modReadedPipedClient = wrapClient.AddModifier<SocketModifierReaderPiped>();
+            Console.WriteLine($"Modifiers added");
+            var t1 = modReadedPipedClient.RunWriter(cts.Token);
+            Console.WriteLine($"Piped Reader write loop Runned");
+
+            ObjectReaderHttp11Piped hor = new ObjectReaderHttp11Piped();
+            hor.Initilize(modReadedPipedClient.Reader, ConstantsForHttp.TYPE_REQUEST, cts, poolItems);
+            Console.WriteLine($"Begin Read First Http Message");
+            var result = await hor.ReadObjectAsync().ConfigureAwait(false);
+            var value = result.value;
+            var pair = value.FindHostAndPortFromField();
+            var host = pair.Item1;
+            var port = pair.Item2;
+            Console.WriteLine($"HttpObject Readed. Host:{host} Port:{port}");
+            Console.WriteLine(value.ToStringInfo());
+
+            wrapClient.RemoveModifier<SocketModifierReaderPiped>();
+            var interceptor = modBufferClient.reader!.AddInterceptorIn<InterceptorTlsHandshakeClient>();
+            var modStreamClient = wrapClient.AddModifier<SocketModifierStream>();
+
+            SslStream sslStreamClient = new SslStream(modStreamClient.Stream);
+            await wrapClient.Writer.WriteAsync(ConstantsForHttp.Responses.bytesOk11, cts.Token);
+            Console.WriteLine($"Sended Ok 200 To Client. Begin awaiting Tls Hello Frame From Client");
+            await interceptor.AwaitFrame().ConfigureAwait(false);
+            interceptor.AnalyzFrame();
+            Console.WriteLine($"Awaited Frame");
+
+            var adresses = await Dns.GetHostAddressesAsync(host).ConfigureAwait(false);
+            IPEndPoint endPoint = new IPEndPoint(adresses.First(x => x.AddressFamily == AddressFamily.InterNetwork), port);
+            Socket socketOrigin = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            await socketOrigin.ConnectAsync(endPoint).ConfigureAwait(false);
+            Console.WriteLine($"Connected to Origin");
+
+            SocketWrap wrapOrigin = new SocketWrap();
+            wrapOrigin.Wrap(socketOrigin, false, false);
+            var modBufferOrigin = wrapOrigin.AddModifier<SocketModifierBufferDefault>();
+
+            var interceptorOrigin = modBufferOrigin.reader.AddInterceptorIn<InterceptorTlsHandshakeServer>();
+            interceptorOrigin.EnableCopying();
+            var modStreamOrigin = wrapOrigin.AddModifier<SocketModifierStream>();
+            SslStream sslStreamOrigin = new SslStream(modStreamOrigin.Stream);
+            Console.WriteLine($"Created SslStream to Origin");
+
+
+            var clientProtocols = interceptor.ProtocolsSsl;
+            var alpnList = new List<SslApplicationProtocol>();
+            if (interceptor.Protocols.HasFlag(ENetworkProtocols.HTTP3))
+            {
+                alpnList.Add(SslApplicationProtocol.Http3);
+            }
+            if (interceptor.Protocols.HasFlag(ENetworkProtocols.HTTP2))
+            {
+                alpnList.Add(SslApplicationProtocol.Http2);
+            }
+            if (interceptor.Protocols.HasFlag(ENetworkProtocols.HTTP11))
+            {
+                alpnList.Add(SslApplicationProtocol.Http11);
+            }
+
+            SslClientAuthenticationOptions options = new SslClientAuthenticationOptions()
+            {
+                TargetHost = host,
+                ApplicationProtocols = alpnList,
+                EnabledSslProtocols = interceptor.ProtocolsSsl,
+                CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+                EncryptionPolicy = EncryptionPolicy.RequireEncryption,
+            };
+            Console.WriteLine($"Begin Authentication To Origin As Client");
+            await sslStreamOrigin.AuthenticateAsClientAsync(options).ConfigureAwait(false);
+            interceptorOrigin.AnalyzFromCopy();
+            Console.WriteLine($"Complete Authentication To Origin As Client");
+            var accepted = sslStreamOrigin.NegotiatedApplicationProtocol;
+
+            var appProtocols = new List<SslApplicationProtocol>(3);
+            SslServerAuthenticationOptions optionsSever = new SslServerAuthenticationOptions()
+            {
+                ServerCertificate = await certManager.ForgedGetOrCreateCertFromCacheAsync((X509Certificate2)sslStreamOrigin.RemoteCertificate!, caCert).ConfigureAwait(false),
+                EncryptionPolicy = EncryptionPolicy.RequireEncryption,
+                EnabledSslProtocols = interceptor.ProtocolsSsl,
+                CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+                ApplicationProtocols = appProtocols,
+            };
+            wrapOrigin.RemoveModifier<SocketModifierBufferDefault>();
+
+            if (accepted == SslApplicationProtocol.Http3)
+            {
+                Console.WriteLine($"Origin Accepted HTTP3");
+                appProtocols.Add(SslApplicationProtocol.Http3);
+            }
+            else if (accepted == SslApplicationProtocol.Http2)
+            {
+                Console.WriteLine($"Origin Accepted HTTP2");
+                appProtocols.Add(SslApplicationProtocol.Http2);
+            }
+            else
+            {
+                Console.WriteLine($"Origin Accepted HTTP1");
+                appProtocols.Add(SslApplicationProtocol.Http11);
+            }
+            Console.WriteLine($"Begin sslStramClient Authentication As Server");
+            await sslStreamClient.AuthenticateAsServerAsync(optionsSever, ct).ConfigureAwait(false);
+            wrapClient.RemoveModifier<SocketModifierBufferDefault>();
+            Console.WriteLine($"Complete sslStramClient Authenticated As Server. Protocols: {sslStreamClient.NegotiatedApplicationProtocol}");
+
+            if (accepted == SslApplicationProtocol.Http3)
+            {
+                wrapOrigin.AddModifier<SocketModifierHttp3>();
+            }
+            else if (accepted == SslApplicationProtocol.Http2)
+            {
+                var modHttp2 = wrapOrigin.AddModifier<SocketModifierHttp2Tls>();
+                modHttp2.SetStream(sslStreamOrigin);
+                var modHttp2Client = wrapClient.AddModifier<SocketModifierHttp2Tls>();
+                modHttp2Client.SetStream(sslStreamClient);
+
+                modReadedPipedClient = wrapClient.AddModifier<SocketModifierReaderPiped>();
+                t1 = modReadedPipedClient.RunWriter();
+                var modReaderHttp2Client = wrapClient.AddModifier<SocketModifierHttp2ReaderPiped>();
+                var readerHttp2Client = modReaderHttp2Client.Reader;
+                Console.WriteLine($"Begin Messaging h2");
+                while (true)
+                {
+                    var req = await readerHttp2Client.ReadObjectAsync().ConfigureAwait(false);
+                }
+            }
+            else if (accepted == SslApplicationProtocol.Http11)
+            {
+                var modHttp11Origin = wrapOrigin.AddModifier<SocketModifierHttp11Tls>();
+                var modHttp11Client = wrapClient.AddModifier<SocketModifierHttp11Tls>();
+            }
+            else
+            {
+                throw new System.NotSupportedException();
+            }
+        }
+
+
 
         public static async Task UpgradeConnect()
         {

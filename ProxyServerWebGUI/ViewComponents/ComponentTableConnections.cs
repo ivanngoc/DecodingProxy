@@ -1,23 +1,27 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using IziHardGames.Libs.ForHttp.Monitoring;
 using IziHardGames.Proxy.WebGUI;
 using Microsoft.AspNetCore.Mvc;
-using DataConnection = IziHardGames.Proxy.gRPC.ProtobufDataConnection;
-using Reply = IziHardGames.Proxy.gRPC.ProtobufReply;
-using Request = IziHardGames.Proxy.gRPC.ProtobufRequest;
 
 namespace ProxyServerWebGUI.ViewComponents
 {
     public class ComponentTableConnections : ViewComponent
     {
-        private GrpcConnector infoProvider;
-        public ComponentTableConnections(GrpcConnector infoProvider)
+        private ProxyInfoProvider infoProvider;
+        private ProxyChangeReflector proxyChangeReflector;
+
+        public ComponentTableConnections(ProxyInfoProvider infoProvider, ProxyChangeReflector proxyChangeReflector)
         {
             this.infoProvider = infoProvider;
+            this.proxyChangeReflector = proxyChangeReflector;
         }
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var connections = await infoProvider.RequestConnectionsAsync().ConfigureAwait(false);
-            return View(connections);
+            //var connections = await infoProvider.RequestConnectionsAsync().ConfigureAwait(false);
+            //return View(connections);
+
+            return View(Enumerable.Empty<InfoConnection>());
         }
     }
 }

@@ -1,16 +1,13 @@
-﻿using HttpDecodingProxy.ForHttp;
-using IziHardGames.Libs.Networking.Pipelines;
-using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Proxy.Consuming;
-using IziHardGames.Tls;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
+using IziHardGames.Core;
 //using ManagerConnectionsToDomainSsl = IziHardGames.Libs.ObjectsManagment.ManagerBase<string, IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls<IziHardGames.Libs.Networking.Pipelines.TcpClientPipedSsl, IziHardGames.Libs.Networking.Pipelines.TcpClientPipedSsl>, (string, int)>;
 //using HttpPipedIntermediarySsl = IziHardGames.Proxy.Sniffing.ForHttp.HttpPipedIntermediary<IziHardGames.Proxy.Tcp.Tls.ConnectionsToDomainTls<IziHardGames.Libs.Networking.Pipelines.TcpClientPipedSsl, IziHardGames.Libs.Networking.Pipelines.TcpClientPipedSsl>, IziHardGames.Libs.Networking.Pipelines.TcpClientPipedSsl>;
 using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Core;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
+using IziHardGames.Libs.Networking.Pipelines;
+using IziHardGames.Proxy.Consuming;
+using IziHardGames.Tls;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {

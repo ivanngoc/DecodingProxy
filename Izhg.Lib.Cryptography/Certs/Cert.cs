@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using IziHardGames.Tls;
 
 namespace IziHardGames.Libs.Cryptography.Certificates
 {
@@ -72,14 +73,22 @@ namespace IziHardGames.Libs.Cryptography.Certificates
             return domain;
         }
 
-        public static string CertToKey(X509Certificate2 cert)
+        public static string CertToKey(X509Certificate2 origin)
         {
-            return GetDomainForFilename(cert);
+            return origin.SerialNumber;
+        }
+        public static string CertToKey(X509Certificate2 forged, X509Certificate2 origin)
+        {
+            return origin.SerialNumber;
         }
 
-        internal static string CertToFilename(X509Certificate2 cert)
+        internal static string CertToFilename(X509Certificate2 origin)
         {
-            return GetDomainForFilename(cert);
+            return origin.SerialNumber;
+        }
+        internal static string CertToFilename(X509Certificate2 forged, X509Certificate2 origin)
+        {
+            return CertToKey(forged, origin);
         }
 
         public static bool CompareDates(X509Certificate2 left, X509Certificate2 right)
@@ -104,9 +113,14 @@ namespace IziHardGames.Libs.Cryptography.Certificates
         {
             throw new NotImplementedException();
         }
-        public static string DomainToKey(string domain)
+        //public static string DomainToKey(string domain)
+        //{
+        //    return GetDomainForFilename(domain);
+        //}
+
+        public static X509Certificate2 FromFile(string pathCert, string pathKey)
         {
-            return GetDomainForFilename(domain);
+            return CertManager.LoadPemFromFile(pathCert, pathKey);
         }
     }
 }

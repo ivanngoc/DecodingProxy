@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using IziHardGames.Proxy.TcpDecoder;
 using Test;
 
+
+
+await TestQuic.Test();
+//await AsyncFlowControl.Test();
+//ReaderHttp2.Test();
 //TlcHelloFromClient.Test12();
 //Console.ReadLine();
 //await TestHttp2.RunTlsParse();
 //await TestHttp2.ShowIp();
-await TestHttp2.UpgradeConnect();
+await TestHttp2.UpgradeConnect2();
 //await TestHttp2.RunProxy();
 //await TestHttp2.RunProxySsl();
 //await TestHttp2.RunHttp2Ssl();

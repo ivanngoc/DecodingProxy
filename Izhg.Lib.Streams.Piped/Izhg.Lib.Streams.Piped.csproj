@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj" />
-    <ProjectReference Include="..\IzhgLibMemory\Izhg.Lib.Memory.csproj" />
   </ItemGroup>
 
 </Project>

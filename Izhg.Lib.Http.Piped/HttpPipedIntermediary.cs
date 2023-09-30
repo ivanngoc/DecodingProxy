@@ -1,21 +1,20 @@
 ﻿using System;
 using System.Buffers;
-using System.IO.Pipelines;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
 using IziHardGames.Libs.Async;
+using IziHardGames.Libs.ForHttp.Http11;
 using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
-using Callback = System.Func<IziHardGames.Proxy.Consuming.DataSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;
+using Callback = System.Func<IziHardGames.Proxy.Consuming.HttpSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
@@ -27,7 +26,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         where THub : IHub<TClient>
         where TClient : class, IClient<SocketReader, SocketWriter>, IReader, new()  // piped client
     {
-        public readonly DataSource source = new DataSource(typeof(HttpPipedIntermediary<THub, TClient>).Name);
+        public readonly HttpSource source = new HttpSource(typeof(HttpPipedIntermediary<THub, TClient>).Name);
 
         private Callback? consumeRequest;
         private Callback? consumeResponse;
@@ -35,11 +34,18 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         private IGetOrCreateUnique<string, THub, (string, int)>? manager;
         private bool isDisposed = true;
         private static readonly Callback dummy = (x, y) => Task.CompletedTask;
-        private IPoolReturn<HttpPipedIntermediary<THub, TClient>> pool;
-        private IChangeNotifier<IConnectionData> monitor;
+        private IPoolReturn<HttpPipedIntermediary<THub, TClient>>? pool;
+        private IChangeNotifier<IConnectionData>? monitor;
         public readonly SyncRedirection sync = new SyncRedirection();
 
-        public HttpPipedIntermediary<THub, TClient> Init(ConsumingProvider consumingProvider, IGetOrCreateUnique<string, THub, (string, int)> manager, IPoolReturn<HttpPipedIntermediary<THub, TClient>> pool, Core.IChangeNotifier<IConnectionData> monitor)
+        private TClient? client;
+        private ObjectReaderHttp11Piped? readerRequest;
+        private ObjectReaderHttp11Piped? readerResponse;
+
+        public HttpPipedIntermediary<THub, TClient> Init(ConsumingProvider consumingProvider,
+                                                         IGetOrCreateUnique<string, THub, (string, int)> manager,
+                                                         IPoolReturn<HttpPipedIntermediary<THub, TClient>> pool,
+                                                         Core.IChangeNotifier<IConnectionData> monitor)
         {
             if (!isDisposed) throw new InvalidOperationException($"Object Must be disposed or use after created");
             isDisposed = false;
@@ -50,22 +56,28 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             this.consumeResponse = consumingProvider!.consumeResponse;
             source.StartNewGeneration();
             this.monitor = monitor;
+            readerRequest = PoolObjectsConcurent<ObjectReaderHttp11Piped>.Shared.Rent();
+            readerResponse = PoolObjectsConcurent<ObjectReaderHttp11Piped>.Shared.Rent();
             return this;
         }
         public async Task Run(TClient agent, CancellationTokenSource cts)
         {
+
+            var poolItems = PoolObjectsConcurent<HttpBinaryMapped>.Shared;
+            readerRequest!.Initilize(agent, ConstantsForHttp.TYPE_REQUEST, cts, poolItems);
+
             IPerfTracker logger = agent.Logger as IPerfTracker ?? throw new NullReferenceException();
 
             var pipedClient = agent as IClientPiped<SocketReader, SocketWriter>;
             Task fillTask = pipedClient?.RunWriterLoop() ?? Task.CompletedTask;
 
             logger.ReportTime($"Awaiting First Msg Begin");
-            using (var req = await this.AwaitMsg(HttpLibConstants.TYPE_REQUEST, agent, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared))
+            using (var req = await this.AwaitMsg(readerRequest, cts, poolItems))
             {
                 logger.ReportTime($"Awaiting First Msg End");
                 var address = req.FindHostAndPortFromField();
                 string addressString = $"{address.Item1}:{address.Item2}";
-                var hub = manager.GetOrCreate(addressString, address);
+                var hub = manager!.GetOrCreate(addressString, address);
                 hub.Use();
                 hub.SetVersion(req.GetVersionString());
                 consumingProvider!.consumeBinaryRequest(this.source, req);
@@ -91,6 +103,9 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         }
         public async Task MaintainProxyConnection(TClient agent, TClient origin, HttpBinaryMapped firstMsg, CancellationTokenSource cts)
         {
+            var poolItems = PoolObjectsConcurent<HttpBinaryMapped>.Shared;
+            readerResponse.Initilize(origin, ConstantsForHttp.TYPE_RESPONSE, cts, poolItems);
+
             IPerfTracker logger = agent.Logger as IPerfTracker ?? throw new NullReferenceException();
             logger.ReportTime($"MaintainProxyConnection start");
             logger.ReportTime($"MaintainProxyConnection start");
@@ -116,14 +131,14 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 //var bb = Encoding.UTF8.GetBytes(getstring);
                 //var sendTask = origin.SendAsync(bb);
                 //origin.Send(bb);
-                var sendTask = origin.Writer.SendAsync(firstMsg.GetMemory(), cts.Token);
+                var sendTask = origin.Writer.WriteAsync(firstMsg.GetMemory(), cts.Token);
                 await sendTask.ConfigureAwait(false);
                 logger.ReportTime($"MaintainProxyConnection Agent Sended to Origin");
 
-                using (var response = await AwaitMsg(HttpLibConstants.TYPE_RESPONSE, origin, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared).ConfigureAwait(false))
+                using (var response = await AwaitMsg(readerResponse, cts, poolItems).ConfigureAwait(false))
                 {
                     logger.ReportTime($"MaintainProxyConnection Recived from origin");
-                    var t1 = agent.Writer.SendAsync(response.GetMemory(), cts.Token);
+                    var t1 = agent.Writer.WriteAsync(response.GetMemory(), cts.Token);
                     consumingProvider.consumeBinaryResponse(source, response);
                     await t1.ConfigureAwait(false);
                     logger.ReportTime($"MaintainProxyConnection Sended to agent");
@@ -140,8 +155,8 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     {
                         if (agent.CheckConnectIndirectly() && origin.CheckConnectIndirectly())
                         {
-                            var t2 = MaintainMessagingV2(HttpLibConstants.TYPE_REQUEST, agent, origin, cts, consumingProvider.consumeBinaryRequest);
-                            var t3 = MaintainMessagingV2(HttpLibConstants.TYPE_RESPONSE, origin, agent, cts, consumingProvider.consumeBinaryResponse);
+                            var t2 = MaintainMessagingV2(readerRequest, agent, origin, cts, consumingProvider.consumeBinaryRequest);
+                            var t3 = MaintainMessagingV2(readerResponse, origin, agent, cts, consumingProvider.consumeBinaryResponse);
                             await Task.WhenAll(t2, t3).ConfigureAwait(false);
                             logger.ReportTime($"MaintainProxyConnection End MaintainMessagingV2");
                         }
@@ -157,257 +172,28 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             logger.ReportTime($"MaintainProxyConnection End");
         }
 
-        public async Task<HttpBinaryMapped> AwaitMsg(int type, TClient client, CancellationTokenSource cts, IPoolObjects<HttpBinaryMapped> pool)
+
+        public async Task<HttpBinaryMapped> AwaitMsg(ObjectReaderHttp11Piped reader, CancellationTokenSource cts, IPoolObjects<HttpBinaryMapped> pool)
         {
-            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
-            logger.ReportTime($"AwaitMsg Start");
-            HttpBinaryMapped item = pool.Rent().Init();
-            item.BindToPool(pool, type);
+            var result = await reader.ReadObjectAsync();
+            var item = result.value;
 
-            if (!cts.IsCancellationRequested)
+            if (!item.Validate()) throw new FormatException(item.ToString());
+            item.ApplyControls(client!);
+
+            if (reader.Type == ConstantsForHttp.TYPE_RESPONSE && item.IsCloseRequired)
             {
-                await AwaitFeilds(item, client, cts.Token).ConfigureAwait(false);
-#if DEBUG
-                Console.WriteLine(item.ToStringFields());
-#endif
-                await AwaitBody(item, client, cts.Token).ConfigureAwait(false);
-                if (!item.Validate()) throw new FormatException(item.ToString());
-                item.ApplyControls(client);
-
-                if (type == HttpLibConstants.TYPE_RESPONSE && item.IsCloseRequired)
+                if (await item.TryReadBodyUntilEnd(client!, cts))
                 {
-                    if (await item.TryReadBodyUntilEnd(client, cts))
-                    {
-                        //Console.WriteLine(response.debug);
-                    }
+                    //Console.WriteLine(response.debug);
                 }
             }
-            logger.PutMsg(item);
-            logger.ReportTime($"AwaitMsg End");
             return item;
         }
 
-        public async Task AwaitFeilds(HttpBinaryMapped item, TClient client, CancellationToken token)
-        {
-            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
-            logger.ReportTime($"AwaitFeilds Begin");
-            var reader = client;
-            item.FieldsStart();
-            int offset = 0;
-            bool isEnd = default;
-            do
-            {
-                ReadResult result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
-                var buffer = result.Buffer;
-                if (buffer.Length > 0)
-                {
-                    isEnd = ParseLineRecursive(item, ref buffer, offset);
-                    offset = item.Length;
-                }
-                else
-                {
-                    Logger.LogWarning($"{nameof(HttpPipedIntermediary<THub, TClient>)}.{AwaitFeilds} Null read Not implemented");
-                }
-                reader.ReportConsume(buffer.Start);
-            } while (!isEnd);
-            logger.ReportTime($"AwaitFeilds End");
-        }
 
-        // исхлдим их того что строка короткая поэтому если к уже считанному сегменту прибавится еще сегмент
-        // то не надо оптимизировать двойное чтение в случае если в сегменте не будет найден конец строки
-        // поэтому даже если будет найдено 10 строк и не будет найден с одного чтения \r\n\r\n то издержки производительности будут ничтожеными исходя из количества таких случаев(0,01%)
-        /// <summary>
-        /// <see cref="HttpObject.Push(ReadOnlySequence{byte})"/>
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <returns>
-        /// <see cref="bool"/> - fields enclosure finded (true)<br/>
-        /// <see cref="ReadOnlySequence{T}"/> - latest buffer after last succesfull slicing<br/>
-        /// </returns>
-        private bool ParseLineRecursive(HttpBinaryMapped item, ref ReadOnlySequence<byte> buffer, int offset)
-        {
-#if DEBUG
-            var s = buffer.ToStringUtf8();
-#endif            
-            SequencePosition? position = buffer.PositionOf((byte)'\n');
 
-            if (position != null)
-            {
-                int index = item.FieldsCount;
-                var nextPos = buffer.GetPosition(1, position.Value);
-                var slice = buffer.Slice(0, nextPos);
-                var span = item.AddField(slice, offset);
-                buffer = buffer.Slice(nextPos);
-                // if empty line
-                if (span.Length == HttpLibConstants.LENGTH_LF) // && span[0] == '\r' && span[1] == '\n')  // almost impossible case
-                {
-                    item.AllocateFieldsMap();
-                    item.MapField(index, offset, HttpLibConstants.LENGTH_LF);
-                    item.FieldsEnd();
-                    return (true);
-                }
-                // Skip the line + the \n character (basically position)
-                var isEnd = ParseLineRecursive(item, ref buffer, offset + span.Length);
-                //if (consumed.Item2 > 0) httpObject.MapField(index, offset, span.Length);  // in case of partial reading in few goes
-                item.MapField(index, offset, span.Length);
-                return (isEnd);
-            }
-            item.AllocateFieldsMap();
-            return false;
-        }
 
-        /// <summary>
-        /// <see cref="HttpObject.FillBodyChunked(in ReadOnlySequence{byte})"/>
-        /// <see cref="HttpBody.ReadBody(Stream, HttpObject)"/>
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="client"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public async Task AwaitBody<T>(HttpBinaryMapped item, T client, CancellationToken token) where T : IReader, IGetLogger
-        {
-            IPerfTracker logger = client.Logger as IPerfTracker ?? throw new NullReferenceException();
-
-            item.BodyStart();
-            logger.ReportTime($"Await Body Begin");
-            int length = item.GetBodyLength();
-            var reader = client;
-            //ReadResult resultD = await reader.ReadAsync().ConfigureAwait(false);
-            //var bufferD = resultD.Buffer;
-            //string debug = Encoding.UTF8.GetString(bufferD);
-
-            if (length > 0)
-            {
-                item.EnsureCapacity(length);
-
-                while (length > 0)
-                {
-                    ReadResult result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
-
-                    var buffer = result.Buffer;
-
-                    if (length > buffer.Length)
-                    {
-                        length -= (int)buffer.Length;
-                        item.AddBody(buffer);
-                        reader.ReportConsume(buffer.End);
-                    }
-                    else
-                    {
-                        SequencePosition position = buffer.GetPosition(length);
-                        var slice = buffer.Slice(0, length);
-                        item.AddBody(slice);
-                        reader.ReportConsume(position);
-                        item.BodyEnd();
-                        goto END;
-                    }
-                }
-            }
-            else if (length == -2)
-            {
-                await ReadBodyChunkedV1(reader, item, token).ConfigureAwait(false);
-
-            }
-            else if (length == -3)
-            {
-                item.isReadingUntilCloseConnection = true;
-                item.BodyEnd();
-                goto END;
-            }
-            END:
-            logger.ReportTime($"Await Body End");
-        }
-
-        /// <summary>
-        /// Read c <see cref="PipedSocket.Consume(int)"/>
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="item"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        /// <exception cref="System.NotImplementedException"></exception>
-        private async Task ReadBodyChunkedV2(TcpClientPiped reader, HttpBinaryMapped item, CancellationToken token)
-        {
-            await Task.Delay(1000);
-            throw new System.NotImplementedException();
-        }
-        private async Task ReadBodyChunkedV1<T>(T reader, HttpBinaryMapped item, CancellationToken token) where T : IReader
-        {
-            SequencePosition? pos;
-            SequencePosition position;
-            bool isReadingChunk = false;
-            bool isReadingControl = true;
-            bool isReadingEnclosure = false;
-            bool isEnd = false;
-            int lengthLeft = 0;
-
-            while (true)
-            {
-                var result = await reader.ReadPipeAsync(token).ConfigureAwait(false);
-                var buffer = result.Buffer;
-                int lengthLoop = buffer.Length < lengthLeft ? (int)buffer.Length : lengthLeft;
-                if (isReadingControl)
-                {   // search control line ending
-                    pos = buffer.PositionOf((byte)'\n');
-
-                    if (pos == null)
-                    {
-                        continue;
-                    }
-                    isReadingControl = false;
-                    var nextPos = buffer.GetPosition(1, pos.Value);
-                    var controline = buffer.Slice(0, nextPos);
-                    // add control line to container
-                    item.AddBodyForSure(controline);
-                    buffer = buffer.Slice(controline.Length);
-                    int chunkLength = controline.ParseHex();
-                    if (chunkLength == 0)
-                    {
-                        isReadingEnclosure = true;
-                        isEnd = true;
-                        item.BodyEnd();
-                        goto END;
-                    }
-                    else
-                    {
-                        isReadingChunk = true;
-                        lengthLeft = chunkLength;
-                        lengthLoop = chunkLength > buffer.Length ? (int)buffer.Length : chunkLength;
-                    }
-                }
-
-                if (isReadingChunk)
-                {
-                    var sliceChunk = buffer.Slice(0, lengthLoop);
-                    // add chunked body to container
-                    item.AddBodyForSure(sliceChunk);
-                    buffer = buffer.Slice(lengthLoop);
-                    lengthLeft -= lengthLoop;
-                    if (lengthLeft == 0) isReadingEnclosure = true;
-                    isReadingChunk = !isReadingEnclosure;
-                }
-                END:
-                if (isReadingEnclosure)
-                {
-                    // read CRLF after chunk and add to container
-                    var lf = buffer.Slice(0, HttpLibConstants.LENGTH_LF);
-                    item.AddBodyForSure(lf);
-                    buffer = buffer.Slice(HttpLibConstants.LENGTH_LF);
-                    isReadingControl = true;
-                    isReadingEnclosure = false;
-                    if (isEnd)
-                    {
-                        position = buffer.GetPosition(0);
-                        reader.ReportConsume(position);
-                        break;
-                    }
-                }
-                position = buffer.GetPosition(0);
-                reader.ReportConsume(position);
-            }
-        }
         public void Dispose()
         {
             if (this.isDisposed) throw new InvalidOperationException($"");
@@ -417,12 +203,22 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             consumeResponse = dummy;
             sync.Dispose();
 
-            pool.Return(this);
+            pool!.Return(this);
             pool = default;
 
             monitor = default;
             this.manager = default;
             this.consumingProvider = default;
+
+            client = default;
+
+            readerRequest!.Dispose();
+            readerResponse!.Dispose();
+            PoolObjectsConcurent<ObjectReaderHttp11Piped>.Shared.Return(readerRequest!);
+            PoolObjectsConcurent<ObjectReaderHttp11Piped>.Shared.Return(readerResponse!);
+
+            readerRequest = default;
+            readerResponse = default;
         }
         public void Resume(int readed)
         {
@@ -450,7 +246,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             });
         }
 
-        public async Task MaintainMessagingSequentially(int type, TClient from, TClient to, CancellationTokenSource cts, Action<DataSource, HttpBinaryMapped> consumer)
+        public async Task MaintainMessagingSequentially(ObjectReaderHttp11Piped producer, TClient from, TClient to, CancellationTokenSource cts, Action<HttpSource, HttpBinaryMapped> consumer)
         {
             IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
 
@@ -458,13 +254,13 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
             int messages = default;
             while (!cts.IsCancellationRequested)
             {
-                var t1 = AwaitMsg(type, from, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared);
+                var t1 = AwaitMsg(producer, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared);
                 var msg = await t1.ConfigureAwait(false);
                 messages++;
                 if (t1.IsCanceled) goto END;
                 logger.ReportTime($"Message #{messages} recived");
 
-                if (type == HttpLibConstants.TYPE_RESPONSE)
+                if (producer.Type == ConstantsForHttp.TYPE_RESPONSE)
                 {
                     from.ConsumeLife();
                     if (msg.IsCloseRequired)
@@ -479,10 +275,10 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     logger.ReportTime($"Message #{messages} recived");
                 }
                 consumer(source, msg);
-                var t2 = to.Writer.SendAsync(msg.GetMemory(), cts.Token);
+                var t2 = to.Writer.WriteAsync(msg.GetMemory(), cts.Token);
                 await t2;
                 logger.ReportTime($"Message #{messages} sended");
-                ReportMessageEnd(type, from, to, cts);
+                ReportMessageEnd(producer.Type, from, to, cts);
             }
             END:
             logger.ReportTime($"MaintainMessaging End");
@@ -497,13 +293,15 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         /// <param name="cts"></param>
         /// <param name="consumer"></param>
         /// <returns></returns>
-        public async Task MaintainMessagingV2(int type, TClient from, TClient to, CancellationTokenSource cts, Action<DataSource, HttpBinaryMapped> consumer)
+        public async Task MaintainMessagingV2(ObjectReaderHttp11Piped producer, TClient from, TClient to, CancellationTokenSource cts, Action<HttpSource, HttpBinaryMapped> consumer)
         {
             IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
 
             var sync = this.sync;
             AsyncAutoResetEvent<HttpBinaryMapped> are = PoolObjectsConcurent<AsyncAutoResetEvent<HttpBinaryMapped>>.Shared.Rent();
             //возможно сервер отправляет данные до поступления запроса на него по принципу детерминированности
+            int type = producer.Type;
+
             var read = Task.Run(async () =>
             {
                 try
@@ -521,11 +319,11 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                         //Console.WriteLine($"MaintainMessagingV2.Type:{type}. From:{from.Title} TO:{to.Title} recived #{counter}. Available:{from.Available}. Begin await msg to recieve");
                         //Console.WriteLine(msg.ToStringFields());
 #endif
-                        var msg = await AwaitMsg(type, from, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared).ConfigureAwait(false);
+                        var msg = await AwaitMsg(producer, cts, PoolObjectsConcurent<HttpBinaryMapped>.Shared).ConfigureAwait(false);
                         counter++;
                         logger.ReportTime($"MaintainMessagingV2.Type:{type}. From:{from.Title} TO:{to.Title} recived #{counter}. Available:{from.Available}");
                         // check for next request
-                        if (type == HttpLibConstants.TYPE_REQUEST)
+                        if (type == ConstantsForHttp.TYPE_REQUEST)
                         {
                             sync.IncrementRecieve();
                             // release connection if there is not data
@@ -577,12 +375,12 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
 #endif
                         var res = await are.WaitAsync(cts.Token).ConfigureAwait(false);
                         counter++;
-                        var task = to.Writer.SendAsync(res.GetMemory(), cts.Token);
+                        var task = to.Writer.WriteAsync(res.GetMemory(), cts.Token);
                         consumer(source, res);
                         await task.ConfigureAwait(false);
                         logger.ReportTime($"MaintainMessagingV2 sended. From:{from.Title} TO:{to.Title} #{counter}. Available:{from.Available}");
 
-                        if (type == HttpLibConstants.TYPE_REQUEST)
+                        if (type == ConstantsForHttp.TYPE_REQUEST)
                         {
                             sync.IncrementResend();
 #if DEBUG
@@ -634,7 +432,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         {
             IPerfTracker logger = from.Logger as IPerfTracker ?? throw new NullReferenceException();
 
-            if (type == HttpLibConstants.TYPE_RESPONSE)
+            if (type == ConstantsForHttp.TYPE_RESPONSE)
             {
                 if (from.Available == 0)
                 {
@@ -643,7 +441,5 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 }
             }
         }
-
-
     }
 }

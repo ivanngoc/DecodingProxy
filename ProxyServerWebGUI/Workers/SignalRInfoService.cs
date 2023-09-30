@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace ProxyServerWebGUI.Workers
 {
+    /// <summary>
+    /// <see cref="SignalRInfoHub"/>
+    /// </summary>
     public class SignalRInfoService : BackgroundService
     {
         private readonly IHubContext<SignalRInfoHub> hubContext;
@@ -27,6 +30,14 @@ namespace ProxyServerWebGUI.Workers
             await hubContext.Clients.All.SendAsync(method: "logDebug", "this is m msg as string");
         }
         #region Connections To Origins
+
+        public async Task AddForAll(int idConnection)
+        {
+#if DEBUG
+            Console.WriteLine($"{typeof(SignalRInfoService).Name}{nameof(AddForAll)} {idConnection.ToString()}");
+#endif
+            await hubContext.Clients.All.SendAsync("connectionAdd", JsonSerializer.Serialize(idConnection));
+        }
         public void AddForAll(IConnectionData data)
         {
 #if DEBUG
@@ -55,7 +66,7 @@ namespace ProxyServerWebGUI.Workers
             Console.WriteLine($"{typeof(SignalRInfoService).Name}{nameof(UpdateForAllStatus)} {data.ToString()}");
 #endif
             hubContext.Clients.All.SendAsync("connectionUpdateAll", data.Id, data.Status);
-        } 
+        }
         #endregion
     }
 }

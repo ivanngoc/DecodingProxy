@@ -25,7 +25,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
         private X509Certificate2 caRootCert;
         private CertManager certManager;
         //private ManagerBase managerSsl;
-        private DataSource dataSource;
+        private HttpSource dataSource;
         private readonly IChangeNotifier<IConnectionData> monitor;
 
         //public ClientHandlerPipedHttpsV2(ConsumingProvider consumingProvider,

@@ -5,6 +5,14 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace ProxyLibs.Extensions
 {
 
+    public static class ExtensionsForDateTime
+    {
+        public static string ToStringAsFilename(in this DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy MM dd HH mm ss fffffff");
+        }
+    }
+
     public static class ExtensionsForObjects
     {
         public static T DeepClone<T>(this T s) where T : ICloneable

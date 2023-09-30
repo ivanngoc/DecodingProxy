@@ -1,4 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System;
+﻿using System;
+using IziHardGames.Libs.ForHttp.Recording;
+
+HttpRecordAnalyzer analyzer = new HttpRecordAnalyzer();
+await analyzer.Run().ConfigureAwait(false);
 
 Console.WriteLine("Hello, World!");

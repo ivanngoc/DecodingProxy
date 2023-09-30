@@ -1,7 +1,16 @@
 ﻿using System.Runtime.InteropServices;
+using IziHardGames.Libs.Binary.Readers;
 
 namespace IziHardGames.Libs.Buffers.Vectors
 {
+
+    [StructLayout(LayoutKind.Explicit, Size = 3)]
+    public struct TestOverlapSize
+    {
+        [FieldOffset(0)] public int val0;
+        [FieldOffset(1)] public int val1;
+        [FieldOffset(2)] public int val2;
+    }
 
     [StructLayout(LayoutKind.Explicit, Size = 3)]
     public struct Bytes3
@@ -9,6 +18,8 @@ namespace IziHardGames.Libs.Buffers.Vectors
         [FieldOffset(0)] public byte byte0;
         [FieldOffset(1)] public byte byte1;
         [FieldOffset(2)] public byte byte2;
+
+        public static implicit operator int(Bytes3 b) => BufferReader.ToInt32(b.byte0, b.byte1, b.byte2);
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 9)]
@@ -55,6 +66,8 @@ namespace IziHardGames.Libs.Buffers.Vectors
         [FieldOffset(21)] public byte byte21;
         [FieldOffset(22)] public byte byte22;
         [FieldOffset(23)] public byte byte23;
+
+        public static implicit operator int(Bytes24 b) => BufferReader.ToInt32(b.byte0, b.byte1, b.byte2);
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 31)]

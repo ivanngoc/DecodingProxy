@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Threading;
 using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Proxy.Tcp;
+using System.Runtime.CompilerServices;
 
 namespace IziHardGames.Libs.Networking.SocketLevel
 {
@@ -27,7 +27,7 @@ namespace IziHardGames.Libs.Networking.SocketLevel
             base.Initilize(wrap);
             var pool = PoolObjectsConcurent<SocketWriterDefault>.Shared;
             var rent = writer = pool.Rent();
-            rent.Initilize(wrap.Socket);
+            rent.Initilize(wrap);
             if (rent is IPoolBind<SocketWriterDefault> poolable) poolable.BindToPool(pool);
             wrap.SetWriter(rent);
         }
@@ -36,19 +36,20 @@ namespace IziHardGames.Libs.Networking.SocketLevel
     public class SocketWriterDefault : SocketWriter, IPoolBind<SocketWriterDefault>
     {
         private IPoolReturn<SocketWriterDefault>? pool;
-        public override async Task SendAsync(byte[] array, CancellationToken token = default)
-        {
-            await socket!.SendAsync(array, SocketFlags.None, token).ConfigureAwait(false);
-        }
-        public override async Task SendAsync(ReadOnlyMemory<byte> readOnlyMemory, CancellationToken token = default)
-        {
-            await socket!.SendAsync(readOnlyMemory, SocketFlags.None, token).ConfigureAwait(false);
-        }
-        internal static SocketWriter Rent()
-        {
-            throw new NotImplementedException();
-        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int Write(byte[] array, int offset, int length)
+        {
+            return source!.Write(array, offset, length);
+        }
+        public override async Task WriteAsync(byte[] array, CancellationToken token = default)
+        {
+            await source!.WriteAsync(array, token).ConfigureAwait(false);
+        }
+        public override async Task WriteAsync(ReadOnlyMemory<byte> readOnlyMemory, CancellationToken token = default)
+        {
+            await source!.WriteAsync(readOnlyMemory, token).ConfigureAwait(false);
+        }
         public void BindToPool(IPoolReturn<SocketWriterDefault> pool)
         {
             this.pool = pool;

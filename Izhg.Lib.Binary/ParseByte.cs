@@ -61,6 +61,10 @@ namespace System
             return (charsPerBytes[first], charsPerBytes[second]);
         }
 
+        public static string ToHexStringFormated(byte[] bytes, int offset, int length)
+        {
+            return ToHexStringFormated(new ReadOnlyMemory<byte>(bytes, offset, length));
+        }
         public static string ToHexStringFormated(ReadOnlySequence<byte> seq)
         {
             int size = (int)seq.Length;

@@ -5,20 +5,21 @@ namespace IziHardGames.Libs.Networking.SocketLevel
 {
     public abstract class SocketProcessor : IDisposable
     {
-        protected Socket? socket;
         protected bool isDisposed = true;
+        protected SocketWrap wrap;
 
-        public void Initilize(Socket socket)
+        public virtual void Initilize(SocketWrap wrap)
         {
             if (!isDisposed) throw new ObjectDisposedException("Object must be disposed for use");
-            this.socket = socket;
+            isDisposed = false;
+            this.wrap = wrap;
         }
 
         public virtual void Dispose()
         {
             if (isDisposed) throw new ObjectDisposedException("Object already disposed");
             isDisposed = true;
-            socket = default;
+            wrap = default;
         }
     }
 }

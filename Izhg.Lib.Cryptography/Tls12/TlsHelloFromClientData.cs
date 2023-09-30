@@ -13,7 +13,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         /// </summary>
         [FieldOffset(0)] public byte contentType;                      //1
         /// <summary>
-        /// <see cref="ConstantsTls.CLIENT_VERSION10"/> | <see cref="ConstantsTls.CLIENT_VERSION12"/>
+        /// <see cref="ConstantsTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsTls.CLIENT_VERSION_TLS12"/>
         /// </summary>  
         [FieldOffset(1)] public short protocolVersion;          //2
         [FieldOffset(3)] public short msgSize;                  //2
@@ -24,7 +24,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 
         // ============================ Client Version
         /// <summary>
-        /// <see cref="ConstantsTls.CLIENT_VERSION10"/> | <see cref="ConstantsTls.CLIENT_VERSION12"/>
+        /// <see cref="ConstantsTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsTls.CLIENT_VERSION_TLS12"/>
         /// </summary>
         [FieldOffset(9)] public short clientVersion;            //2
 

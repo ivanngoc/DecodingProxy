@@ -1,3 +1,5 @@
+using IziHardGames.Libs.gRPC.Services;
+using IziHardGames.Proxy;
 using IziHardGames.Proxy.WebGUI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,12 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
+builder.Services.AddGrpc();
 
+builder.Services.AddHostedService<WebGuiLogService>();
 builder.Services.AddHostedService<SignalRInfoService>();
 builder.Services.AddSingleton<SignalRInfoService>();
-builder.Services.AddSingleton<GrpcConnector>();
+builder.Services.AddSingleton<ProxyInfoProvider>();
 builder.Services.AddSingleton<ProxyChangeReflector>();
 builder.Services.AddSingleton<SignalRInfoHub>();
+builder.Services.AddSingleton<GrpcHubService>();
 
 var app = builder.Build();
 
@@ -27,10 +32,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.MapGrpcService<GrpcHubService>();
 app.UseRouting();
 app.UseAuthorization();
 app.MapRazorPages();

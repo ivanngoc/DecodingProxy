@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option csharp_namespace = "IziHardGames.Libs.gRPC.Examples";
+
+package example;
+
+// The greeting service definition.
+service ExampleService {
+  // Unary RPC
+  rpc ExampleMethodSimple (ExampleRequest) returns (ExampleResponse);
+  // Server streaming RPCs 
+  rpc LotsOfReplies(ExampleRequest) returns (stream ExampleResponse);
+  // Client streaming RPCs 
+  rpc LotsOfGreetings(stream ExampleRequest) returns (ExampleResponse);
+  // Bidirectional streaming RPCs 
+  rpc BidiHello(stream ExampleRequest) returns (stream ExampleResponse);
+}
+
+// The request message containing the user's name.
+message ExampleRequest {
+  string name = 1;
+  ExampleNestedObject nested = 2;
+}
+
+
+/* this is comment too
+this is comment too */
+
+// The response message containing the greetings.
+message ExampleResponse {
+  string valueString  = 1;
+  int32 valueInt32 = 2;
+  repeated int32 valueArrayInt32 = 3;  // this is comment
+  bytes valueBytes = 4;
+}
+
+message ExampleNestedObject
+{
+
+
+}

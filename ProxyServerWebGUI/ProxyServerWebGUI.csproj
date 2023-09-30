@@ -12,17 +12,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\ProxyForDecoding\Protos\proxy.proto" GrpcServices="Client" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HttpDecodingProxy\ProxyForDecodingHttp.csproj" />
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Clients\Izhg.Lib.gRPC.Clients.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
     <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Libs.Tables.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Lib\" />
+    <Folder Include="WebConsole\" />
     <Folder Include="Views\Shared\Components\ComponentRaw\" />
   </ItemGroup>
 

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option csharp_namespace = "IziHardGames.Libs.gRPC.Hubs";
+
+package hubs;
+
+// The greeting service definition.
+service GrpcHub {
+  // Sends a greeting
+  rpc SendObject (Request) returns (Reply);
+  rpc PushBinary (BinaryMessage) returns (VoidReply);
+  rpc ExchangeBinary (BinaryMessage) returns (BinaryMessage);
+  rpc BidirectExchange ( stream BinaryMessage) returns (stream BinaryMessage);
+  rpc ServerRequests ( stream BinaryMessage) returns (stream BinaryMessage);
+}
+
+// The request message containing the user's name.
+message Request {
+  string name = 1;
+}
+
+message VoidReply {
+
+}
+// The response message containing the greetings.
+message Reply {
+  string message = 1;
+}
+
+message BinaryMessage {
+  int32 id = 1;
+  int32 type = 2;
+  int32 length = 3;
+  bytes bytes = 4;
+  int32 clientId = 5;
+}

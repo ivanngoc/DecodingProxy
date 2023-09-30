@@ -1,5 +1,6 @@
 ﻿namespace IziHardGames.Libs.Networking.Contracts
 {
+
     public interface IApplyControl
     {
         void SetTimeouts(int send, int recieve);

@@ -19,6 +19,16 @@ namespace IziHardGames.Libs.Binary.Readers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
+        public static unsafe int ToInt32Size3(in ReadOnlySpan<byte> span)
+        {
+            int result = default;
+            byte* pointer = (byte*)&result;
+            pointer[0] = span[2];
+            pointer[1] = span[1];
+            pointer[2] = span[0];
+            return result;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
         public static unsafe int ToInt32(byte v1, byte v2, byte v3)
         {
             int result = default;
@@ -37,7 +47,7 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[0] = v2;
             pointer[1] = v1;
             return result;
-        } 
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
         public static unsafe ushort ToUshort(byte v1, byte v2)
         {
@@ -46,7 +56,7 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[0] = v2;
             pointer[1] = v1;
             return result;
-        } 
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
         public static unsafe ushort ToUshort(ReadOnlySpan<byte> bytes)
         {
@@ -57,7 +67,7 @@ namespace IziHardGames.Libs.Binary.Readers
             return result;
         }
 
-       
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 
         public static T ToStruct<T>(byte[] buffer, int offset, int length) where T : unmanaged
@@ -70,6 +80,38 @@ namespace IziHardGames.Libs.Binary.Readers
         public static T ToStruct<T>(ReadOnlySpan<byte> readOnlySpan) where T : unmanaged
         {
             return MemoryMarshal.Cast<byte, T>(readOnlySpan)[0];
+        } 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T ToStruct<T>(ReadOnlyMemory<byte> mem) where T : unmanaged
+        {
+            return MemoryMarshal.Cast<byte, T>(mem.Span)[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static T ToStructUnsafe<T>(void* readOnlySpan) where T : unmanaged
+        {
+            Span<T> span = new Span<T>(readOnlySpan, 1);
+            return span[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static T ToStructWithPointers<T>(ReadOnlyMemory<byte> mem) where T : unmanaged
+        {
+            return ToStructWithPointers<T>(mem.Span);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static T ToStructWithPointers<T>(ReadOnlySpan<byte> span) where T : unmanaged
+        {
+            T result = default(T);
+            byte* pointer = (byte*)&result;
+            int length = sizeof(T);
+            var size = Marshal.SizeOf<T>();
+            for (int i = 0; i < length; i++)
+            {
+                pointer[i] = span[i];
+            }
+            return result;
         }
     }
 }

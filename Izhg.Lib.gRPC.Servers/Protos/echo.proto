@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option csharp_namespace = "IziHardGames.Libs.gRPC.Examples";
+
+package echo;
+
+// The greeting service definition.
+service EchoService {
+  rpc UnaryRpc (EchoRequest) returns (EchoResponse);
+  rpc ServerStreamingRpc (EchoRequest) returns (stream EchoResponse);
+  rpc ClientStreamingRpc(stream EchoRequest) returns (EchoResponse);
+  rpc BidirectionalStreamingRpc(stream EchoRequest) returns (stream EchoResponse);
+}
+
+// The request message containing the user's name.
+message EchoRequest {
+  string valueString  = 1;
+}
+
+
+message EchoResponse{
+  string valueString  = 1;
+}

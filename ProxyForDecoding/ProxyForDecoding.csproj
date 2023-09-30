@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\proxy.proto" GrpcServices="Server" />
   </ItemGroup>
 
@@ -15,11 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HttpDecodingProxy\ProxyForDecodingHttp.csproj" />
-    <ProjectReference Include="..\HttpRecorder\ProxyForRecording.csproj" />
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
     <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
     <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+    <ProjectReference Include="..\ProxyForRecording\ProxyForRecording.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>
 

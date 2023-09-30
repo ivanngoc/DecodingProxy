@@ -1,55 +1,32 @@
-﻿using Grpc.Core;
-using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.Proxy.gRPC;
-using IziHardGames.Proxy.Http;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Grpc.Core;
+using IziHardGames.Libs.Networking.Contracts;
+using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Proxy.gRPC;
+using Microsoft.Extensions.Logging;
 using DataConnection = IziHardGames.Proxy.gRPC.ProtobufDataConnection;
 using Reply = IziHardGames.Proxy.gRPC.ProtobufReply;
 using Request = IziHardGames.Proxy.gRPC.ProtobufRequest;
 
 namespace IziHardGames.Proxy
 {
-
-    /// <summary>
-    /// Provides Methods to acquire datas by UI apps
-    /// </summary>
-    public class GrpcServiceServer
-    {
-
-    }
-
     public class GrpcProxyPublisherService : IziHardGames.Proxy.gRPC.ProxyPublisher.ProxyPublisherBase
     {
         public readonly ConcurrentDictionary<uint, GrpcConnection> keyValues = new ConcurrentDictionary<uint, GrpcConnection>();
         private uint idCounter;
         private CancellationTokenSource cts = new CancellationTokenSource();
-        //private readonly ILogger<GrpcService> _logger;
+        private readonly ILogger<GrpcProxyPublisherService> _logger;
 
         public static GrpcProxyPublisherService singleton;
         private readonly static object lockSingleton = new object();
-        public GrpcProxyPublisherService()
+        public GrpcProxyPublisherService(ILogger<GrpcProxyPublisherService> logger)
         {
+            this._logger = logger;
             // check that gRPC framework doesn't create duplicate when we use services.AddSingleton<ThisClassName>()
-            Console.WriteLine($"Created GrpcProxyPublisherService.{Environment.NewLine}{Environment.StackTrace}");
-
-            if (singleton == null)
-            {
-                lock (lockSingleton)
-                {
-                    if (singleton == null)
-                    {
-                        singleton = this;
-                    }
-                    else
-                    {
-                        throw new System.NotImplementedException();
-                    }
-                }
-            }
+            //Console.WriteLine($"Created GrpcProxyPublisherService.{Environment.NewLine}{Environment.StackTrace}");
         }
 
         public async override Task<Reply> GetHubs(Request request, ServerCallContext context)

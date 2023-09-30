@@ -129,7 +129,7 @@ namespace HttpDecodingProxy.ForHttp
                 lengthAnalyzed = -2;
                 return -2;
             }
-            else if (TryGetFieldValueAsInt(HttpLibConstants.FieldNames.NAME_CONTENT_LENGTH, out int val))
+            else if (TryGetFieldValueAsInt(ConstantsForHttp.FieldNames.NAME_CONTENT_LENGTH, out int val))
             {
                 lengthAnalyzed = val;
                 return val;
@@ -140,7 +140,7 @@ namespace HttpDecodingProxy.ForHttp
 
         public (string, int) FindHostAndPortFromField()
         {
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_HOST, out var value))
+            if (TryGetFieldValueCI(ConstantsForHttp.FieldNames.NAME_HOST, out var value))
             {
 #if DEBUG
                 var s = value.ToStringUtf8();
@@ -176,7 +176,7 @@ namespace HttpDecodingProxy.ForHttp
                 {
                     if (char.ToLowerInvariant((char)span[j]) != char.ToLowerInvariant((char)fieldName[j])) goto NEXT;
                 }
-                int offset = fieldName.Length + HttpLibConstants.LENGTH_LF;  // exclude substring: field-name:[BWS] .* \r\n
+                int offset = fieldName.Length + ConstantsForHttp.LENGTH_LF;  // exclude substring: field-name:[BWS] .* \r\n
                 int count = span.Length - (fieldName.Length + 4);
                 if (count > 0)
                 {
@@ -292,16 +292,16 @@ namespace HttpDecodingProxy.ForHttp
         /// <returns></returns>
         public bool CheckChunked()
         {
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_TRANSFER_ENCODING, out ReadOnlySpan<byte> span))
+            if (TryGetFieldValueCI(ConstantsForHttp.FieldNames.NAME_TRANSFER_ENCODING, out ReadOnlySpan<byte> span))
             {
-                return span.GotSubsequenceProbablyAtBackCI(HttpLibConstants.FieldValues.VALUE_CHUNKED);
+                return span.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.FieldValues.VALUE_CHUNKED);
             }
             return false;
         }
 
         public bool CheckNoBody()
         {
-            if (HttpLibConstants.TYPE_RESPONSE == type)
+            if (ConstantsForHttp.TYPE_RESPONSE == type)
             {
                 var status = GetStatus();
                 // any 1xx
@@ -312,7 +312,7 @@ namespace HttpDecodingProxy.ForHttp
 
         public bool TryGetStatus(out int value)
         {
-            if (type == HttpLibConstants.TYPE_RESPONSE)
+            if (type == ConstantsForHttp.TYPE_RESPONSE)
             {
                 value = GetStatus();
                 return true;
@@ -342,9 +342,9 @@ namespace HttpDecodingProxy.ForHttp
         }
         private bool CheckCloseConnection()
         {
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_CONNECTION, out var raw))
+            if (TryGetFieldValueCI(ConstantsForHttp.FieldNames.NAME_CONNECTION, out var raw))
             {
-                return raw.GotSubsequenceProbablyAtBackCI(HttpLibConstants.FieldValues.VALUE_CLOSE_CONNECTION);
+                return raw.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.FieldValues.VALUE_CLOSE_CONNECTION);
             }
             return false;
         }
@@ -423,7 +423,7 @@ namespace HttpDecodingProxy.ForHttp
             timeout = default;
             max = default;
 
-            if (TryGetFieldValueCI(HttpLibConstants.FieldNames.NAME_KEEP_ALIVE, out ReadOnlySpan<byte> span))
+            if (TryGetFieldValueCI(ConstantsForHttp.FieldNames.NAME_KEEP_ALIVE, out ReadOnlySpan<byte> span))
             {
                 int index = 0;
                 int offset = 0;
@@ -465,10 +465,10 @@ namespace HttpDecodingProxy.ForHttp
             switch (FindVersion())
             {
                 case EHttpVersion.None: throw new ArgumentOutOfRangeException();
-                case EHttpVersion.Version10: return HttpLibConstants.version10;
-                case EHttpVersion.Version11: return HttpLibConstants.version11;
-                case EHttpVersion.Version20: return HttpLibConstants.version20;
-                case EHttpVersion.Version30: return HttpLibConstants.version30;
+                case EHttpVersion.Version10: return ConstantsForHttp.version10;
+                case EHttpVersion.Version11: return ConstantsForHttp.version11;
+                case EHttpVersion.Version20: return ConstantsForHttp.version20;
+                case EHttpVersion.Version30: return ConstantsForHttp.version30;
                 default: goto case EHttpVersion.None;
             }
         }
@@ -477,7 +477,7 @@ namespace HttpDecodingProxy.ForHttp
             ReadOnlySpan<byte> version;
             var span = this[0];
 
-            if (type == HttpLibConstants.TYPE_REQUEST)
+            if (type == ConstantsForHttp.TYPE_REQUEST)
             {   //   get start-line
                 version = span.FindSplit(ConstantsUtf8.SPACE, 2);
             }
@@ -485,17 +485,17 @@ namespace HttpDecodingProxy.ForHttp
             {
                 version = span.FindSplit(ConstantsUtf8.SPACE, 0);
             }
-            if (version.GotSubsequenceProbablyAtBackCI(HttpLibConstants.version11)) return EHttpVersion.Version11;
-            if (version.GotSubsequenceProbablyAtBackCI(HttpLibConstants.version20)) return EHttpVersion.Version20;
-            if (version.GotSubsequenceProbablyAtBackCI(HttpLibConstants.version30)) return EHttpVersion.Version30;
-            if (version.GotSubsequenceProbablyAtBackCI(HttpLibConstants.version10)) return EHttpVersion.Version11;
+            if (version.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.version11)) return EHttpVersion.Version11;
+            if (version.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.version20)) return EHttpVersion.Version20;
+            if (version.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.version30)) return EHttpVersion.Version30;
+            if (version.GotSubsequenceProbablyAtBackCI(ConstantsForHttp.version10)) return EHttpVersion.Version11;
             throw new ArgumentException($"Can't parse version. Recived:{version.ToStringUtf8()}");
         }
         public EHttpMethod FindMethod()
         {
             ReadOnlySpan<byte> method;
             var span = this[0];
-            if (type == HttpLibConstants.TYPE_REQUEST)
+            if (type == ConstantsForHttp.TYPE_REQUEST)
             {   //   get start-line
                 method = span.FindSplit(ConstantsUtf8.SPACE, 0);
                 ///<see cref="HttpMethod"/>
