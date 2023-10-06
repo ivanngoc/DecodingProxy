@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
 using IziHardGames.Libs.Async;
-using IziHardGames.Libs.ForHttp.Http11;
+using IziHardGames.Libs.HttpCommon.Http11;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.Networking.SocketLevel;

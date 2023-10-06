@@ -4,7 +4,7 @@ using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.gRPC.Services;
 using IziHardGames.Libs.Networking.States;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     public class HttpEventPublisherGrpc : HttpEventConsumer, IDisposable
     {

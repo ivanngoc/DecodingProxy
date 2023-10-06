@@ -4,7 +4,7 @@ using System;
 using IziHardGames.Libs.NonEngine.Collections;
 using IziHardGames.Libs.Networking.States;
 
-namespace IziHardGames.Libs.ForHttp
+namespace IziHardGames.Libs.HttpCommon
 {
     public class HttpConsumer
     {

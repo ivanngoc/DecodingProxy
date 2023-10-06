@@ -2,7 +2,7 @@
 using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.NonEngine.Memory;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     public class InfoConnection : IDisposable
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.Text;
 
-namespace IziHardGames.Libs.ForHttp.Helpers
+namespace IziHardGames.Libs.HttpCommon.Helpers
 {
     public static class HttpHelper
     {

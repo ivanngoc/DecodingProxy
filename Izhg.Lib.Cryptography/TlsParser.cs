@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Authentication;
+using IziHardGames.Libs.Cryptography;
 
 namespace IziHardGames.Proxy.TcpDecoder
 {
@@ -13,9 +14,9 @@ namespace IziHardGames.Proxy.TcpDecoder
         {
             switch (value)
             {
-                case ConstantsTls.CLIENT_VERSION_TLS11: { return SslProtocols.Tls11; }
-                case ConstantsTls.CLIENT_VERSION_TLS12: { return SslProtocols.Tls12; }
-                case ConstantsTls.CLIENT_VERSION_TLS13: { return SslProtocols.Tls13; }
+                case ConstantsForTls.CLIENT_VERSION_TLS11: { return SslProtocols.Tls11; }
+                case ConstantsForTls.CLIENT_VERSION_TLS12: { return SslProtocols.Tls12; }
+                case ConstantsForTls.CLIENT_VERSION_TLS13: { return SslProtocols.Tls13; }
                 default: throw new ArgumentOutOfRangeException(value.ToString());
             }
         }

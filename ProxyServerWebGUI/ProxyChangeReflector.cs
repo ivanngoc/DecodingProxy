@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
-using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.HttpCommon.Monitoring;
 using IziHardGames.Libs.gRPC.Services;
 using IziHardGames.Libs.Networking.Contracts;
 using ProxyServerWebGUI.Hubs;
@@ -35,7 +35,7 @@ namespace IziHardGames.Proxy.WebGUI
             grpcHubService.SetHandlers(new Func[] {
                 (x)=> throw new  ArgumentOutOfRangeException("This index Processed as Error. Index Must be Non Zero"),
                 HandleEvent, /// <see cref="HttpDecodingProxy.ForHttp.ConstantsForHttp.Events"/>
-                RegistInfoProvider , /// <see cref="IziHardGames.Libs.ForHttp.Monitoring.ConstantsForMonitoring.ACTION_MARK_AS_INFO_PROVIDER"/>
+                RegistInfoProvider , /// <see cref="IziHardGames.Libs.HttpCommon.Monitoring.ConstantsForMonitoring.ACTION_MARK_AS_INFO_PROVIDER"/>
             });
         }
 

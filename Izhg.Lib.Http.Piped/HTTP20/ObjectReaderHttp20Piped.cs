@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using IziHardGames.Libs.Pipelines;
 using IziHardGames.Proxy.Sniffing.ForHttp;
 
-namespace IziHardGames.Libs.ForHttp.Http11
+namespace IziHardGames.Libs.ForHttp20
 {
     public class ObjectReaderHttp20Piped : PipedObjectReader<HttpReadResult>
     {

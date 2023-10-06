@@ -1,0 +1,33 @@
+﻿/*
+Version 1.0
+-если структура встречается впервые то должно быть встроено его объявдение. Если далее поле этого типа встречается то достаточно указать его тип
+-если поле имеет примитивной тип то указывается его тип
+-если тип преобразования имеет больший размер, чем фактически находится в структуре то берется его размер указанный в скобках: 
+	uint HandshakeHeader.Length (3), 
+Тут uint=4 байт но в структуре находится только 3
+-если необходимо пометить поле как источник то перед его объявлением ставится $. Далее чтобы обращаться к нему используется $IdentificatorName (сделано чтобы в случае замены заменялось везде)
+
+Правила
+
+
+Описание синтаксиса:
+{TypeStruct}:{Identifier} {Size}
+{
+	{FieldType} {Identifier} {Size:Number if fixed, $id - if specified by field},
+	{FieldType} {Identifier} {Size:Number if fixed, $id - if specified by field},
+}
+*/
+
+
+Keywords:
+Frame
+Item
+Swtich case
+
+
+Prefefined Types:
+byte
+ushort
+uint
+vector
+

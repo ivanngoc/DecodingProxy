@@ -1,6 +1,6 @@
-﻿using IziHardGames.Libs.ForHttp.Common;
+﻿using IziHardGames.Libs.HttpCommon.Common;
 
-namespace IziHardGames.Libs.ForHttp.Http11
+namespace IziHardGames.Libs.HttpCommon.Http11
 {
 
     public class SocketModifierHttp11Tls : SocketModifierHttpTls

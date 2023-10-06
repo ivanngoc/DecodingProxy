@@ -1,12 +1,15 @@
-﻿using System.Text;
-using System;
+﻿using System;
+using System.Text;
+using IziHardGames.Libs.HttpCommon.Attributes;
+using IziHardGames.Libs.HttpCommon.Contracts;
 
 namespace IziHardGames.Libs.ForHttp20.DecodingHeaders
 {
     /// <summary>
     /// The HeaderField class.
     /// </summary>
-    public class HeaderField20 : IComparable<HeaderField20>
+    [HttpHeader]
+    public class HeaderField20 : IComparable<HeaderField20>, IHttpHader
     {
         private readonly byte[] name;
         private readonly byte[] value;

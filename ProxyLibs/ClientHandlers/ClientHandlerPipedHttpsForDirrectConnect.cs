@@ -6,7 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Core;
-using IziHardGames.Libs.ForHttp.Piped;
+using IziHardGames.Libs.Cryptography;
+using IziHardGames.Libs.Cryptography.Tls;
+using IziHardGames.Libs.HttpCommon.Piped;
 using IziHardGames.Libs.IO;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
@@ -16,7 +18,6 @@ using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Tcp.Tls;
-using IziHardGames.Proxy.TcpDecoder;
 using IziHardGames.Tls;
 using Enumerator = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromClientExtensionsEnumerator;
 
@@ -152,7 +153,7 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                 if (extension.type == (ushort)(ETlsExtensions.APPLICATION_LAYER_PROTOCOL_NEGOTIATION))
                 {
                     //h3 - HTTP/3 0x68 0x33
-                    if (extension.data.ContainSequence(ConstantsTls.ALPN.h3))
+                    if (extension.data.ContainSequence(ConstantsForTls.ALPN.h3))
                     {
                         httpVersion = EHttpVersion.Version30;
                         return true;
@@ -162,12 +163,12 @@ namespace IziHardGames.Proxy.Sniffing.ForHttp
                     // 0x68 0x32 - "h2". The string is serialized into an ALPN protocol identifier as the two-octet sequence: 0x68, 0x32. https://httpwg.org/specs/rfc9113.html#versioning
                     // 0x08 - горизонтальная табуляция
                     // 0x68 0x74 0x74 0x70 0x2f 0x31 0x2e 0x31 = "http/1.1"
-                    if (extension.data.ContainSequence(ConstantsTls.ALPN.h2))
+                    if (extension.data.ContainSequence(ConstantsForTls.ALPN.h2))
                     {
                         httpVersion = EHttpVersion.Version20;
                         return true;
                     }
-                    if (extension.data.ContainSequence(ConstantsTls.ALPN.http11))
+                    if (extension.data.ContainSequence(ConstantsForTls.ALPN.http11))
                     {
                         httpVersion = EHttpVersion.Version11;
                         return true;

@@ -1,10 +1,10 @@
 ﻿using System;
-using IziHardGames.Libs.ForHttp.Http11;
+using IziHardGames.Libs.ForHttp20;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Pipelines.Contracts;
 
-namespace IziHardGames.Libs.ForHttp.Http20
+namespace IziHardGames.Libs.HttpCommon.Http20
 {
     public class SocketModifierHttp2ReaderPiped : SocketWrapModifier
     {

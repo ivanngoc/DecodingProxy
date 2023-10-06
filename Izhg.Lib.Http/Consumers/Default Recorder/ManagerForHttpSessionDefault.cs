@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 
-namespace IziHardGames.Libs.ForHttp
+namespace IziHardGames.Libs.HttpCommon
 {
     public class ManagerForHttpSessionDefault : ManagerForHttpSession
     {

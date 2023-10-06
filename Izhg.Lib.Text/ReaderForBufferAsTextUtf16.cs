@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Izhg.Lib.Text
+namespace IziHardGames.Lib.Text
 {
     public static class ReaderForBufferAsTextUtf16
     {

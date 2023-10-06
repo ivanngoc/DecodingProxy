@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
-using IziHardGames.Libs.ForHttp;
+using IziHardGames.Libs.HttpCommon;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Http;
 using IziHardGames.Proxy.Recoreder;

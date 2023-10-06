@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IziHardGames.Libs.ForHttp.Common
+namespace IziHardGames.Libs.HttpCommon.Common
 {
     public struct HttpMessageRecord
     {

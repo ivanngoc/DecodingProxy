@@ -10,13 +10,14 @@ using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.Streaming;
 using IziHardGames.Libs.Text;
 using ProxyLibs.Extensions;
-using Query = IziHardGames.Libs.ForHttp.Streaming.HttpQuery<IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder>;
-using Wrap = IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder;
+using Query = IziHardGames.Libs.HttpCommon.Streaming.HttpQuery<IziHardGames.Libs.HttpCommon.Streaming.WrapIndexerForStringBuilder>;
+using Wrap = IziHardGames.Libs.HttpCommon.Streaming.WrapIndexerForStringBuilder;
 
 
 
 namespace IziHardGames.Proxy.Sniffing.ForHttp
 {
+
     internal delegate void HandlerForBufferReader(byte[] buffer, ref int start, ref int length);
 
     /// <summary>

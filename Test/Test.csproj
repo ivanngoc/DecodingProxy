@@ -12,6 +12,7 @@
     <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj" />
     <ProjectReference Include="..\ProxyForRecording\ProxyForRecording.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>

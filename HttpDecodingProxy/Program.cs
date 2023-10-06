@@ -1,5 +1,5 @@
 ﻿using System;
-using IziHardGames.Libs.ForHttp.Recording;
+using IziHardGames.Libs.HttpCommon.Recording;
 
 HttpRecordAnalyzer analyzer = new HttpRecordAnalyzer();
 await analyzer.Run().ConfigureAwait(false);

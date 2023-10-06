@@ -1,4 +1,4 @@
-﻿namespace IziHardGames.Libs.ForHttp.Monitoring
+﻿namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     public class ConstantsForMonitoring
     {

@@ -13,11 +13,11 @@ namespace IziHardGames.Libs.Buffers.Vectors
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 3)]
-    public struct Bytes3
+    public readonly struct Bytes3
     {
-        [FieldOffset(0)] public byte byte0;
-        [FieldOffset(1)] public byte byte1;
-        [FieldOffset(2)] public byte byte2;
+        [FieldOffset(0)] public readonly byte byte0;
+        [FieldOffset(1)] public readonly byte byte1;
+        [FieldOffset(2)] public readonly byte byte2;
 
         public static implicit operator int(Bytes3 b) => BufferReader.ToInt32(b.byte0, b.byte1, b.byte2);
     }
@@ -96,5 +96,17 @@ namespace IziHardGames.Libs.Buffers.Vectors
         [FieldOffset(20)] public int int5;
         [FieldOffset(24)] public int int6;
         [FieldOffset(28)] public int int7;
+    }
+    
+    [StructLayout(LayoutKind.Explicit, Size = 28)]
+    public readonly struct Bytes28
+    {
+        [FieldOffset(0)] public readonly int int0;
+        [FieldOffset(4)] public readonly int int1;
+        [FieldOffset(8)] public readonly int int2;
+        [FieldOffset(12)] public readonly int int3;
+        [FieldOffset(16)] public readonly int int4;
+        [FieldOffset(20)] public readonly int int5;
+        [FieldOffset(24)] public readonly int int6;
     }
 }

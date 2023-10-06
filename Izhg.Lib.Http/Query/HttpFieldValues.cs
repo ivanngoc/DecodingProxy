@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace IziHardGames.Libs.ForHttp.Streaming
+namespace IziHardGames.Libs.HttpCommon.Streaming
 {
     /// <summary>
     /// https://httpwg.org/specs/rfc9110.html#fields.values

@@ -1,0 +1,46 @@
+﻿Scheme:HttpProxy
+{
+	Read [SourceType=Frame] [SourceName=HttpConnect];
+	Read [SourceType=Frame] [SourceName=SslFrame] [Repeat=True];
+}
+
+Frame:HttpConnect [LengthType=Dynamic]
+{
+	string Http.StartLine (var) [Algo=StringCompare] [ConditionType=ClosedBy] [ConditionValue="\r\n"],
+	vector string Http.Headers (var) [Algo=StringCompare] [ConditionType=ClosedBy] [ConditionValue="\r\n"],
+	string Http.EndHeaders = "\r\n\r\n" (4),
+	string Http.Body (var) [ConditionType=Func] [ConditionValue=SearchBody],
+}
+
+Frame:SslFrame [LengthType=Dynamic]
+{
+	Item:TlsRecord [Size=5] [LengthType=Defined]
+	{
+		byte $TlsRecord.RecordType (1),
+		Item:ProtocolVersion [Size=2] [LengthType=Defined]
+		{
+			byte ProtocolVersion.major (1),
+			byte ProtocolVersion.minor (1),
+		}
+		ushort $TlsRecord.Length (2),
+		Item: TlsRecord.Payload [Size=$TlsRecord.Length] [LengthType=Linked]
+		{
+			Switch ($TlsRecord.RecordType)
+			{
+			 case (0x16)
+				{
+					Item:HandshakeHeader [Size=4] [LengthType=Defined]
+					{
+						byte HandshakeHeader.messageType (1),
+						uint $HandshakeHeader.Length (3),
+					}
+					vector TlsRecord.Payload ($HandshakeHeader.Length)
+				}
+			 case (0x17)
+				{
+
+				}
+			}
+		}
+	}
+}

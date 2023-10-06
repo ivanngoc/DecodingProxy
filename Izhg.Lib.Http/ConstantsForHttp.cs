@@ -149,5 +149,10 @@ namespace HttpDecodingProxy.ForHttp
                 https = new ReadOnlyMemory<char>(httpsArray);
             }
         }
+
+        public static class StartLine
+        {
+            public readonly static byte[] CONNECT_AS_BYTES = new byte[] { 0x43, 0x4F, 0x4E, 0x4E, 0x45, 0x43, 0x54 };
+        }
     }
 }

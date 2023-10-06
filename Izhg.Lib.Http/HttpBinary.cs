@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Buffers;
-using Izhg.Lib.Collections.Contracts;
+using IziHardGames.Lib.Collections.Contracts;
+using IziHardGames.Libs.HttpCommon.Attributes;
 using IziHardGames.Libs.NonEngine.Memory;
 
-namespace IziHardGames.Libs.ForHttp
+namespace IziHardGames.Libs.HttpCommon
 {
+    [HttpMessage]
     public class HttpBinary : ISingleEdgeNode<HttpBinary>, IDisposable, IPoolBind<HttpBinary>
     {
+        private IPoolReturn<HttpBinary>? pool;
+
         protected byte[] datas = Array.Empty<byte>();
         protected int length;
-        private IPoolReturn<HttpBinary>? pool;
         public HttpBinary? Next { get; set; }
 
         public void Initilize(byte[] buffer, int offset, int length)

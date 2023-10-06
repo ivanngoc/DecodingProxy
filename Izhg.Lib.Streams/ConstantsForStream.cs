@@ -1,5 +1,6 @@
 ﻿namespace IziHardGames.Libs.Streams
 {
+
     public class ConstantsForStream
     {
         public class Timeouts

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -18,7 +19,7 @@ namespace IziHardGames.Libs.Binary.Readers
             return (short)((v1 << 8) | v2);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe int ToInt32Size3(in ReadOnlySpan<byte> span)
         {
             int result = default;
@@ -28,7 +29,7 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[2] = span[0];
             return result;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe int ToInt32(byte v1, byte v2, byte v3)
         {
             int result = default;
@@ -39,7 +40,7 @@ namespace IziHardGames.Libs.Binary.Readers
             return result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe short ToShort(byte v1, byte v2)
         {
             short result = default;
@@ -48,7 +49,7 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[1] = v1;
             return result;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe ushort ToUshort(byte v1, byte v2)
         {
             ushort result = default;
@@ -57,13 +58,24 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[1] = v1;
             return result;
         }
-        [MethodImpl(MethodImplOptions.AggressiveInlining), BigEndian]
-        public static unsafe ushort ToUshort(ReadOnlySpan<byte> bytes)
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
+        public static unsafe ushort ToUshort(in ReadOnlySpan<byte> bytes)
         {
             ushort result = default;
             byte* pointer = (byte*)&result;
             pointer[0] = bytes[1];
             pointer[1] = bytes[0];
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
+        public static unsafe ushort ToUshortConsume(ref ReadOnlySpan<byte> bytes)
+        {
+            ushort result = default;
+            byte* pointer = (byte*)&result;
+            pointer[0] = bytes[1];
+            pointer[1] = bytes[0];
+            bytes = bytes.Slice(2);
             return result;
         }
 
@@ -77,12 +89,12 @@ namespace IziHardGames.Libs.Binary.Readers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ToStruct<T>(ReadOnlySpan<byte> readOnlySpan) where T : unmanaged
+        public static T ToStruct<T>(in ReadOnlySpan<byte> readOnlySpan) where T : unmanaged
         {
             return MemoryMarshal.Cast<byte, T>(readOnlySpan)[0];
-        } 
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T ToStruct<T>(ReadOnlyMemory<byte> mem) where T : unmanaged
+        public static T ToStruct<T>(in ReadOnlyMemory<byte> mem) where T : unmanaged
         {
             return MemoryMarshal.Cast<byte, T>(mem.Span)[0];
         }
@@ -95,13 +107,13 @@ namespace IziHardGames.Libs.Binary.Readers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static T ToStructWithPointers<T>(ReadOnlyMemory<byte> mem) where T : unmanaged
+        public unsafe static T ToStructWithPointers<T>(in ReadOnlyMemory<byte> mem) where T : unmanaged
         {
             return ToStructWithPointers<T>(mem.Span);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static T ToStructWithPointers<T>(ReadOnlySpan<byte> span) where T : unmanaged
+        public unsafe static T ToStructWithPointers<T>(in ReadOnlySpan<byte> span) where T : unmanaged
         {
             T result = default(T);
             byte* pointer = (byte*)&result;
@@ -112,6 +124,24 @@ namespace IziHardGames.Libs.Binary.Readers
                 pointer[i] = span[i];
             }
             return result;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ushort ReverseEndians(ushort value)
+        {
+            return BinaryPrimitives.ReverseEndianness(value);
+        } 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint ReverseEndians(uint value)
+        {
+            return BinaryPrimitives.ReverseEndianness(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe static T ToStructConsume<T>(ref ReadOnlyMemory<byte> mem) where T : unmanaged
+        {
+            T st = ToStruct<T>(in mem);
+            mem = mem.Slice(sizeof(T));
+            return st;
         }
     }
 }

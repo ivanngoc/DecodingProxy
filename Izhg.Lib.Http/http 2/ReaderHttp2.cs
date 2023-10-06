@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Text;
 using IziHardGames.Libs.Binary.Readers;
-using IziHardGames.Libs.ForHttp;
-using IziHardGames.Libs.ForHttp.Http20;
+using IziHardGames.Libs.HttpCommon;
+using IziHardGames.Libs.HttpCommon.Http20;
 using IziHardGames.Libs.ForHttp20.DecodingHeaders;
 using IziHardGames.Libs.ForHttp20.Huffman;
 using static System.Net.Mime.MediaTypeNames;
-using static IziHardGames.Libs.ForHttp.Http20.HeadersFrame;
+using static IziHardGames.Libs.HttpCommon.Http20.HeadersFrame;
 using static IziHardGames.Libs.ForHttp20.ConstantsForHttp20;
 
 namespace IziHardGames.Libs.ForHttp20

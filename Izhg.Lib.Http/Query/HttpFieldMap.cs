@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace IziHardGames.Libs.ForHttp.Streaming
+namespace IziHardGames.Libs.HttpCommon.Streaming
 {
     public struct HttpFieldMap<T> where T : IIndexer<char>
     {

@@ -4,16 +4,19 @@ using IziHardGames.Core.Buffers;
 using IziHardGames.Core.Buffers.Extensions;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Buffers.Vectors;
-using IziHardGames.Proxy.TcpDecoder;
+using IziHardGames.Libs.Cryptography.Attributes;
+using IziHardGames.Libs.Cryptography.Tls;
 
 namespace IziHardGames.Libs.Cryptography.Tls12
 {
     public struct TlsHelloFromServer
     {
+        [HandshakeAnalyz(Side = EHandshakeSide.Server)]
         public static void Read<T>(T frame) where T : IIndexReader<byte>, IReadOnlySpanProvider<byte>
         {
             //https://tls12.xargs.org/#server-hello
             //Record Header
+
             int i = default;
             byte type = frame[0];
             i++;

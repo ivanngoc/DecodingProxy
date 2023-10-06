@@ -1,4 +1,5 @@
 ﻿using IziHardGames.Libs.Binary.Readers;
+using IziHardGames.Libs.Cryptography.Attributes;
 using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Proxy.TcpDecoder;
 using System;
@@ -17,15 +18,21 @@ namespace IziHardGames.Libs.Cryptography.Tls.Shared
         public int offset;
         private ushort lengthLeft;
 
-        public TlsHelloFromServerExtensionsEnumerator(ReadOnlySequence<byte> data) : this()
+        public TlsHelloFromServerExtensionsEnumerator(in ReadOnlyMemory<byte> mem) : this()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        [HandshakeAnalyz(Side = EHandshakeSide.Server)]
+        public TlsHelloFromServerExtensionsEnumerator(in ReadOnlySequence<byte> data) : this()
         {
             this.data = data;
-            if (TlsHandshakeReader.CheckIntegrity(in data, out ushort length))
+            if (TlsHandshakeReadOperation.CheckIntegrity(in data, out ushort length))
             {
 #if DEBUG
                 //  Don't use bytes 3,4: Some TLS servers fail if the record version is greater than TLS 1.0 for the initial ClientHello.
                 ushort protocolVersion = BufferReader.ToUshort(data.GetItemAt(9), data.GetItemAt(10));
-                if (protocolVersion != ConstantsTls.CLIENT_VERSION_TLS12) throw new ArgumentOutOfRangeException($"Expected TLS1.2 But recived: {protocolVersion}");
+                if (protocolVersion != ConstantsForTls.CLIENT_VERSION_TLS12) throw new ArgumentOutOfRangeException($"Expected TLS1.2 But recived: {protocolVersion}");
 #endif
                 if (data.IsSingleSegment)
                 {
@@ -82,5 +89,7 @@ namespace IziHardGames.Libs.Cryptography.Tls.Shared
             }
             return false;
         }
+
+      
     }
 }

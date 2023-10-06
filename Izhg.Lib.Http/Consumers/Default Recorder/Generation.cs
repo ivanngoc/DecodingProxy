@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace IziHardGames.Libs.ForHttp
+namespace IziHardGames.Libs.HttpCommon
 {
     public class Generation
     {

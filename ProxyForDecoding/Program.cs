@@ -1,6 +1,6 @@
 ﻿using System;
 using IziHardGames;
-using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.HttpCommon.Monitoring;
 using IziHardGames.Libs.gRPC.Services;
 using IziHardGames.Proxy;
 using IziHardGames.Proxy.Http;

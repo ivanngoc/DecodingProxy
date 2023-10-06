@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using IziHardGames.Proxy;
 
-namespace IziHardGames.Libs.ForHttp
+namespace IziHardGames.Libs.HttpCommon
 {
     public class HttpSessionDefault : HttpSession, IDisposable
     {

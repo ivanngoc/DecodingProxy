@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 
-namespace IziHardGames.Libs.ForHttp.Common
+namespace IziHardGames.Libs.HttpCommon.Common
 {
     /// <summary>
     /// Subscribe to events that might indicate for closing connection or make it stall

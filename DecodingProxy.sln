@@ -71,6 +71,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.gRPC.Clients", "Iz
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Monitoring", "Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj", "{B09807FC-95AE-4081-84BF-6CCFDA3811B7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.MappedFrameReader", "Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj", "{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Regex", "Izhg.Lib.Regex\Izhg.Lib.Regex.csproj", "{B5B8D44E-401F-4475-BBF3-A397B437542C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,6 +217,14 @@ Global
 		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B09807FC-95AE-4081-84BF-6CCFDA3811B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

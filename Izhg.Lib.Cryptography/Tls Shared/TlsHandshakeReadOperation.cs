@@ -4,11 +4,10 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using IziHardGames.Libs.Binary.Readers;
-using IziHardGames.Proxy.TcpDecoder;
 
 namespace IziHardGames.Libs.Cryptography.Tls12
 {
-    public class TlsHandshakeReader : IDisposable
+    public class TlsHandshakeReadOperation : IDisposable
     {
         private byte[] buffer = new byte[8092];
         private int offset;
@@ -21,7 +20,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         private bool isDisposed = true;
         public readonly Func<ReadOnlyMemory<byte>, bool> actionAddDataWithCheck;
 
-        public TlsHandshakeReader()
+        public TlsHandshakeReadOperation()
         {
             actionAddDataWithCheck = (x) => AddDataWithCheck(in x);
         }
@@ -108,7 +107,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         /// <returns></returns>
         public bool CheckIntegrity()
         {
-            if (buffer[0] != ConstantsTls.HANDSHAKE_RECORD) throw new FormatException();
+            if (buffer[0] != ConstantsForTls.HANDSHAKE_RECORD) throw new FormatException();
             handshakeLength = BufferReader.ToUshort(buffer[3], buffer[4]);
             return !(this.offset < (this.offset - 5));
         }
@@ -117,7 +116,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         {
             if (mem.Length < 5) return false;
             var span = mem.Span;
-            if (span[0] != ConstantsTls.HANDSHAKE_RECORD) throw new FormatException("First Byte Must be = 0x16");
+            if (span[0] != ConstantsForTls.HANDSHAKE_RECORD) throw new FormatException("First Byte Must be = 0x16");
             var length = BufferReader.ToUshort(span[3], span[4]);
             return (length + 5) <= mem.Length;
         }
@@ -130,13 +129,13 @@ namespace IziHardGames.Libs.Cryptography.Tls12
             if (data.IsSingleSegment)
             {
                 var span = data.FirstSpan;
-                if (span[0] != ConstantsTls.HANDSHAKE_RECORD) throw new FormatException($"First Byte Must be 0x16");
+                if (span[0] != ConstantsForTls.HANDSHAKE_RECORD) throw new FormatException($"First Byte Must be 0x16");
                 length = BufferReader.ToUshort(span[3], span[4]);
                 return (5 + length) <= data.Length;
             }
             else
             {
-                if (data.GetItemAt(0) != ConstantsTls.HANDSHAKE_RECORD) throw new FormatException($"First Byte Must be 0x16");
+                if (data.GetItemAt(0) != ConstantsForTls.HANDSHAKE_RECORD) throw new FormatException($"First Byte Must be 0x16");
                 length = BufferReader.ToUshort(data.GetItemAt(3), data.GetItemAt(4));
                 return (5 + length) <= data.Length;
             }
@@ -149,7 +148,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 
         public async Task AwaitHandShake()
         {
-            if (tcs == null) throw new NullReferenceException($"{nameof(TlsHandshakeReader)} wasn't initilized yet");
+            if (tcs == null) throw new NullReferenceException($"{nameof(TlsHandshakeReadOperation)} wasn't initilized yet");
             await awaitingTask.ConfigureAwait(false);
             tcs = default;
             awaitingTask = default;

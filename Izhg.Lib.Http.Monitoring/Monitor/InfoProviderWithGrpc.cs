@@ -2,7 +2,7 @@
 using IziHardGames.Libs.Networking.Contracts;
 using Func = System.Func<System.ReadOnlyMemory<byte>, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     public class InfoProviderWithGrpc
     {

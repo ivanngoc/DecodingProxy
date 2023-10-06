@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.NonEngine.Memory;
-using static IziHardGames.Libs.ForHttp.Http20.HeadersFrame;
+using static IziHardGames.Libs.HttpCommon.Http20.HeadersFrame;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     public class ManagerForInfoConnections
     {

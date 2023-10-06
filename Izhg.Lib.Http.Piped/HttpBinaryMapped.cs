@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using IziHardGames.Libs.ForHttp;
+using IziHardGames.Libs.HttpCommon;
+using IziHardGames.Libs.HttpCommon.Attributes;
 using IziHardGames.Libs.IO;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
@@ -14,6 +15,7 @@ using IziHardGames.Libs.NonEngine.Memory;
 
 namespace HttpDecodingProxy.ForHttp
 {
+    [HttpMessage]
     public class HttpBinaryMapped : HttpBinary, IHttpObject, IDisposable, ICloneable, IPoolBind<HttpBinaryMapped>
     {
         private int lengthAnalyzed;

@@ -3,22 +3,28 @@ using IziHardGames.Core;
 using IziHardGames.Core.Buffers;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Buffers.Vectors;
+using IziHardGames.Libs.Cryptography.Attributes;
+using IziHardGames.Libs.Cryptography.Tls;
 using IziHardGames.Proxy.TcpDecoder;
 
 namespace IziHardGames.Libs.Cryptography.Tls12
 {
+    /// <summary>
+    /// <see cref="TlsRecord"/>
+    /// </summary>
     public struct TlsHelloFromClient
     {
+        [HandshakeAnalyz(Side = EHandshakeSide.Client)]
         public static void Read<T>(T frame) where T : IIndexReader<byte>, IReadOnlySpanProvider<byte>
         {
             byte type = frame[0];
             short protocolVersion = BufferReader.ToShort(frame[1], frame[2]);
             short msgSize = BufferReader.ToShort(frame[3], frame[4]);
-            /// <see cref="ConstantsTls.HANDSHAKE_MESSAGE_TYPE_CLIENT_HELLO"/>
+            /// <see cref="ConstantsForTls.HANDSHAKE_MESSAGE_TYPE_CLIENT_HELLO"/>
             byte handshakeMessageType = frame[5];
             int sizeClientHello = BufferReader.ToInt32(frame[6], frame[7], frame[8]);
             short clientVersion = BufferReader.ToShort(frame[9], frame[10]);
-            Bytes32 clientRandom = BufferReader.ToStruct<Bytes32>(frame.GetSpan(11, 32));
+            TlsRandom clientRandom = BufferReader.ToStruct<TlsRandom>(frame.GetSpan(11, 32));
             byte sessionIdLength = frame[43];
             ReadOnlySpan<byte> sessionId = frame.GetSpan(44, sessionIdLength);
             int i = 44;

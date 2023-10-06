@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace IziHardGames.Libs.ForHttp.Common
+namespace IziHardGames.Libs.HttpCommon.Common
 {
     public class ConnectionControllerHttp11 : ConnectionControllerHttp
     {

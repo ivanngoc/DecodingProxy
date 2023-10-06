@@ -1,9 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.IO.Compression;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Izhg.Lib.Text;
+using IziHardGames.Lib.Text;
 using IziHardGames.Libs.NonEngine.Enumerables;
 using IziHardGames.Libs.NonEngine.Enumerators;
 using IziHardGames.Libs.Text;
@@ -26,6 +27,24 @@ namespace HttpDecodingProxy.ForHttp
             while (true)
             {
                 int readed = await socket.ReceiveAsync(rawReadBuffer, SocketFlags.None).ConfigureAwait(false);
+                size += readed;
+                if (size > 4)
+                {
+                    if (rawReadBuffer[size - 4] == '\r' && rawReadBuffer[size - 3] == '\n' && rawReadBuffer[size - 2] == '\r' && rawReadBuffer[size - 1] == '\n')
+                    {
+                        return size;
+                    }
+                }
+            }
+            throw new System.NotImplementedException();
+        } 
+        
+        public static async Task<int> AwaitHeadersWithEmptyBody(byte[] rawReadBuffer, Stream stream)
+        {
+            int size = default;
+            while (true)
+            {
+                int readed = await stream.ReadAsync(rawReadBuffer).ConfigureAwait(false);
                 size += readed;
                 if (size > 4)
                 {
@@ -202,9 +221,9 @@ namespace HttpDecodingProxy.ForHttp
 
     public struct StartLineReadResult
     {
-        public EStartLine flags;
         public int port;
         public int step;
+        public EStartLine flags;
         public EHttpVersion httpVersion;
         public ReadOnlyMemory<byte> host;
         public string Host => Encoding.UTF8.GetString(host.Span);
@@ -219,6 +238,22 @@ namespace HttpDecodingProxy.ForHttp
         internal void NextStep()
         {
             step++;
+        }
+
+        public string ToStringFlags()
+        {
+            string result = string.Empty;
+            var values = Enum.GetValues(typeof(EStartLine));
+
+            foreach (var value in values)
+            {
+                if (flags.HasFlag((EStartLine)value)) result += $"{value.ToString()}|";
+            }
+            return result;
+        }
+        public string ToStringInfo()
+        {
+            return $"Flags:{ToStringFlags()}; host:{host}; port:{port}; version:{httpVersion}";
         }
     }
 

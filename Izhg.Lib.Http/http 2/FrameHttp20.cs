@@ -8,7 +8,7 @@ using IziHardGames.Libs.Buffers.Vectors;
 using IziHardGames.Libs.ForHttp20;
 using static IziHardGames.Libs.ForHttp20.ConstantsForHttp20;
 
-namespace IziHardGames.Libs.ForHttp.Http20
+namespace IziHardGames.Libs.HttpCommon.Http20
 {
     [StructLayout(LayoutKind.Explicit, Size = ConstantsForHttp20.FRAME_DATA_SIZE_SETTINGS)]
     public struct FrameDataSettingHttp20
@@ -84,6 +84,10 @@ namespace IziHardGames.Libs.ForHttp.Http20
                 case FrameTypes.CONTINUATION: return nameof(FrameTypes.CONTINUATION);
                 default: throw new ArgumentOutOfRangeException();
             }
+        }
+        public string ToStringInfo()
+        {
+            throw new System.NotImplementedException();
         }
     }
 

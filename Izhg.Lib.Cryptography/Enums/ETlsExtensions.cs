@@ -1,4 +1,6 @@
-﻿namespace IziHardGames.Proxy.TcpDecoder
+﻿using IziHardGames.Libs.Cryptography;
+
+namespace IziHardGames.Libs.Cryptography.Tls
 {
     /// <summary>
     /// https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml
@@ -22,5 +24,14 @@
         EXTENSION_H2 = 0x68_32,                         //26674
         //64251-65279 	Unassigned
         EXTENSION_RENEGOTIATION_INFO = 0xff_01,         //65281
+    }
+
+    public enum ETlsProtocolVersion : ushort
+    {
+        None,
+        Tls10 = ConstantsForTls.CLIENT_VERSION_TLS10,
+        Tls11 = ConstantsForTls.CLIENT_VERSION_TLS11,
+        Tls12 = ConstantsForTls.CLIENT_VERSION_TLS12,
+        Tls13 = ConstantsForTls.CLIENT_VERSION_TLS13,
     }
 }

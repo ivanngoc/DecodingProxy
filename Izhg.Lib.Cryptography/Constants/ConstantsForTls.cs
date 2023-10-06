@@ -1,9 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace IziHardGames.Proxy.TcpDecoder
+namespace IziHardGames.Libs.Cryptography
 {
-    public class ConstantsTls
+    public static class ConstantsForTls
     {
+        public const int SIZE_READ_ONLY_MEMORY = 16;
+        public const int SIZE_RECORD = 5;
+        public const int SIZE_HANDSHAKE_HEADER = 4;
+        public const int SIZE_RECORD_HANDSHAKE = SIZE_RECORD + SIZE_HANDSHAKE_HEADER;
+        public const int SIZE_RANDOM = 32;
+
         /// <summary>
         /// SSL 3.1 - это TLS 1.0
         /// </summary>

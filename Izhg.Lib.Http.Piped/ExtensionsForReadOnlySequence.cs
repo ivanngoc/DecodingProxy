@@ -2,7 +2,7 @@
 using System.Buffers;
 using IziHardGames.Core;
 
-namespace IziHardGames.Libs.ForHttp.Piped
+namespace IziHardGames.Libs.HttpCommon.Piped
 {
     public static class ExtensionsForReadOnlySequence
     {

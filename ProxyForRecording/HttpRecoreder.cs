@@ -1,5 +1,5 @@
 ﻿using HttpDecodingProxy.ForHttp;
-using IziHardGames.Libs.ForHttp;
+using IziHardGames.Libs.HttpCommon;
 using IziHardGames.Libs.ForHttp20;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Recoreder.MemoryBased;

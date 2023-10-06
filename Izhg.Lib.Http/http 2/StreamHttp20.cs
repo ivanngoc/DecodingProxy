@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IziHardGames.Libs.ForHttp.Http20
+namespace IziHardGames.Libs.HttpCommon.Http20
 {
     public class StreamHttp20
     {

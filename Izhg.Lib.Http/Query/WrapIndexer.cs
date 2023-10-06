@@ -1,7 +1,7 @@
 ﻿using ProxyLibs.Extensions;
 using System.Text;
 
-namespace IziHardGames.Libs.ForHttp.Streaming
+namespace IziHardGames.Libs.HttpCommon.Streaming
 {
     public struct WrapIndexerForStringBuilder : IIndexer<char>
     {

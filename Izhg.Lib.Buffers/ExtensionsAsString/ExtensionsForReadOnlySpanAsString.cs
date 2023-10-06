@@ -15,7 +15,8 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int IndexAfterRnRn(in this ReadOnlySpan<byte> span)
         {
-            for (int i = 0; i < span.Length; i++)
+            int indexLimit = span.Length - 3;
+            for (int i = 0; i < indexLimit; i++)
             {
                 if (span[i] == '\r' && span[i + 1] == '\n' && span[i + 2] == '\r' && span[i + 3] == '\n')
                 {

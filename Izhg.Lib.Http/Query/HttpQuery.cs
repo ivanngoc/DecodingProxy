@@ -4,9 +4,9 @@ using System;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using Query = IziHardGames.Libs.ForHttp.Streaming.HttpQuery<IziHardGames.Libs.ForHttp.Streaming.WrapIndexerForStringBuilder>;
+using Query = IziHardGames.Libs.HttpCommon.Streaming.HttpQuery<IziHardGames.Libs.HttpCommon.Streaming.WrapIndexerForStringBuilder>;
 
-namespace IziHardGames.Libs.ForHttp.Streaming
+namespace IziHardGames.Libs.HttpCommon.Streaming
 {
     /// <summary>
     /// Stream Query

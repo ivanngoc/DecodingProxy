@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using IziHardGames.Libs.Buffers.Vectors;
-using IziHardGames.Proxy.TcpDecoder;
 
 namespace IziHardGames.Libs.Cryptography.Tls12
 {
@@ -9,11 +8,11 @@ namespace IziHardGames.Libs.Cryptography.Tls12
     {
         // ============================ Record Header
         /// <summary>
-        /// <see cref="ConstantsTls.HANDSHAKE_RECORD"/>
+        /// <see cref="ConstantsForTls.HANDSHAKE_RECORD"/>
         /// </summary>
         [FieldOffset(0)] public byte contentType;                      //1
         /// <summary>
-        /// <see cref="ConstantsTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsTls.CLIENT_VERSION_TLS12"/>
+        /// <see cref="ConstantsForTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsForTls.CLIENT_VERSION_TLS12"/>
         /// </summary>  
         [FieldOffset(1)] public short protocolVersion;          //2
         [FieldOffset(3)] public short msgSize;                  //2
@@ -24,7 +23,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 
         // ============================ Client Version
         /// <summary>
-        /// <see cref="ConstantsTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsTls.CLIENT_VERSION_TLS12"/>
+        /// <see cref="ConstantsForTls.CLIENT_VERSION_TLS10"/> | <see cref="ConstantsForTls.CLIENT_VERSION_TLS12"/>
         /// </summary>
         [FieldOffset(9)] public short clientVersion;            //2
 
@@ -33,7 +32,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 
         // ============================ Session ID
         /// <summary>
-        /// <see cref="ConstantsTls.SESSION_ID_NOT_PROVIDED"/>
+        /// <see cref="ConstantsForTls.SESSION_ID_NOT_PROVIDED"/>
         /// </summary>
         [FieldOffset(43)] public byte SessionID;                //1
 

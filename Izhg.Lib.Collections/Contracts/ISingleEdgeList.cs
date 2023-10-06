@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Izhg.Lib.Collections.Contracts
+namespace IziHardGames.Lib.Collections.Contracts
 {
     public interface ISingleEdgeList<T> : ISingleEdgeNode<T> 
     {

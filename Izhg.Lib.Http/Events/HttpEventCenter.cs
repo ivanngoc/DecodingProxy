@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using IziHardGames.Libs.Networking.States;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
 
     public static class HttpEventCenter

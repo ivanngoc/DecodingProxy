@@ -20,6 +20,11 @@ namespace IziHardGames.Libs.Streams
             this.length = length;
             this.dateTime = DateTime.Now.Ticks;
         }
+
+        public string ToStringInfo()
+        {
+            return $"index:{index}; length:{length}; datetime:{new DateTime(dateTime)}";
+        }
     }
 
     public class StreamForRecording : Stream
@@ -47,7 +52,7 @@ namespace IziHardGames.Libs.Streams
 
         private unsafe bool RecordWriter(ReadOnlyMemory<byte> arg)
         {
-            return false;
+            //return false;
             var header = new Delimeter(countHeadersWriter, arg.Length);
             lock (actionRecordReader)
             {
@@ -59,7 +64,7 @@ namespace IziHardGames.Libs.Streams
 
         private unsafe bool RecordReader(ReadOnlyMemory<byte> arg)
         {
-            return false;
+            //return false;
             var header = new Delimeter(countHeadersReader, arg.Length);
             lock (actionRecordWriter)
             {

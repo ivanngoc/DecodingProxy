@@ -1,4 +1,4 @@
-﻿namespace IziHardGames.Libs.IO
+﻿namespace IziHardGames.Libs.Cryptography
 {
     public class TlsReader
     {

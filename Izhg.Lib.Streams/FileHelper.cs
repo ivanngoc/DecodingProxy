@@ -19,6 +19,7 @@ namespace IziHardGames.Libs.IO
                 fileStream = File.OpenWrite(path);
             }
             fileStream.Seek(0, SeekOrigin.End);
+            fileStream.Write(buffer);
             fileStream.Write(data.Span);
             fileStream.Close();
         }

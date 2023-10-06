@@ -2,7 +2,7 @@
 
 namespace IziHardGames.Libs.Binary.Readers
 {
-    public class BigEndianAttribute : Attribute
+    public class ToBigEndianAttribute : Attribute
     {
 
     }

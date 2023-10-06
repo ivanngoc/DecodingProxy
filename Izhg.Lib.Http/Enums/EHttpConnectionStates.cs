@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IziHardGames.Libs.ForHttp.Monitoring
+namespace IziHardGames.Libs.HttpCommon.Monitoring
 {
     [Flags]
     public enum EHttpConnectionStates

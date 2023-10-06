@@ -14,8 +14,8 @@ using System.Web;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.Async;
 using IziHardGames.Libs.Cryptography.Tls12;
-using IziHardGames.Libs.ForHttp.Helpers;
-using IziHardGames.Libs.ForHttp.Monitoring;
+using IziHardGames.Libs.HttpCommon.Helpers;
+using IziHardGames.Libs.HttpCommon.Monitoring;
 using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.Networking.Tls;
 using IziHardGames.Libs.NonEngine.Memory;
@@ -24,7 +24,7 @@ using IziHardGames.Proxy;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Tls;
 
-namespace IziHardGames.Libs.ForHttp.Common
+namespace IziHardGames.Libs.HttpCommon.Common
 {
     public static class AwaitIO
     {
@@ -56,6 +56,17 @@ namespace IziHardGames.Libs.ForHttp.Common
         private const string dir = @"C:\Builds\DecodingProxy\Records";
         public static async Task HandleSocket(HttpConsumer consumer, Socket socketClient, CancellationToken ct = default)
         {
+            Guid guid = Guid.NewGuid();
+            SocketStream socketStreamClient = PoolObjectsConcurent<SocketStream>.Shared.Rent();
+            socketStreamClient.Initilize(socketClient);
+            StreamDemultiplexer demuxClient = PoolObjectsConcurent<StreamDemultiplexer>.Shared.Rent();
+            demuxClient.Initilize(socketStreamClient);
+            //DEBUG
+            StreamForRecording recordAgent = PoolObjectsConcurent<StreamForRecording>.Shared.Rent();
+            recordAgent.Initilize($"{guid}", dir, demuxClient);
+            var keyReaderRecordClient = demuxClient.RegistReader(recordAgent.actionRecordReader);
+            var keyWriterRecordClient = demuxClient.RegistWriter(recordAgent.actionRecordWriter);
+
             counter++;
             uint idConnection = counter;
             HttpEventCenter.OnNewConnection(idConnection);
@@ -64,7 +75,7 @@ namespace IziHardGames.Libs.ForHttp.Common
             HttpSource dataSource = new HttpSource($"Connection:{counter}");
             Console.WriteLine($"Begin Handle Socket counter:[{counter}]");
             byte[] rawReadBuffer = ArrayPool<byte>.Shared.Rent((1 << 20) * 32);
-            int size = await ReaderHttpBlind.AwaitHeadersWithEmptyBody(rawReadBuffer, socketClient).ConfigureAwait(false);
+            int size = await ReaderHttpBlind.AwaitHeadersWithEmptyBody(rawReadBuffer, demuxClient).ConfigureAwait(false);
             Console.WriteLine("Awaited First HTTP request");
 
             var memWithMsg = new ReadOnlyMemory<byte>(rawReadBuffer, 0, size);
@@ -74,7 +85,6 @@ namespace IziHardGames.Libs.ForHttp.Common
 
             if (ReaderHttpBlind.TryReadStartLine(in memWithMsg, out StartLineReadResult startLine))
             {
-                Guid guid = Guid.NewGuid();
                 var flags = startLine.flags;
                 var host = startLine.Host;
                 var port = startLine.port;
@@ -117,23 +127,15 @@ namespace IziHardGames.Libs.ForHttp.Common
                 var keyReaderRecordOrigin = demuxOrigin.RegistReader(recordOrigin.actionRecordReader);
                 var keyWriterRecordOrigin = demuxOrigin.RegistWriter(recordOrigin.actionRecordWriter);
 
-                SocketStream socketStreamClient = PoolObjectsConcurent<SocketStream>.Shared.Rent();
-                socketStreamClient.Initilize(socketClient);
-                StreamDemultiplexer demuxClient = PoolObjectsConcurent<StreamDemultiplexer>.Shared.Rent();
-                demuxClient.Initilize(socketStreamClient);
 
-                //DEBUG
-                StreamForRecording recordAgent = PoolObjectsConcurent<StreamForRecording>.Shared.Rent();
-                recordAgent.Initilize($"{guid}", dir, demuxClient);
-                var keyReaderRecordClient = demuxClient.RegistReader(recordAgent.actionRecordReader);
-                var keyWriterRecordClient = demuxClient.RegistWriter(recordAgent.actionRecordWriter);
+
 
                 if (flags.HasFlag(EStartLine.MethodConnect))
                 {
                     var sendedToClient = await socketClient.SendAsync(ConstantsForHttp.Responses.bytesOk11, SocketFlags.None).ConfigureAwait(false);
                     Console.WriteLine($"OK200 Sended");
 
-                    TlsHandshakeReader tlsReaderClient = PoolObjectsConcurent<TlsHandshakeReader>.Shared.Rent();
+                    TlsHandshakeReadOperation tlsReaderClient = PoolObjectsConcurent<TlsHandshakeReadOperation>.Shared.Rent();
                     tlsReaderClient.Initilize();
                     var keyReaderHandshakeClient = demuxClient.RegistReader(tlsReaderClient.actionAddDataWithCheck);
 
@@ -178,7 +180,7 @@ namespace IziHardGames.Libs.ForHttp.Common
 
                     if (clientProtocol == ProtocolType.Tcp)
                     {
-                        TlsHandshakeReader tlsHandshakeReaderOrigin = PoolObjectsConcurent<TlsHandshakeReader>.Shared.Rent();
+                        TlsHandshakeReadOperation tlsHandshakeReaderOrigin = PoolObjectsConcurent<TlsHandshakeReadOperation>.Shared.Rent();
                         tlsHandshakeReaderOrigin.Initilize();
 
                         var keyReaderHandshakeOrigin = demuxOrigin.RegistReader(tlsHandshakeReaderOrigin.actionAddDataWithCheck);
@@ -301,7 +303,7 @@ namespace IziHardGames.Libs.ForHttp.Common
                         }
 
                         throw new System.NotImplementedException();
-                        PoolObjectsConcurent<TlsHandshakeReader>.Shared.Return(tlsHandshakeReaderOrigin);
+                        PoolObjectsConcurent<TlsHandshakeReadOperation>.Shared.Return(tlsHandshakeReaderOrigin);
                         //PoolObjectsConcurent<StreamBuffered>.Shared.Return(streamBufferedOrigin);
                     }
                     else
@@ -311,7 +313,7 @@ namespace IziHardGames.Libs.ForHttp.Common
                     tlsReaderClient.Dispose();
                     sslStreamClient.Dispose();
                     PoolObjectsConcurent<StreamBufferedForReads>.Shared.Return(streamBufferedClient);
-                    PoolObjectsConcurent<TlsHandshakeReader>.Shared.Return(tlsReaderClient);
+                    PoolObjectsConcurent<TlsHandshakeReadOperation>.Shared.Return(tlsReaderClient);
                 }
                 else if (flags.HasFlag(EStartLine.MethodGet))
                 {
@@ -342,17 +344,17 @@ namespace IziHardGames.Libs.ForHttp.Common
                 {
                     throw new System.NotImplementedException();
                 }
-                demuxClient.Dispose();
                 demuxOrigin.Dispose();
                 recordAgent.Dispose();
                 recordOrigin.Dispose();
-                PoolObjectsConcurent<SocketStream>.Shared.Return(socketStreamClient);
                 PoolObjectsConcurent<SocketStream>.Shared.Return(socketStreamOrigin);
                 PoolObjectsConcurent<StreamDemultiplexer>.Shared.Return(demuxOrigin);
-                PoolObjectsConcurent<StreamDemultiplexer>.Shared.Return(demuxClient);
-                PoolObjectsConcurent<StreamForRecording>.Shared.Return(recordAgent);
                 PoolObjectsConcurent<StreamForRecording>.Shared.Return(recordOrigin);
             }
+            demuxClient.Dispose();
+            PoolObjectsConcurent<SocketStream>.Shared.Return(socketStreamClient);
+            PoolObjectsConcurent<StreamDemultiplexer>.Shared.Return(demuxClient);
+            PoolObjectsConcurent<StreamForRecording>.Shared.Return(recordAgent);
         }
     }
 }

@@ -9,7 +9,7 @@ using IziHardGames.Libs.NonEngine.Memory;
 using IziHardGames.Libs.Pipelines;
 using IziHardGames.Proxy.Sniffing.ForHttp;
 
-namespace IziHardGames.Libs.ForHttp.Http11
+namespace IziHardGames.Libs.HttpCommon.Http11
 {
 
     public class ObjectReaderHttp11Piped : PipedObjectReader<HttpReadResult>, IDisposable
