@@ -55,7 +55,7 @@ namespace IziHardGames.Proxy.Http
 
             foreach (var host in DecodingProxyServerConfig.Singleton.HostsForSniffing)
             {
-                Logger.SetFilter(host);
+                MyLogger.SetFilter(host);
             }
 
             try
@@ -65,7 +65,7 @@ namespace IziHardGames.Proxy.Http
             catch (Exception ex)
             {
                 Break();
-                Logger.LogException(ex);
+                MyLogger.LogException(ex);
                 throw ex;
             }
         }
@@ -91,7 +91,7 @@ namespace IziHardGames.Proxy.Http
 
         public async Task Run(ConsumingProvider consumingProvider)
         {
-            Logger.LogLine($"Start Proxy decoding");
+            MyLogger.LogLine($"Start Proxy decoding");
             this.consumingProvider = consumingProvider;
             ConfigJson.EnsureConfigExist();
             UpdateSettings();
@@ -134,7 +134,7 @@ namespace IziHardGames.Proxy.Http
         public async Task Break()
         {
             cts.Cancel();
-            Logger.LogException(new ApplicationException($"{nameof(HttpSpyProxy)} Has Stopped"));
+            MyLogger.LogException(new ApplicationException($"{nameof(HttpSpyProxy)} Has Stopped"));
         }
 
         private static void UpdateSettings()

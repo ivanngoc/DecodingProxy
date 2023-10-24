@@ -9,7 +9,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Regex\Izhg.Lib.Regex.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Text\Izhg.Lib.Text.csproj" />
   </ItemGroup>
 
   <ItemGroup>

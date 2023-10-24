@@ -2,6 +2,7 @@
 
 namespace IziHardGames.Libs.Text
 {
+
     public static class Strings
     {
         public static bool IsStartWithCI(in ReadOnlySpan<byte> buffer, char[] start)

@@ -1,9 +1,9 @@
-﻿using IziHardGames.Libs.Tables.Contracts;
+﻿using IziHardGames.Libs.Tables.Abstractions;
+using IziHardGames.Libs.Tables.Contracts;
 using System.Collections.Generic;
 
-namespace IziHardGames.Libs.Tables
+namespace IziHardGames.Libs.Tables.Classic
 {
-
     public class ClassicDynamicTable : IDynamicTable
     {
         protected TableRaw[] raws;
@@ -25,22 +25,8 @@ namespace IziHardGames.Libs.Tables
         public TableCell this[int index] { get => indexer[index]; set => indexer[index] = value; }
     }
 
-    public class TableRaw : TableLine
-    {
-
-    }
-    public class TableColumn : TableLine
-    {
-
-    }
-    public abstract class TableCell
-    {
-        public virtual void SetValue<T>(T value)
-        {
-
-        }
-    }
-
+   
+   
     public class CellIndexer
     {
         public TableCell this[int index]

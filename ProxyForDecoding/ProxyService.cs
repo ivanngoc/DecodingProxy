@@ -29,7 +29,7 @@ namespace IziHardGames.Proxy
             this.logger = logger;
             this.proxyServer = proxy;
             this.httpRecoreder = httpRecoreder;
-            Logger.logger = logger;
+            MyLogger.logger = logger;
             logger.Log(LogLevel.Information, $"Created {typeof(ProxyService).FullName}");
             httpRecoreder.SetManager(new ManagerForHttpSessionDefault());
 

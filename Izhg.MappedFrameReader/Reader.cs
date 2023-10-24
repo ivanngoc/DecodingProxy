@@ -1,41 +1,166 @@
 ﻿using System.Buffers;
 using Func = System.Func<System.ReadOnlyMemory<byte>, int>;
 
+
 namespace IziHardGames.MappedFrameReader
 {
+    internal class ReaderContext
+    {
+        private Reader reader;
+        /// <summary>
+        /// Current buffer
+        /// </summary>
+        internal ReadOnlyMemory<byte> bufferSingle;
+        internal NodesQueue NodesQueue => reader.nodesQueue;
+        public int position;
+        internal TableOfResults tableOfResults;
+
+        public ReaderContext(Reader reader)
+        {
+            this.reader = reader;
+        }
+
+        public ReadOnlyMemory<byte> Slice(int offset, int length)
+        {
+            return bufferSingle.Slice(offset, length);
+        }
+
+        public void Advance(int length)
+        {
+            position += length;
+        }
+    }
+
     // Совмещены идеи: JsonElement (Node-Reading); Mapping; 
     public class Reader
     {
         internal EReadType readType;
         internal ReadProgress Progress => throw new System.NotImplementedException();
         private int offset;
-        private Node Curent { get; set; }
+        private Node? Current { get; set; }
 
         private Adapter adapter;
-        private ReadOperation? current;
-
+        private ReportFunc resultHandler;
+        public readonly Scheme scheme;
+        internal readonly ReadResults results = new ReadResults();
+        internal readonly NodesQueue nodesQueue = new NodesQueue();
+        internal readonly ReaderContext readerContext;
+        internal readonly TableOfResults tableOfResults = new TableOfResults();
         public Reader(Scheme scheme)
         {
-            throw new System.NotImplementedException();
+            readerContext = new ReaderContext(this);
+            readerContext.tableOfResults = tableOfResults;
+
+            this.scheme = scheme;
+            Initilize(scheme);
         }
+
+        private void Initilize(Scheme scheme)
+        {
+            var nodes = scheme.Graph.nodes;
+
+            foreach (var node in nodes)
+            {
+                if (node.value.isWriteToTable)
+                {
+                    results.AddSlot(node.value);
+                }
+            }
+        }
+
         private bool MoveNext()
         {
             throw new System.NotImplementedException();
         }
 
-        internal void RegistHandlers(string id, Func value)
+        public async Task ReadAllAsync(byte[] data)
         {
-            throw new NotImplementedException();
-        }
+            Console.WriteLine();
+            Console.WriteLine();
+            Current = scheme.Head;
+            ReadOnlyMemory<byte> mem = new ReadOnlyMemory<byte>(data);
+            ReadOnlyMemory<byte> slice = mem;
+            readerContext.bufferSingle = slice;
 
-        internal async Task ReadAsync(byte[] testData)
-        {
-            while (current != null)
+            while (Current != null)
             {
-                await current.ReadAsync();
-                current = current.Next;
+                var node = Current;
+                Console.WriteLine($"NodeType:{node.GetType()}\tpath:{node.path}. Position:{readerContext.position}");
+                nodesQueue.Push(node);
+                node.offset = readerContext.position;
+
+                var t1 = node.ExecuteAsync(slice, readerContext);
+                node.lengthDiff = readerContext.position - node.offset;
+                //Console.WriteLine($"ExecuteAsync.\tDiff:{node.lengthDiff}\tType:[{node.GetType().Name}]\tPath:[{node.path}]\toffset:{node.offset}");
+                if (t1.IsFaulted)
+                    throw new System.NotImplementedException("Task Is Faulted");
+                await t1.ConfigureAwait(false);
+
+                int consumed = node.lengthConsumed;
+                slice = slice.Slice(consumed);
+
+                if (node is NodeResult nodeResult)
+                {
+                    var result = nodeResult.GetResult();
+
+                    if (nodeResult.IsValid())
+                    {
+                        if (nodeResult.HandlerSync is not null)
+                        {
+                            nodeResult.HandlerSync.Invoke(result);
+                            Console.WriteLine($"Invoke HandlerSync");
+                        }
+                        if (nodeResult.HandlerAsyncNonBlock is not null)
+                        {
+                            var task = nodeResult.HandlerAsyncNonBlock.Invoke(result);
+                            Console.WriteLine($"Invoke HandlerAsyncNonBlock");
+                        }
+                        if (nodeResult.HandlerAsyncWithBlock is not null)
+                        {
+                            int status = await nodeResult.HandlerAsyncWithBlock.Invoke(result);
+                            Console.WriteLine($"Invoke HandlerAsyncWithBlock");
+                        }
+                        tableOfResults.AddResult(nodeResult);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Result. length:[{nodeResult.Length}] for: {nodeResult.Target.path}\r\n" + nodeResult.ResultAsString());
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                    }
+                    else
+                    {
+                        throw new System.NotImplementedException("Task.Delay() or Error");
+                    }
+                }
+                else if (node is NodeRepeat nodeRepeat)
+                {
+
+                }
+                Current = node.Tail;
             }
         }
+
+        public void OnResult(ReportFunc func)
+        {
+            this.resultHandler = func;
+        }
+    }
+
+    internal class ReadResults
+    {
+        public readonly Dictionary<string, ResultItem> values = new Dictionary<string, ResultItem>();
+
+        internal void AddSlot(Node value)
+        {
+            ResultItem resultItem = new ResultItem();
+            resultItem.node = value;
+            resultItem.idName = value.path;
+        }
+    }
+
+    internal class ResultItem
+    {
+        public string idName = string.Empty;
+        public ReadOnlyMemory<byte> data;
+        public Node node;
     }
 
     /// <summary>
@@ -140,11 +265,6 @@ namespace IziHardGames.MappedFrameReader
         {
             this.readOnlySpan = mem;
         }
-    }
-
-    internal readonly struct Node
-    {
-
     }
 
     internal readonly ref struct ReadProgress

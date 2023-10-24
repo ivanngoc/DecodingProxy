@@ -1,4 +1,7 @@
-﻿namespace IziHardGames.MappedFrameReader
+﻿using System;
+using Func = System.Func<System.ReadOnlyMemory<byte>, int>;
+
+namespace IziHardGames.MappedFrameReader
 {
     /// <summary>
     /// Mapping Sceme for separation
@@ -20,7 +23,23 @@
         /// </summary>        
         private string[] ids;
         private List<string> tempIds;
-        private ReadFrame head;
+        private SchemeGraph graph;
+        internal SchemeGraph Graph => graph;
+        internal NodeBegin Head => graph.nodes.First().value as NodeBegin ?? throw new NullReferenceException();
+
+        internal TableOfVariables TableOfVariables { get; set; }
+        internal TableOfPromises TableOfPromises { get; set; }
+        internal TableOfTypes TableOfTypes { get; set; }
+        internal TableOfFrames TableOfFrames { get; set; }
+
+        public Scheme()
+        {
+
+        }
+        internal Scheme(SchemeGraph graph)
+        {
+            this.graph = graph;
+        }
 
         public SchemeBinary SchemeBinary => new SchemeBinary(this);
 
@@ -45,10 +64,14 @@
 
         private void BuildReaders()
         {
-            ReadOperation operation = default;
+            NodeReadFromSource operation = default;
             throw new System.NotImplementedException();
         }
-
+        public void RegistHandlers(string path, Func value)
+        {
+            var variable = TableOfVariables.GetVariable(path);
+            variable.nodeResult.HandlerSync = value;
+        }
         public void Begin()
         {
 
@@ -113,10 +136,6 @@
             scheme.End();
         }
 
-        internal void SetHeadReader(ReadFrame rf)
-        {
-            this.head = rf;
-        }
         #endregion
 #endif
         public enum ESizeType

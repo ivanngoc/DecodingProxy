@@ -9,45 +9,6 @@ using IziHardGames.Libs.NonEngine.Memory;
 namespace IziHardGames.Libs.Async
 {
     /// <summary>
-    /// same as <see cref="AsyncSignaler"/> but struct
-    /// </summary>
-    [Obsolete("Not Imlemented")]
-    public struct ValueTaskSource : IValueTaskSource, IValueTaskBased, IAwaitComntrol
-    {
-        private ManualResetValueTaskSourceCore<bool> cts;
-
-        public void GetResult(short token)
-        {
-            cts.GetResult(token);
-        }
-
-        public ValueTaskSourceStatus GetStatus(short token)
-        {
-            return cts.GetStatus(token);
-        }
-
-        public void OnCompleted(Action<object?> continuation, object? state, short token, ValueTaskSourceOnCompletedFlags flags)
-        {
-            cts.OnCompleted(continuation, state, token, flags);
-        }
-        public ValueTask Await(CancellationToken token = default)
-        {
-            if (token != default) token.Register(() => throw new System.NotImplementedException());
-            return new ValueTask(this, cts.Version);
-        }
-
-        internal void Set()
-        {
-            cts.SetResult(true);
-        }
-
-        public static void Test()
-        {
-            ThreadPool.QueueUserWorkItem((x) => { });
-        }
-    }
-
-    /// <summary>
     /// Семафор для паттерн производитель-потребитель. 1 производитель вызывает метод Set(), после чего потребитель завершает await и потребляет. 1к1. одновременно может быть только 1 await.    /// 
     /// Аналог <see cref=""/> c базой на <see cref="ValueTask{TResult}"/>
     /// </summary>
@@ -62,14 +23,13 @@ namespace IziHardGames.Libs.Async
         private int requests;
         private int responses;
         private CancellationToken cancellationToken;
-        private static readonly object lockShared = new object();
 
         public AsyncSignaler()
         {
             actionSetException = SetException;
         }
         /// <summary>
-        /// 
+        /// Await until <see cref="Set"/> is Called. Stackable result. But only 1 consumer can await
         /// </summary>
         /// <returns>
         /// <see langword="true"/> - succesfully awaited<br/>
@@ -77,7 +37,7 @@ namespace IziHardGames.Libs.Async
         /// </returns>
         public ValueTask<bool> Await(CancellationToken ct = default)
         {
-            lock (lockShared)
+            lock (actionSetException)
             {
                 if (responses > 0)
                 {
@@ -118,7 +78,7 @@ namespace IziHardGames.Libs.Async
 
         public void Set()
         {
-            lock (lockShared)
+            lock (actionSetException)
             {
                 if (requests > 0)
                 {
@@ -139,10 +99,10 @@ namespace IziHardGames.Libs.Async
         }
         public void Dispose()
         {
-            pool.Return(this);
+            pool!.Return(this);
             if (responses > 0 || requests > 0) throw new InvalidOperationException("All tasks must be completed");
             pool = default;
-
+            cancellationToken = default;
         }
 
         public static AsyncSignaler Rent()

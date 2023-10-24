@@ -68,12 +68,12 @@ namespace IziHardGames.Proxy
 
             if (!File.Exists(fn))
             {
-                Logger.LogLine("Config not founded. Begin creating...");
+                MyLogger.LogLine("Config not founded. Begin creating...");
 
                 var fs = File.Create(fn);
                 fs.Write(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new ConfigJson())));
                 fs.Dispose();
-                Logger.LogLine("Config were created!");
+                MyLogger.LogLine("Config were created!");
             }
         }
     }

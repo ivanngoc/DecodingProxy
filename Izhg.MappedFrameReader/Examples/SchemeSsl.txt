@@ -6,40 +6,58 @@
 
 Frame:HttpConnect [LengthType=Dynamic]
 {
-	string Http.StartLine (var) [Algo=StringCompare] [ConditionType=ClosedBy] [ConditionValue="\r\n"],
-	vector string Http.Headers (var) [Algo=StringCompare] [ConditionType=ClosedBy] [ConditionValue="\r\n"],
-	string Http.EndHeaders = "\r\n\r\n" (4),
-	string Http.Body (var) [ConditionType=Func] [ConditionValue=SearchBody],
+	string HttpConnect.StartLine (?) [AdvanceMode=StringCompare] [ConditionType=ClosedBy] [ConditionValue="\r\n"],
+	vector string HttpConnect.Headers (?) [AdvanceMode=StringCompare] [ConditionType=ClosedBy] [Separator="\r\n"] [Repeat=True] [Enclose="\r\n\r\n"],
+	slice HttpConnect.Body (?) [AdvanceMode=Func] [Repeat=False] [ConditionType=Func] [ConditionValue=ReadBodyHttp11],
 }
 
 Frame:SslFrame [LengthType=Dynamic]
 {
-	Item:TlsRecord [Size=5] [LengthType=Defined]
+	Item:SslFrame.TlsRecord [Size=5] [LengthType=Defined]
 	{
-		byte $TlsRecord.RecordType (1),
-		Item:ProtocolVersion [Size=2] [LengthType=Defined]
+		byte $SslFrame.TlsRecord.RecordType (1),
+		Item:SslFrame.TlsRecord.ProtocolVersion [Size=2] [LengthType=Defined]
 		{
 			byte ProtocolVersion.major (1),
 			byte ProtocolVersion.minor (1),
 		}
-		ushort $TlsRecord.Length (2),
-		Item: TlsRecord.Payload [Size=$TlsRecord.Length] [LengthType=Linked]
+		ushort $SslFrame.TlsRecord.Length (2),
+		Item:SslFrame.TlsRecord.Payload [Size=$SslFrame.TlsRecord.Length] [LengthType=Linked]
 		{
-			Switch ($TlsRecord.RecordType)
+			Switch ($SslFrame.TlsRecord.RecordType)
 			{
 			 case (0x16)
 				{
-					Item:HandshakeHeader [Size=4] [LengthType=Defined]
+					Item:SslFrame.TlsRecord.Payload.HandshakeHeader [Size=4] [LengthType=Defined]
 					{
-						byte HandshakeHeader.messageType (1),
-						uint $HandshakeHeader.Length (3),
+						byte SslFrame.TlsRecord.Payload.HandshakeHeader.messageType (1),
+						uint $SslFrame.TlsRecord.Payload.HandshakeHeader.Length (3) [Cast=True], 
+						Switch ($SslFrame.TlsRecord.Payload.HandshakeHeader.messageType)
+						{
+							case (0x00)
+							{
+							
+							}
+							case (0x01)
+							{
+							
+							}
+							case (default)
+							{
+			 
+							}
+						}
 					}
-					vector TlsRecord.Payload ($HandshakeHeader.Length)
+					slice SslFrame.TlsRecord.Payload.Data ($SslFrame.TlsRecord.Payload.HandshakeHeader.Length),
 				}
 			 case (0x17)
 				{
 
 				}
+			 case (default)
+			 {
+			 
+			 }
 			}
 		}
 	}

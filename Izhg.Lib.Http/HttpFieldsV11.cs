@@ -337,7 +337,7 @@ namespace HttpDecodingProxy.ForHttp
 
                 if (IsStatusCodeRange(ConstantsForHttp.StatusCodes.SUCCESSFUL_200))
                 {
-                    Logger.LogLine($"Status code", ConsoleColor.Red);
+                    MyLogger.LogLine($"Status code", ConsoleColor.Red);
                 }
             }
             else if (IsRequest)

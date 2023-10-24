@@ -203,7 +203,7 @@ namespace IziHardGames.Tls
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex);
+                MyLogger.LogException(ex);
                 throw ex;
             }
         }
@@ -285,7 +285,7 @@ namespace IziHardGames.Tls
                 if (!Cert.CompareCerts(existed, cert))
                 {
                     var ex = new ArgumentException($"Certs have same key but comparison is Failed");
-                    Logger.LogException(ex);
+                    MyLogger.LogException(ex);
                     throw ex;
                 }
             }

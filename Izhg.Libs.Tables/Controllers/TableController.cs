@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using IziHardGames.Libs.Tables.Classic;
 
 namespace IziHardGames.Libs.Tables
 {

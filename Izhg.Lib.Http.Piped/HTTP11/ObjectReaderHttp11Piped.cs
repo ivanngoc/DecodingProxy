@@ -65,7 +65,7 @@ namespace IziHardGames.Libs.HttpCommon.Http11
                 }
                 else
                 {
-                    Logger.LogWarning($"{nameof(ObjectReaderHttp11Piped)}.{AwaitFeilds} Null read Not implemented");
+                    MyLogger.LogWarning($"{nameof(ObjectReaderHttp11Piped)}.{AwaitFeilds} Null read Not implemented");
                 }
                 reader.ReportConsume(buffer.Start);
             } while (!isEnd);

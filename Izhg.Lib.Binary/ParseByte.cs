@@ -65,7 +65,7 @@ namespace System
         {
             return ToHexStringFormated(new ReadOnlyMemory<byte>(bytes, offset, length));
         }
-        public static string ToHexStringFormated(ReadOnlySequence<byte> seq)
+        public static string ToHexStringFormated(in ReadOnlySequence<byte> seq)
         {
             int size = (int)seq.Length;
             // 0x[char0][char1][SPACE]
@@ -86,11 +86,11 @@ namespace System
             }
             return new string(chars);
         }
-        public static string ToHexStringFormated(ReadOnlyMemory<byte> bytes)
+        public static string ToHexStringFormated(in ReadOnlyMemory<byte> bytes)
         {
             return ToHexStringFormated(bytes.Span);
         }
-        public static string ToHexStringFormated(ReadOnlySpan<byte> data)
+        public static string ToHexStringFormated(in ReadOnlySpan<byte> data)
         {
             int size = data.Length;
             // 0x[char0][char1][SPACE]

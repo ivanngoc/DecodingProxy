@@ -1,8 +1,8 @@
 ﻿using System;
 using IziHardGames.Libs.Binary.Readers;
+using IziHardGames.Libs.Cryptography.Shared.Headers;
 using IziHardGames.Libs.Cryptography.Tls;
 using IziHardGames.Libs.Cryptography.Tls12;
-using IziHardGames.Proxy.TcpDecoder;
 using ServerExtensions = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromServerExtensionsEnumerator;
 
 namespace IziHardGames.Libs.Cryptography
@@ -40,10 +40,10 @@ namespace IziHardGames.Libs.Cryptography
                             ServerHello hello = BufferReader.ToStruct<ServerHello>(in mem);
                             var sessionId = mem.Slice(0, hello.session_id.length);
                             mem = mem.Slice(hello.session_id.length);
-                            CipherSuiteServer cipherSuite = BufferReader.ToStructConsume<CipherSuiteServer>(ref mem);
-                            CompressionMethod compressionMethod = BufferReader.ToStructConsume<CompressionMethod>(ref mem);
+                            CipherSuiteValue cipherSuite = BufferReader.ToStructConsume<CipherSuiteValue>(ref mem);
+                            CompressionMethodValue compressionMethod = BufferReader.ToStructConsume<CompressionMethodValue>(ref mem);
                             // extensions
-                            while (TlsExtension.TryReadConsume(ref mem, out var ext))
+                            while (Infos.TlsExtensionInfo.TryReadConsume(ref mem, out var ext))
                             {
                                 Console.WriteLine(ext.ToStringInfo());
                             }

@@ -1,0 +1,52 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+#console-container {
+    display: flex;
+    border: 2px solid black;
+    justify-content: space-between;
+    align-items: stretch;
+    flex-direction: row;
+    height: 200px;
+    /*
+    overflow-y: auto;
+    overflow-x: auto;
+    */
+}
+
+.console-channel {
+    border: 1px solid red;
+    flex: 1;
+}
+
+#console-list {
+    display: flex;
+}
+
+.console-control {
+}
+
+#compare-window {
+    display: flex;
+}
+
+#compre-window-left, #compre-window-right {
+    border: 1px solid red;
+    flex: 1;
+}

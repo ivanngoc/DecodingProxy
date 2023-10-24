@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Target Name="Test">
+    <Message Importance="high" Text="MSBuildNodeCount: $(MSBuildNodeCount)" />
+  </Target>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DevConsole.Client\DevConsole.Client.csproj" />
+    <ProjectReference Include="..\DevConsole.Server\DevConsole.Server.csproj" />
+    <ProjectReference Include="..\DevConsole.Shared\DevConsole.Shared.csproj" />
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
     <ProjectReference Include="..\Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />

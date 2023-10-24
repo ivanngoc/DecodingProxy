@@ -43,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.NetStandart21.Core", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxyForDecoding", "ProxyForDecoding\ProxyForDecoding.csproj", "{C3FD5F87-A38D-40F3-BFE0-6916F5864F96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Libs.Tables", "Izhg.Libs.Tables\Izhg.Libs.Tables.csproj", "{7093B221-B2EA-4609-A6A3-50E898AA6717}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Tables", "Izhg.Libs.Tables\Izhg.Lib.Tables.csproj", "{7093B221-B2EA-4609-A6A3-50E898AA6717}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Tables.Web", "Izhg.Lib.Tables.Web\Izhg.Lib.Tables.Web.csproj", "{28A3DC63-E849-4FAC-BEB8-AE14F49FD2DD}"
 EndProject
@@ -63,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Streams.Piped", "I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Pipelines", "Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj", "{4F90EEE3-FC0D-4043-A56B-B773A6D2E3FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpRecorder", "HttpRecorder\HttpRecorder.csproj", "{CF5C9A88-7E9A-453A-B72D-224E71615D57}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Recording.DataBase", "Izhg.Lib.Http.Recording.DataBase\Izhg.Lib.Http.Recording.DataBase.csproj", "{CF5C9A88-7E9A-453A-B72D-224E71615D57}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.gRPC.Servers", "Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj", "{39A7B90C-3519-49AE-BBC0-AC442311A5B8}"
 EndProject
@@ -73,7 +73,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Monitoring", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.MappedFrameReader", "Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj", "{DD45EE09-98A0-4CCC-92DD-CA1319FDE9B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Regex", "Izhg.Lib.Regex\Izhg.Lib.Regex.csproj", "{B5B8D44E-401F-4475-BBF3-A397B437542C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Regex", "Izhg.Lib.Regex\Izhg.Lib.Regex.csproj", "{B5B8D44E-401F-4475-BBF3-A397B437542C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevConsole.Shared", "DevConsole.Shared\DevConsole.Shared.csproj", "{61222A61-7667-4223-83C2-55BB80E0BCAC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevConsole.Server", "DevConsole.Server\DevConsole.Server.csproj", "{1557C93A-4F66-44F2-B1BE-3CB33F48697B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.gRPC.Shared", "Izhg.Lib.gRPC.Shared\Izhg.Lib.gRPC.Shared.csproj", "{B3696789-CFD0-41FB-AD08-231E6AE620CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevConsole.Client", "DevConsole.Client\DevConsole.Client.csproj", "{416B1772-A6F1-4930-9F29-F801E57E1910}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Izhg.Lib.Mapping", "Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj", "{5AAE930F-B745-4EA9-8ADA-E050B9F9B8DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -225,6 +235,26 @@ Global
 		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5B8D44E-401F-4475-BBF3-A397B437542C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61222A61-7667-4223-83C2-55BB80E0BCAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61222A61-7667-4223-83C2-55BB80E0BCAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61222A61-7667-4223-83C2-55BB80E0BCAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61222A61-7667-4223-83C2-55BB80E0BCAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1557C93A-4F66-44F2-B1BE-3CB33F48697B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1557C93A-4F66-44F2-B1BE-3CB33F48697B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1557C93A-4F66-44F2-B1BE-3CB33F48697B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1557C93A-4F66-44F2-B1BE-3CB33F48697B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3696789-CFD0-41FB-AD08-231E6AE620CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3696789-CFD0-41FB-AD08-231E6AE620CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3696789-CFD0-41FB-AD08-231E6AE620CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3696789-CFD0-41FB-AD08-231E6AE620CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{416B1772-A6F1-4930-9F29-F801E57E1910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{416B1772-A6F1-4930-9F29-F801E57E1910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{416B1772-A6F1-4930-9F29-F801E57E1910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{416B1772-A6F1-4930-9F29-F801E57E1910}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AAE930F-B745-4EA9-8ADA-E050B9F9B8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AAE930F-B745-4EA9-8ADA-E050B9F9B8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AAE930F-B745-4EA9-8ADA-E050B9F9B8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AAE930F-B745-4EA9-8ADA-E050B9F9B8DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

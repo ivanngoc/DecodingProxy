@@ -13,6 +13,8 @@ namespace IziHardGames.Libs.Cryptography
         public const int SIZE_HANDSHAKE_HEADER = 4;
         public const int SIZE_RECORD_HANDSHAKE = SIZE_RECORD + SIZE_HANDSHAKE_HEADER;
         public const int SIZE_RANDOM = 32;
+        public const int SIZE_SESSION_ID = 1;
+        public const int SIZE_HANDSHAKE_COMPRESSION_METHOD = 1;
 
         /// <summary>
         /// SSL 3.1 - это TLS 1.0

@@ -4,7 +4,6 @@ using IziHardGames.Core.Buffers;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Cryptography.Attributes;
 using IziHardGames.Libs.Cryptography.Tls12;
-using IziHardGames.Proxy.TcpDecoder;
 using ByteEnum = IziHardGames.Libs.Buffers.Enumerators.EnumerotorForReadOnlySequence;
 
 namespace IziHardGames.Libs.Cryptography.Tls.Shared
@@ -12,7 +11,7 @@ namespace IziHardGames.Libs.Cryptography.Tls.Shared
     public ref struct TlsHelloFromClientExtensionsEnumerator
     {
         public ReadOnlySequence<byte> data;
-        public TlsExtension Current { get; set; }
+        public Infos.TlsExtensionInfo Current { get; set; }
         public bool IsError { get; set; }
         /// <summary>
         /// Current offset in <see cref="data"/>
@@ -145,7 +144,7 @@ namespace IziHardGames.Libs.Cryptography.Tls.Shared
                     offset += 2;
                     ushort length = BufferReader.ToUshort(span[offset], span[offset + 1]);
                     offset += 2;
-                    Current = new TlsExtension(type: type, length: length, data: data.Slice(offset, length));
+                    Current = new Infos.TlsExtensionInfo(type: type, length: length, data: data.Slice(offset, length));
                     offset += length;
                     lengthLeft -= (ushort)(4 + length);
                     return true;
@@ -160,7 +159,7 @@ namespace IziHardGames.Libs.Cryptography.Tls.Shared
                     data.Slice(offset).CopyTo(span2);
                     ushort length = BufferReader.ToUshort(span2);
                     offset += 2;
-                    Current = new TlsExtension(type: type, length: length, data: data.Slice(offset, length));
+                    Current = new Infos.TlsExtensionInfo(type: type, length: length, data: data.Slice(offset, length));
                     offset += length;
                     lengthLeft -= (ushort)(4 + length);
                     return true;

@@ -17,7 +17,6 @@ namespace IziHardGames.Libs.Buffers.Sequences
 
             BufferSegmentDefault<T> tail = head;
 
-
             foreach (var mem in values.Skip(1))
             {
                 BufferSegmentDefault<T> next = BufferSegmentDefault<T>.Rent();

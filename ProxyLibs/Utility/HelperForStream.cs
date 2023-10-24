@@ -19,7 +19,7 @@ namespace IziHardGames.Libs.IO
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex);
+                MyLogger.LogException(ex);
             }
         }
 

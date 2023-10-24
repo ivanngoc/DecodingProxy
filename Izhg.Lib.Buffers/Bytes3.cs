@@ -3,7 +3,6 @@ using IziHardGames.Libs.Binary.Readers;
 
 namespace IziHardGames.Libs.Buffers.Vectors
 {
-
     [StructLayout(LayoutKind.Explicit, Size = 3)]
     public struct TestOverlapSize
     {

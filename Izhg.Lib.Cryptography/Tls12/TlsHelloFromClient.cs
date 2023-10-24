@@ -4,6 +4,7 @@ using IziHardGames.Core.Buffers;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Buffers.Vectors;
 using IziHardGames.Libs.Cryptography.Attributes;
+using IziHardGames.Libs.Cryptography.Shared.Headers;
 using IziHardGames.Libs.Cryptography.Tls;
 using IziHardGames.Proxy.TcpDecoder;
 
@@ -14,7 +15,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
     /// </summary>
     public struct TlsHelloFromClient
     {
-        [HandshakeAnalyz(Side = EHandshakeSide.Client)]
+        [Map("Read Tls Hello From Client"), HandshakeAnalyz(Side = ESide.Client)]
         public static void Read<T>(T frame) where T : IIndexReader<byte>, IReadOnlySpanProvider<byte>
         {
             byte type = frame[0];

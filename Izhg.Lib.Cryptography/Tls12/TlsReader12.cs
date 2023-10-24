@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using IziHardGames.Libs.Cryptography.Readers;
 using IziHardGames.Proxy.TcpDecoder;
 
 namespace IziHardGames.Libs.Cryptography.Tls12

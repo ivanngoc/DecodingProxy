@@ -1,5 +1,4 @@
 ﻿using IziHardGames.Libs.Binary.Readers;
-using IziHardGames.Proxy.TcpDecoder;
 using System.Security.Authentication;
 using System.Buffers;
 using System.Security.Authentication;
@@ -14,22 +13,25 @@ using IziHardGames.Libs.Cryptography.Tls;
 
 namespace IziHardGames.Libs.Cryptography
 {
-    public class TlsExtensionInfo : IDisposable, IPoolBind<TlsExtensionInfo>
+    /// <summary>
+    /// <see cref="Infos.TlsExtensionInfo"/>
+    /// </summary>
+    public class TlsExtensionInfoReusable : IDisposable, IPoolBind<TlsExtensionInfoReusable>
     {
-        private IPoolReturn<TlsExtensionInfo> pool;
+        private IPoolReturn<TlsExtensionInfoReusable> pool;
         public ETlsExtensions type;
         public byte[] datas;
         public int length;
-        public static TlsExtensionInfo FromStruct(in TlsExtension extension)
+        public static TlsExtensionInfoReusable FromStruct(in Infos.TlsExtensionInfo extension)
         {
-            var pool = PoolObjectsConcurent<TlsExtensionInfo>.Shared;
-            TlsExtensionInfo info = pool.Rent();
+            var pool = PoolObjectsConcurent<TlsExtensionInfoReusable>.Shared;
+            TlsExtensionInfoReusable info = pool.Rent();
             info.BindToPool(pool);
             info.Initilize(in extension);
             return info;
         }
 
-        private void Initilize(in TlsExtension extension)
+        private void Initilize(in Infos.TlsExtensionInfo extension)
         {
             this.type = (ETlsExtensions)extension.type;
             datas = extension.data.ToArray();
@@ -44,7 +46,7 @@ namespace IziHardGames.Libs.Cryptography
             datas = default;
         }
 
-        public void BindToPool(IPoolReturn<TlsExtensionInfo> pool)
+        public void BindToPool(IPoolReturn<TlsExtensionInfoReusable> pool)
         {
             this.pool = pool;
         }
@@ -94,15 +96,15 @@ namespace IziHardGames.Libs.Cryptography
         public SslProtocols protocolsSsl;
         public int length;
 
-        public List<TlsExtensionInfo> extensions = new List<TlsExtensionInfo>();
+        public List<TlsExtensionInfoReusable> extensions = new List<TlsExtensionInfoReusable>();
 
-        [HandshakeAnalyz(Side = EHandshakeSide.Server)]
+        [HandshakeAnalyz(Side = ESide.Server)]
         public void AnalyzAsServer(ReadOnlyMemory<byte> mem)
         {
             throw new System.NotImplementedException();
         }
 
-        [HandshakeAnalyz(Side = EHandshakeSide.Client)]
+        [HandshakeAnalyz(Side = ESide.Client)]
         public int AnalyzeAsClient(in HandshakeRecord clientHello, in ReadOnlyMemory<byte> mem)
         {
             var span = mem.Span;
@@ -121,7 +123,7 @@ namespace IziHardGames.Libs.Cryptography
             while (tlsExtensions.MoveNext())
             {
                 var extension = tlsExtensions.Current;
-                TlsExtensionInfo info = TlsExtensionInfo.FromStruct(extension);
+                TlsExtensionInfoReusable info = TlsExtensionInfoReusable.FromStruct(extension);
                 extensions.Add(info);
                 //Console.WriteLine($"DEBUG: {(ETlsExtensions)extension.type}. Length:{extension.length}. DataAsString: {Encoding.UTF8.GetString(extension.data)}. Data Raw:{ParseByte.ToHexStringFormated(extension.data)}");
 

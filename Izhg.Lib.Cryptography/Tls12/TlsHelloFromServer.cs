@@ -11,7 +11,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 {
     public struct TlsHelloFromServer
     {
-        [HandshakeAnalyz(Side = EHandshakeSide.Server)]
+        [Map("Read Tls Hello From Server"), HandshakeAnalyz(Side = ESide.Server)]
         public static void Read<T>(T frame) where T : IIndexReader<byte>, IReadOnlySpanProvider<byte>
         {
             //https://tls12.xargs.org/#server-hello

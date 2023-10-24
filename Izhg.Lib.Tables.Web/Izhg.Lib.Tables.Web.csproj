@@ -3,10 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.Libs.Tables.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Libs.Tables.csproj" />
+    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj" />
   </ItemGroup>
 
 </Project>

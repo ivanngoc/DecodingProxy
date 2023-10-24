@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace IziHardGames.Libs.Binary.Readers
-{
+{   
     public static class BufferReader
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining), LittleEndian]
@@ -129,7 +129,7 @@ namespace IziHardGames.Libs.Binary.Readers
         public static ushort ReverseEndians(ushort value)
         {
             return BinaryPrimitives.ReverseEndianness(value);
-        } 
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReverseEndians(uint value)
         {
@@ -142,6 +142,13 @@ namespace IziHardGames.Libs.Binary.Readers
             T st = ToStruct<T>(in mem);
             mem = mem.Slice(sizeof(T));
             return st;
+        }
+
+        public static ReadOnlyMemory<byte> Consume(int length, ref ReadOnlyMemory<byte> slice)
+        {
+            ReadOnlyMemory<byte> result = slice.Slice(0, length);
+            slice = slice.Slice(length);
+            return result;
         }
     }
 }

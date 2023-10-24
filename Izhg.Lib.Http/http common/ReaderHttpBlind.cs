@@ -37,8 +37,8 @@ namespace HttpDecodingProxy.ForHttp
                 }
             }
             throw new System.NotImplementedException();
-        } 
-        
+        }
+
         public static async Task<int> AwaitHeadersWithEmptyBody(byte[] rawReadBuffer, Stream stream)
         {
             int size = default;
@@ -186,7 +186,7 @@ namespace HttpDecodingProxy.ForHttp
         {
             lock (locker)
             {
-                EnumeratorForSpanNewLine enumerator = new EnumeratorForSpanNewLine(in memWithMsg);
+                EnumeratorForSpanLine enumerator = new EnumeratorForSpanLine(in memWithMsg);
                 var span = memWithMsg.Span;
                 while (enumerator.MoveNext())
                 {
@@ -203,7 +203,7 @@ namespace HttpDecodingProxy.ForHttp
         }
         public static ReadOnlyMemory<byte> FindHostFeild(in ReadOnlyMemory<byte> memWithMsg)
         {
-            EnumeratorForSpanNewLine enumerator = new EnumeratorForSpanNewLine(in memWithMsg);
+            EnumeratorForSpanLine enumerator = new EnumeratorForSpanLine(in memWithMsg);
             var span = memWithMsg.Span;
             while (enumerator.MoveNext())
             {
@@ -216,7 +216,11 @@ namespace HttpDecodingProxy.ForHttp
             return default;
         }
 
-
+        public static bool TryFindBody(in ReadOnlyMemory<byte> header, out int lengthBody)
+        {
+            lengthBody = HttpBody.FindBodyLength(in header);
+            return lengthBody > 0;
+        }
     }
 
     public struct StartLineReadResult

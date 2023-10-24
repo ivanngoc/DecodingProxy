@@ -13,12 +13,15 @@ using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Buffers.Sequences;
 using IziHardGames.Libs.Cryptography;
+using IziHardGames.Libs.Cryptography.Infos;
+using IziHardGames.Libs.Cryptography.Recording;
 using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Libs.ForHttp20;
 using IziHardGames.Libs.HttpCommon.Common;
 using IziHardGames.Libs.HttpCommon.Info;
 using IziHardGames.Libs.Streams;
-using static IziHardGames.Libs.Cryptography.Tls12.TlsConnection12;
+using IziHardGames.MappedFrameReader;
+using static IziHardGames.Libs.Cryptography.Readers.Tls12.ParserForTls12;
 using EnumHttp11 = IziHardGames.Libs.ForHttp11.Maps.EnumerabableFromBufferForHttp11;
 using EnumHttp20 = IziHardGames.Libs.ForHttp20.Maps.EnumerabableFromBufferForHttp20;
 
@@ -32,11 +35,11 @@ namespace IziHardGames.Libs.HttpCommon.Recording
 
         public async Task Run()
         {
-            await LoadFiles();
-            Analyz();
+            await LoadFiles().ConfigureAwait(false);
+            await Analyz().ConfigureAwait(false);
         }
 
-        private void Analyz()
+        private async Task Analyz()
         {
             foreach (var item in records)
             {
@@ -47,7 +50,9 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             foreach (var id in ids)
             {
                 var items = records.Where(x => x.guid == id).OrderBy(x => x.index).ToArray();
+                if (items.Length != 4) continue;
                 Entry entry = new Entry(items);
+                await entry.AnalyzEntries().ConfigureAwait(false);
                 var timeline = DecodeMessagesAndBuildTimeline(entry);
                 timelines.Add(timeline);
             }
@@ -56,7 +61,7 @@ namespace IziHardGames.Libs.HttpCommon.Recording
         private Timeline DecodeMessagesAndBuildTimeline(Entry entry)
         {
             Timeline timeline = new Timeline(entry);
-            throw new System.NotImplementedException();
+            return timeline;
         }
 
         private async Task LoadFiles()
@@ -68,17 +73,39 @@ namespace IziHardGames.Libs.HttpCommon.Recording
 
             foreach (var file in files)
             {
-                Record record = new Record();
-                var fs = file.OpenRead();
-                byte[] buffer = ArrayPool<byte>.Shared.Rent((int)fs.Length);
-                int readed = await fs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
-                record.source = buffer;
-                record.datasRaw = new ReadOnlyMemory<byte>(buffer, 0, readed);
-                record.filename = file.Name.Remove(file.Name.Length - file.Extension.Length);
-                Console.WriteLine(file.Name);
-                record.ext = file.Extension;
-                record.Analyz();
-                records.Add(record);
+                if (file.Extension == ".clear")
+                {
+                    string fname = file.Name;
+                    string name = fname.Substring(0, fname.Length - 6);
+                    Record record = new Record();
+                    var fs = file.OpenRead();
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent((int)fs.Length);
+                    int readed = await fs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    record.datasAsBytesRaw = buffer;
+                    record.datasAsMemRaw = new ReadOnlyMemory<byte>(buffer, 0, readed);
+                    record.filename = name.Remove(name.Length - 7);
+                    record.dir = file.Directory!.FullName;
+                    Console.WriteLine(file.Name);
+                    record.ext = file.Extension;
+                    record.Analyz();
+                    records.Add(record);
+                }
+                else if (false)
+                {
+                    string name = file.Name;
+                    Record record = new Record();
+                    var fs = file.OpenRead();
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent((int)fs.Length);
+                    int readed = await fs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    record.datasAsBytesRaw = buffer;
+                    record.datasAsMemRaw = new ReadOnlyMemory<byte>(buffer, 0, readed);
+                    record.filename = name.Remove(name.Length - 7);
+                    record.dir = file.Directory!.FullName;
+                    Console.WriteLine(file.Name);
+                    record.ext = file.Extension;
+                    record.Analyz();
+                    records.Add(record);
+                }
             }
         }
 
@@ -93,15 +120,16 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             /// <summary>
             /// Data from file with <see cref="Delimeter"/>
             /// </summary>
-            public ReadOnlyMemory<byte> datasRaw;
-            public ReadOnlyMemory<byte> datas;
-            public byte[] source;
+            public ReadOnlyMemory<byte> datasAsMemRaw;
+            public ReadOnlyMemory<byte> datasAsMem;
+            public byte[] datasAsBytesRaw;
+            public byte[] datasAsBytes;
             public Guid guid;
             public DateTime dateTime;
             public int index;
+            public string dir;
             public string filename;
             public string ext;
-            public byte[] datasBytes;
 
             public void Analyz()
             {
@@ -113,33 +141,43 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             public void AnalyzStage2()
             {
                 Console.WriteLine($"Begin analyz stage 2: {filename}{ext}");
-                var mem = datasRaw;
-                int length = mem.Length;
-
-                while (length > 0)
+                var mem = datasAsMemRaw;
+                // If file without headers
+                if (ext != ".clear")
                 {
-                    Delimeter del = BufferReader.ToStruct<Delimeter>(mem.Slice(0, 16));
-                    //Console.WriteLine($"{del.ToStringInfo()}");
-                    delimeters.Add(del);
-                    mem = mem.Slice(16);
-                    var slice = mem.Slice(0, del.length);
-                    slices.Add(slice);
-                    mem = mem.Slice(del.length);
-                    length -= (16 + slice.Length);
+                    int length = mem.Length;
+
+                    while (length > 0)
+                    {
+                        Delimeter del = BufferReader.ToStruct<Delimeter>(mem.Slice(0, 16));
+                        //Console.WriteLine($"{del.ToStringInfo()}");
+                        delimeters.Add(del);
+                        mem = mem.Slice(16);
+                        var slice = mem.Slice(0, del.length);
+                        slices.Add(slice);
+                        mem = mem.Slice(del.length);
+                        length -= (16 + slice.Length);
+                    }
+                    var seqExample = new ReadOnlySequence<byte>(datasAsMemRaw);
+                    var sequence = SequenceFactory.FromEnumerable(slices);
+                    var lengthSeq = sequence.Length;
+                    var span = sequence.FirstSpan;
+                    datasAsBytes = sequence.ToArray();
+                    File.WriteAllBytes(Path.Combine(dir, filename + ext + ".clear"), datasAsBytes);
+                    datasAsMem = datasAsBytes.AsMemory();
                 }
-                var seqExample = new ReadOnlySequence<byte>(datasRaw);
-                var sequence = SequenceFactory.FromEnumerable(slices);
-                var lengthSeq = sequence.Length;
-                var span = sequence.FirstSpan;
-                datasBytes = sequence.ToArray();
-                datas = datasBytes.AsMemory();
+                else
+                {
+                    this.datasAsBytes = datasAsBytesRaw;
+                    this.datasAsMem = datasAsBytes.AsMemory();
+                }
             }
 
             public void Dispose()
             {
-                ArrayPool<byte>.Shared.Return(source);
-                source = default;
-                datasRaw = default;
+                ArrayPool<byte>.Shared.Return(datasAsBytesRaw);
+                datasAsBytesRaw = default;
+                datasAsMemRaw = default;
                 delimeters.Clear();
                 slices.Clear();
             }
@@ -147,10 +185,22 @@ namespace IziHardGames.Libs.HttpCommon.Recording
 
         private struct Entry
         {
+            /// <summary>
+            /// Данные от агента (браузера/клиента)
+            /// </summary>
             public Record agentRequests;
+            /// <summary>
+            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="originResponses"/>
+            /// </summary>
             public Record agentResponses;
 
+            /// <summary>
+            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="agentRequests"/>
+            /// </summary>
             public Record originRequests;
+            /// <summary>
+            /// Данные от сервера
+            /// </summary>
             public Record originResponses;
 
             public Entry(Record[] items) : this()
@@ -179,6 +229,31 @@ namespace IziHardGames.Libs.HttpCommon.Recording
                     originRequests = items[2];
                 }
             }
+
+            public async Task AnalyzEntries()
+            {
+                return;
+                var t1 = Parse(agentRequests.datasAsBytes);
+                await t1.ConfigureAwait(false);
+
+                var t2 = Parse(agentResponses.datasAsBytes);
+                await t2.ConfigureAwait(false);
+
+                var t3 = Parse(originRequests.datasAsBytes);
+                await t3.ConfigureAwait(false);
+
+                var t4 = Parse(originResponses.datasAsBytes);
+                await t4.ConfigureAwait(false);
+            }
+            private static async Task Parse(byte[] testData)
+            {
+                SchemeImporter importer = new SchemeImporter();
+                importer.tableOfFuncs.AddAdvancingFunc($"ReadBodyHttp11", PopularFuncs.ReadBodyHttp11);
+                Scheme scheme = await importer.FromFileAsync("C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\Izhg.MappedFrameReader\\Examples\\SchemeSsl.txt");
+                Reader reader = new Reader(scheme);
+                reader.OnResult(ReportPublisher.ReportFunc);
+                await reader.ReadAllAsync(testData);
+            }
         }
 
         private class Timeline
@@ -195,18 +270,28 @@ namespace IziHardGames.Libs.HttpCommon.Recording
 
             private void BuildResponses()
             {
-                throw new NotImplementedException();
+
             }
+
 
             private void BuildRequests()
             {
                 var req = entry.agentRequests;
-                var sliceRequest = req.datas;
-                var memRaw = req.datas;
-                string s = Encoding.UTF8.GetString(req.datas.Span.Slice(0, 100));
+                var sliceRequest = req.datasAsMem;
+                var memRaw = req.datasAsMem;
+#if DEBUG
+                string s = Encoding.UTF8.GetString(req.datasAsMem.Span.Slice(0, 500));
                 Console.WriteLine(s);
+#endif
                 var header = ReaderHttpBlind.FindHeadersHttp11(in sliceRequest);
                 sliceRequest = sliceRequest.Slice(header.Length);
+
+                if (ReaderHttpBlind.TryFindBody(in header, out int lengthBody))
+                {
+                    sliceRequest = sliceRequest.Slice(lengthBody);
+                }
+                var clientData = sliceRequest;
+                var serverData = entry.originResponses.datasAsMem;
 
                 if (ReaderHttpBlind.TryReadStartLine(in header, out StartLineReadResult result))
                 {
@@ -214,99 +299,11 @@ namespace IziHardGames.Libs.HttpCommon.Recording
                     var flags = result.flags;
                     if (flags.HasFlag(EStartLine.MethodConnect))
                     {
-                        var copyReader = sliceRequest;
-                        Console.WriteLine($"Client Begin Raw frames");
-                        while (TlsConnection12.TryParse(ref copyReader, out ParseResult parseResult))
-                        {
-                            if (copyReader.Length == 0)
-                            {
-                                Console.WriteLine("Reached Zero");
-                            }
-                            Console.WriteLine(parseResult.ToStringInfo() + $" LEFT:{copyReader.Length}");
-                        }
-                        Console.WriteLine($"Client ended");
-
-                        var clientHello = TlsConnection12.ParseClientHello(ref sliceRequest, out ReadOnlyMemory<byte> payload0);
-                        var clientKeyExchange = TlsConnection12.ParseClientKeyExchange(ref sliceRequest, out ReadOnlyMemory<byte> payload2);
-                        var clientChangeCipherSpec = TlsConnection12.ParseClientChangeCipherSpec(ref sliceRequest, out ReadOnlyMemory<byte> payload3);
-                        var clientHandshakeFinished = TlsConnection12.ParseClientHandshakeFinished(ref sliceRequest, out ReadOnlyMemory<byte> payload4);
-                        var clientApplicationData = TlsConnection12.ParseClientApplicationData(ref sliceRequest, out ReadOnlyMemory<byte> payload5);
-                        var clientCloseNotify = TlsConnection12.ParseClientCloseNotify(ref sliceRequest, out ReadOnlyMemory<byte> payload6);
-
-                        HandshakeHelloInfo handshakeInfo = BuildTlsHandshakeAsClient(in clientHello, in payload0);
-
-                        Console.WriteLine(handshakeInfo.ToStringInfo());
-
-                        if (handshakeInfo.isAlpnH3)
-                        {
-                            throw new System.NotImplementedException();
-                        }
-                        else if (handshakeInfo.isAlpnH2)
-                        {
-                            var sliceResponse = entry.agentResponses.datas;
-                            X509Certificate2Collection certCollection = default;
-
-                            var serverHello = TlsConnection12.ParseServerHello(ref sliceResponse, out var payloadServerHello);
-                            if (!HandshakeHelloFromServerAnalyz.TryAnalyz(in serverHello, in payloadServerHello, out var serverHello0))
-                            {
-
-                            }
-
-                            while (TlsConnection12.TryParse(ref sliceResponse, out ParseResult parseResult))
-                            {
-                                if (sliceResponse.Length == 0)
-                                {
-                                    Console.WriteLine("Reached Zero");
-                                }
-                                Console.WriteLine(parseResult.ToStringInfo() + $" LEFT:{sliceResponse.Length}");
-
-                                if (parseResult.record.TypeRecord == ETlsTypeRecord.Handshake)
-                                {
-                                    if (parseResult.handsakeHeader.Type == ETlsTypeHandshakeMessage.Certificate)
-                                    {
-                                        certCollection = TlsParser.ParseServerCert(in parseResult, in parseResult.payload);
-                                    }
-                                }
-                            }
-
-                            var serverCert = certCollection[0];
-                            SslServerAuthenticationOptions optionsSever = new SslServerAuthenticationOptions()
-                            {
-                                ServerCertificate = serverCert,
-                                EncryptionPolicy = EncryptionPolicy.RequireEncryption,
-                                EnabledSslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11,
-                                CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
-                                ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http2, SslApplicationProtocol.Http11 },
-                            };
-
-
-                            var fakeStream = new StreamForReadOnlyMemory();
-                            fakeStream.Initilize(memRaw);
-                            // SSL traffic
-                            SslStream sslStream = new SslStream(fakeStream);
-                            sslStream.AuthenticateAsServer(optionsSever);
-
-                            var preface = sliceRequest.Slice(0, ConstantsForHttp20.CLIENT_PREFACE_SIZE);
-                            if (!preface.CompareWith(ConstantsForHttp20.clientPrefaceBytes))
-                            {
-                                throw new ArgumentOutOfRangeException("Preface not passed!");
-                            }
-                            sliceRequest = sliceRequest.Slice(ConstantsForHttp20.CLIENT_PREFACE_SIZE);
-
-                            foreach (var map in new EnumHttp20(sliceRequest))
-                            {
-                                HttpInfoMessage msg = HttpInfoMessage.Create(map);
-                                Console.WriteLine(msg.ToInfoString());
-                            }
-                        }
-                        else if (handshakeInfo.isHttp11)
-                        {
-
-                            foreach (var map in new EnumHttp11(sliceRequest))
-                            {
-
-                            }
-                        }
+                        TlsPlayer tlsPlayer = new TlsPlayer(clientData, serverData);
+                        var decryptedData = tlsPlayer.Decrypt();
+                        if (decryptedData is null) return;
+                        //var session = ParseTlsHandshake(memRaw, ref sliceRequest);
+                        //ParseEncryptedHttp(session, memRaw, ref sliceRequest);
                     }
                     else
                     {
@@ -314,6 +311,38 @@ namespace IziHardGames.Libs.HttpCommon.Recording
                     }
                 }
                 throw new System.NotImplementedException();
+            }
+
+            private void ParseEncryptedHttp(TlsSession session, ReadOnlyMemory<byte> memRaw, ref ReadOnlyMemory<byte> sliceRequest)
+            {
+                var serverCert = session.server.cert;
+
+                SslServerAuthenticationOptions optionsSever = new SslServerAuthenticationOptions()
+                {
+                    ServerCertificate = serverCert,
+                    EncryptionPolicy = EncryptionPolicy.RequireEncryption,
+                    EnabledSslProtocols = SslProtocols.Tls13 | SslProtocols.Tls12 | SslProtocols.Tls11,
+                    CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+                    ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http2, SslApplicationProtocol.Http11 },
+                };
+                var fakeStream = new StreamForReadOnlyMemory();
+                fakeStream.Initilize(memRaw);
+                // SSL traffic
+                SslStream sslStream = new SslStream(fakeStream);
+                sslStream.AuthenticateAsServer(optionsSever);
+
+                var preface = sliceRequest.Slice(0, ConstantsForHttp20.CLIENT_PREFACE_SIZE);
+                if (!preface.CompareWith(ConstantsForHttp20.clientPrefaceBytes))
+                {
+                    throw new ArgumentOutOfRangeException("Preface not passed!");
+                }
+                sliceRequest = sliceRequest.Slice(ConstantsForHttp20.CLIENT_PREFACE_SIZE);
+
+                foreach (var map in new EnumHttp20(sliceRequest))
+                {
+                    HttpInfoMessage msg = HttpInfoMessage.Create(map);
+                    Console.WriteLine(msg.ToInfoString());
+                }
             }
 
             private HandshakeCertificateInfo BuildCertificate(in ReadOnlyMemory<byte> mem)

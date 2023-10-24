@@ -67,7 +67,6 @@ namespace IziHardGames.Libs.Streams
         {
             throw new System.NotImplementedException();
         }
-
         #region Write
         public override void Write(byte[] buffer, int offset, int count)
         {

@@ -1,4 +1,5 @@
 ﻿using IziHardGames;
+using IziHardGames.Libs.NonEngine.Enumerators;
 using ProxyLibs.Extensions;
 using System;
 using System.Buffers;
@@ -125,7 +126,7 @@ namespace HttpDecodingProxy.ForHttp
         /// <param name="obj"></param>
         private void ReadChunks(Stream stream, HttpObject obj)
         {
-            Logger.LogLine($"Begin Read Chunk");
+            MyLogger.LogLine($"Begin Read Chunk");
 
             var fields = obj.fields;
             buffer = ArrayPool<byte>.Shared.Rent(INITIAL_BUFFER_SIZE);
@@ -139,7 +140,7 @@ namespace HttpDecodingProxy.ForHttp
                 int size = int.Parse(hexSize, System.Globalization.NumberStyles.HexNumber);
                 // if last chunk
                 if (size == 0) break;
-                Logger.LogLine($"Size: {size}");
+                MyLogger.LogLine($"Size: {size}");
 
                 EnsureSizeToAppend(size + 2);
                 stream.ReadForSure(buffer, bufferLength, size);
@@ -162,7 +163,7 @@ namespace HttpDecodingProxy.ForHttp
             //    Logger.LogLine(tr.ReadLine());
             //}
             datas = new Memory<byte>(buffer, 0, bufferLength);
-            Logger.LogLine($"Read Chunk Completed");
+            MyLogger.LogLine($"Read Chunk Completed");
         }
 
         private void EnsureSizeToAppend(int size)
@@ -272,6 +273,22 @@ namespace HttpDecodingProxy.ForHttp
             buffer = memoryStream.ToArray();
             memoryStream.Dispose();
             memoryStream = default;
+        }
+
+        public static int FindBodyLength(in ReadOnlyMemory<byte> mem)
+        {
+            EnumeratorForSpanLine enumeratorForSpanNewLine = new EnumeratorForSpanLine(in mem);
+
+            while (enumeratorForSpanNewLine.MoveNext())
+            {
+                var line = enumeratorForSpanNewLine.Current;
+                string s = Encoding.UTF8.GetString(line.Span);
+                if (s.Contains("Content-Length", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new System.NotImplementedException();
+                }
+            }
+            return 0;
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace IziHardGames.Lib.Collections.Contracts
 {
-    public interface IDoubleEdgeList<T> : IDoubleEdgeNode<T>
+    public interface IDoubleEdgeList<T> : INodeBidirectional<T>
     {
 
 
@@ -10,9 +10,16 @@
         public T Next { get; set; }
     }
 
-    public interface IDoubleEdgeNode<T>
+    public interface INodeBidirectional<T>: INodeForward<T>, INodeBackward<T>
+    {
+    }
+
+    public interface INodeForward<T>
+    {
+        public T Tail { get; set; }
+    }
+    public interface INodeBackward<T>
     {
         public T Head { get; set; }
-        public T Tail { get; set; }
     }
 }

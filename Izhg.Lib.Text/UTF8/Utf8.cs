@@ -5,6 +5,11 @@ namespace IziHardGames.Libs.IO
 {
     public static class Utf8
     {
+        public const byte LEADING_1_BYTE = 0;                  //0
+        public const byte LEADING_2_BYTE = 0b1100_0000;        //110
+        public const byte LEADING_3_BYTE = 0b1110_0000;        //1110
+        public const byte LEADING_4_BYTE = 0b1111_0000;        //11110
+
         // this masks using for extract value from
         public const int MASK_UTF8_BYTE1 = 0b_1000_0000_0000_0000; // 0xxx xxxx
         public const int MASK_UTF8_BYTE2 = 0b_1110_0000_0000_0000; // 110x xxxx

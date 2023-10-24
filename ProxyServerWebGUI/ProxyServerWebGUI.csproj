@@ -18,7 +18,7 @@
     <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Libs.Tables.csproj" />
+    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
   </ItemGroup>
 
