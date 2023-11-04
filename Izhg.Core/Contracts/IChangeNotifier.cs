@@ -1,5 +1,12 @@
-﻿namespace IziHardGames.Core
+﻿using System;
+
+namespace IziHardGames.Core
 {
+
+    public interface IziDisposable : IDisposable
+    {
+        private bool IsDisposed { get => throw new System.NotImplementedException(); set => this.IsDisposed = value; }
+    }
 
     public interface IChangeNotifier<T>
     {

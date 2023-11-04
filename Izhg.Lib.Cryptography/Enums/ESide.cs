@@ -2,6 +2,7 @@
 
 namespace IziHardGames.Libs.Cryptography
 {
+
     [Flags]
     public enum ESide
     {

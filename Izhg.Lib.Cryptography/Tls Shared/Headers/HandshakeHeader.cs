@@ -14,7 +14,7 @@ namespace IziHardGames.Libs.Cryptography.Shared.Headers
         /// <see cref="ETlsTypeHandshakeMessage"/>
         /// </summary>
         [FieldOffset(0)] public readonly byte messageType;
-        [FieldOffset(1)] public readonly Bytes3 length1Follows;
+        [FieldOffset(1)] private readonly Bytes3 length1Follows;
 
         public int Length => (int)length1Follows;
         public ETlsTypeHandshakeMessage Type => (ETlsTypeHandshakeMessage)messageType;

@@ -12,8 +12,8 @@ namespace IziHardGames.Libs.Cryptography.Tls12
 
         public bool TryAnalyzeTlsFrame(byte[] buffer, int offset, int length)
         {
-            Array.Copy(buffer, offset, frameHello, this.length, length);
-            this.length += length;
+            Array.Copy(buffer, offset, frame, this.offset, length);
+            this.offset += length;
             return TryAnalyze();
         }
 
@@ -21,8 +21,8 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         {
             while (true)
             {
-                int readed = await networkStream.ReadAsync(frameHello, length, frameHello.Length - length);
-                length += readed;
+                int readed = await networkStream.ReadAsync(frame, offset, frame.Length - offset);
+                offset += readed;
                 TryAnalyze();
             }
         }
@@ -30,7 +30,7 @@ namespace IziHardGames.Libs.Cryptography.Tls12
         protected bool TryAnalyze()
         {
             TlsHelloFromClient tlcHelloFromClient = new TlsHelloFromClient();
-            TlsHelloFromClient.Read<IndexReaderForArray<byte>>(frameHello);
+            TlsHelloFromClient.Read<IndexReaderForArray<byte>>(frame);
             return default;
         }
     }

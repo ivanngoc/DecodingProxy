@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -12,6 +13,8 @@ namespace IziHardGames.Libs.Async
     /// Семафор для паттерн производитель-потребитель. 1 производитель вызывает метод Set(), после чего потребитель завершает await и потребляет. 1к1. одновременно может быть только 1 await.    /// 
     /// Аналог <see cref=""/> c базой на <see cref="ValueTask{TResult}"/>
     /// </summary>
+
+    [Guid("5994bba1-cc3a-4b7f-a2c6-dcdbabefa86e")]
     public sealed class AsyncSignaler : IValueTaskSource<bool>, IDisposable, IPoolBind<AsyncSignaler>, IValueTaskBased, IAwaitComntrol
     {
         public static readonly OperationCanceledException exception = new OperationCanceledException();

@@ -95,7 +95,7 @@ namespace IziHardGames.Proxy.Http
             this.consumingProvider = consumingProvider;
             ConfigJson.EnsureConfigExist();
             UpdateSettings();
-            CertManager.CreateShared(ConfigJson.PathCertForged, ConfigJson.PathCertOriginal);
+            CertManager.CreateSharedCa();
             Init(CertManager.Shared, consumingProvider);
             var token = cts.Token;
 

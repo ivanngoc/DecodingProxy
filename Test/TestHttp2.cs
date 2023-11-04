@@ -357,7 +357,7 @@ namespace Test
         private async Task TestHandleClient(Socket socket)
         {
             Console.WriteLine($"Begin Handle Client. Remote Endpoint:{socket.RemoteEndPoint}. Local EndPoint:{socket.LocalEndPoint}");
-            CertManager.CreateShared(@"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original");
+            CertManager.CreateSharedCa(); // @"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original"
             var certManager = CertManager.Shared;
             var caCert = CertManager.SharedCa;
 

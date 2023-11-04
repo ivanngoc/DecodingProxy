@@ -3,7 +3,11 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Libs.Buffers.Abstracts;
+using IziHardGames.Libs.Buffers.Readers;
+using IziHardGames.Libs.Buffers.Sources;
+using IziHardGames.Libs.Buffers.Writers;
 using IziHardGames.Libs.Streaming;
+using IziHardGames.Libs.Streams.Attributes;
 
 namespace IziHardGames.Libs.Streams
 {
@@ -11,22 +15,41 @@ namespace IziHardGames.Libs.Streams
     {
         protected AdapterForWrite? writer;
         protected AdapterForRead? reader;
-        protected SourceAdapter? sourceAdapter;
+        protected SourceAdapter? sourceAdapterReader;
+        protected SourceAdapter? sourceAdapterWriter;
 
-        public override bool CanRead { get => sourceAdapter.CanRead; }
-        public override bool CanSeek { get => sourceAdapter.CanSeek; }
-        public override bool CanWrite { get => sourceAdapter.CanWrite; }
-        public override long Length { get => sourceAdapter.Length; }
-        public override long Position { get => sourceAdapter.Position; set => sourceAdapter.Position = value; }
+        public override bool CanRead { get => sourceAdapterReader?.CanRead ?? false; }
+        public override bool CanWrite { get => sourceAdapterWriter?.CanWrite ?? false; }
+        public override bool CanSeek { get => throw new System.NotImplementedException(); }
+        public override long Length { get => throw new System.NotImplementedException(); }
+        public override long Position { get; set; }
 
-        public void Initilize(ReadOnlyMemory<byte> readOnlyMemory)
+        public void Initilize(Stream streamRead, Stream streamWrite)
         {
-            SourceAdapterForReadOnlyMemory source = SourceAdapterForReadOnlyMemory.GetOrCreate();
-            source.source = readOnlyMemory;
-            this.sourceAdapter = source;
-            var reader = this.reader = AdaptedReaderForReadOnlyMemory.GetOrCreate();
-            reader.SetSource(source);
+            InitilizeReader(streamRead);
+            InitilizeWriter(streamWrite);
         }
+
+
+        public void Initilize(in ReadOnlyMemory<byte> readOnlyMemory, Stream stream)
+        {
+            InitilizeReader(in readOnlyMemory);
+            InitilizeWriter(stream);
+        }
+
+        [Bidirectional(Type = ETransmitType.ReadWrite)]
+        public void Initilize(in ReadOnlyMemory<byte> readOnlyMemory, Memory<byte> write)
+        {
+            InitilizeReader(in readOnlyMemory);
+            InitilizeWriter(write);
+        }
+
+        [OneDirection(Type = ETransmitType.OnlyRead)]
+        public void Initilize(in ReadOnlyMemory<byte> readOnlyMemory)
+        {
+            InitilizeReader(in readOnlyMemory);
+        }
+
         public void Initilize(byte[] bytes)
         {
             throw new System.NotImplementedException();
@@ -34,6 +57,38 @@ namespace IziHardGames.Libs.Streams
         public void Initilize(Stream stream)
         {
             throw new System.NotImplementedException();
+        }
+
+        private void InitilizeReader(Stream streamRead)
+        {
+            throw new NotImplementedException();
+        }
+        private void InitilizeReader(in ReadOnlyMemory<byte> readOnlyMemory)
+        {
+            SourceAdapterForReadOnlyMemory source = SourceAdapterForReadOnlyMemory.GetOrCreate();
+            source.source = readOnlyMemory;
+            this.sourceAdapterReader = source;
+
+            var reader = this.reader = AdapterForReadFromReadOnlyMemory.GetOrCreate();
+            reader.SetSource(source);
+        }
+        private void InitilizeWriter(Memory<byte> readOnlyMemory)
+        {
+            SourceAdapterForMemory source = SourceAdapterForMemory.GetOrCreate();
+            source.source = readOnlyMemory;
+            this.sourceAdapterWriter = source;
+
+            var writer = this.writer = AdapterForWriteToMemory.GetOrCreate();
+            writer.SetSource(source);
+        }
+        private void InitilizeWriter(Stream stream)
+        {
+            SourceAdapterForStream source = SourceAdapterForStream.GetOrCreate();
+            source.source = stream;
+            this.sourceAdapterWriter = source;
+
+            var writer = this.writer = AdapterForWriteToStream.GetOrCreate();
+            writer.SetSource(source);
         }
 
         public override void Flush()
@@ -74,21 +129,39 @@ namespace IziHardGames.Libs.Streams
             throw new System.NotImplementedException();
         }
 
+        #region Writers
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new System.NotImplementedException();
         }
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            throw new System.NotImplementedException();
+        }
+        public override void WriteByte(byte value)
+        {
+            throw new System.NotImplementedException();
+        }
+        public async override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await writer!.WriteAsync(new Memory<byte>(buffer, offset, count)).ConfigureAwait(false);
+        }
+        public async override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            await writer!.WriteAsync(buffer).ConfigureAwait(false);
+        }
+        #endregion
 
         public override void Close()
         {
             base.Close();
             writer!.Dispose();
             reader!.Dispose();
-            sourceAdapter!.Dispose();
+            sourceAdapterReader!.Dispose();
 
             writer = default;
             reader = default;
-            sourceAdapter = default;
+            sourceAdapterReader = default;
         }
     }
 }

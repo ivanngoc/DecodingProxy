@@ -1,6 +1,6 @@
 ﻿using IziHardGames.Core;
+using IziHardGames.Libs.Cryptography.Defaults;
 using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.Networking.Options;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
@@ -62,7 +62,7 @@ namespace IziHardGames.Proxy.Tcp.Tls
             SocketWrapUpgradeTlsHttp upgrade;
             if (filter.HasFlag(EConnectionFlags.HTTP2) && filter.HasFlag(EConnectionFlags.TLS12))
             {
-                upgrade = client.UpgradeTls(NetworkDefaults.DefaultHttp2) as SocketWrapUpgradeTlsHttp ?? throw new NullReferenceException();
+                upgrade = client.UpgradeTls(SslDefaults.DefaultHttp2) as SocketWrapUpgradeTlsHttp ?? throw new NullReferenceException();
                 goto NEXT;
             }
             else if (filter.HasFlag(EConnectionFlags.HTTP11) && filter.HasFlag(EConnectionFlags.TLS12))

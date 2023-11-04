@@ -1,6 +1,6 @@
 ﻿namespace IziHardGames.Libs.Text
 {
-    public static class ConstantsForCHars
+    public static class ConstantsForChars
     {
 
     }

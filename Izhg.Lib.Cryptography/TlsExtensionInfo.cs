@@ -9,7 +9,7 @@ namespace IziHardGames.Libs.Cryptography.Infos
     /// <summary>
     /// <see cref="IziHardGames.Libs.Cryptography.TlsExtensionInfoReusable"/>
     /// </summary>
-    public readonly ref struct TlsExtensionInfo
+    public readonly struct TlsExtensionInfo
     {
         public readonly ushort type;
         public readonly ushort length;

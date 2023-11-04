@@ -63,8 +63,28 @@ namespace IziHardGames.Libs.NonEngine.Memory
         void Bind(IPoolObjects pool);
     }
 
+    public interface IPoolBindTrait<T> where T : class, new()
+    {
+        public IPoolReturn<T> Pool { get; set; }
+        public void BindToPool(IPoolReturn<T> pool)
+        {
+            this.Pool = pool;
+        }
+    }
+
     public interface IPoolBind<T>
     {
         void BindToPool(IPoolReturn<T> pool);
+    }
+
+    public interface IPooDisposable<T> : IDisposable, IPoolBindTrait<T> where T : class, new()
+    {
+        void DisposeAndReturnToPool()
+        {
+
+            //T item = this;
+            //this.Dispose();
+            //Pool.Return(this);
+        }
     }
 }

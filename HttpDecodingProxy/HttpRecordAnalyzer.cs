@@ -53,14 +53,15 @@ namespace IziHardGames.Libs.HttpCommon.Recording
                 if (items.Length != 4) continue;
                 Entry entry = new Entry(items);
                 await entry.AnalyzEntries().ConfigureAwait(false);
-                var timeline = DecodeMessagesAndBuildTimeline(entry);
+                var timeline = await DecodeMessagesAndBuildTimeline(entry).ConfigureAwait(false);
                 timelines.Add(timeline);
             }
         }
 
-        private Timeline DecodeMessagesAndBuildTimeline(Entry entry)
+        private async Task<Timeline> DecodeMessagesAndBuildTimeline(Entry entry)
         {
             Timeline timeline = new Timeline(entry);
+            await timeline.Run().ConfigureAwait(false);
             return timeline;
         }
 
@@ -73,11 +74,13 @@ namespace IziHardGames.Libs.HttpCommon.Recording
 
             foreach (var file in files)
             {
+                Record record = new Record();
+                record.fullName = file.FullName;
+
                 if (file.Extension == ".clear")
                 {
                     string fname = file.Name;
                     string name = fname.Substring(0, fname.Length - 6);
-                    Record record = new Record();
                     var fs = file.OpenRead();
                     byte[] buffer = ArrayPool<byte>.Shared.Rent((int)fs.Length);
                     int readed = await fs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
@@ -93,7 +96,6 @@ namespace IziHardGames.Libs.HttpCommon.Recording
                 else if (false)
                 {
                     string name = file.Name;
-                    Record record = new Record();
                     var fs = file.OpenRead();
                     byte[] buffer = ArrayPool<byte>.Shared.Rent((int)fs.Length);
                     int readed = await fs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
@@ -130,6 +132,7 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             public string dir;
             public string filename;
             public string ext;
+            internal string fullName;
 
             public void Analyz()
             {
@@ -188,61 +191,61 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             /// <summary>
             /// Данные от агента (браузера/клиента)
             /// </summary>
-            public Record agentRequests;
+            public Record proxyReadFromClient;
             /// <summary>
-            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="originResponses"/>
+            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="proxyReadFromOrigin"/>
             /// </summary>
-            public Record agentResponses;
+            public Record proxyWriteToClient;
 
             /// <summary>
-            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="agentRequests"/>
+            /// Если прокси не изменял данные то эти данные Должны совпадать с <see cref="proxyReadFromClient"/>
             /// </summary>
-            public Record originRequests;
+            public Record proxyWriteToOrigin;
             /// <summary>
             /// Данные от сервера
             /// </summary>
-            public Record originResponses;
+            public Record proxyReadFromOrigin;
 
             public Entry(Record[] items) : this()
             {
                 var temp1 = items[0];
                 if (temp1.ext == ".writer")
                 {
-                    agentResponses = items[0];
-                    agentRequests = items[1];
+                    proxyWriteToClient = items[0];
+                    proxyReadFromClient = items[1];
                 }
                 else
                 {
-                    agentResponses = items[1];
-                    agentRequests = items[0];
+                    proxyReadFromClient = items[0];
+                    proxyWriteToClient = items[1];
                 }
                 var temp2 = items[2];
 
                 if (temp2.ext == ".writer")
                 {
-                    originResponses = items[2];
-                    originRequests = items[3];
+                    proxyWriteToOrigin = items[2];
+                    proxyReadFromOrigin = items[3];
                 }
                 else
                 {
-                    originResponses = items[3];
-                    originRequests = items[2];
+                    proxyReadFromOrigin = items[2];
+                    proxyWriteToOrigin = items[3];
                 }
             }
 
             public async Task AnalyzEntries()
             {
                 return;
-                var t1 = Parse(agentRequests.datasAsBytes);
+                var t1 = Parse(proxyReadFromClient.datasAsBytes);
                 await t1.ConfigureAwait(false);
 
-                var t2 = Parse(agentResponses.datasAsBytes);
+                var t2 = Parse(proxyWriteToClient.datasAsBytes);
                 await t2.ConfigureAwait(false);
 
-                var t3 = Parse(originRequests.datasAsBytes);
+                var t3 = Parse(proxyWriteToOrigin.datasAsBytes);
                 await t3.ConfigureAwait(false);
 
-                var t4 = Parse(originResponses.datasAsBytes);
+                var t4 = Parse(proxyReadFromOrigin.datasAsBytes);
                 await t4.ConfigureAwait(false);
             }
             private static async Task Parse(byte[] testData)
@@ -264,7 +267,12 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             public Timeline(Entry entry)
             {
                 this.entry = entry;
-                BuildRequests();
+            }
+
+            public async Task Run()
+            {
+
+                await BuildRequests().ConfigureAwait(false);
                 BuildResponses();
             }
 
@@ -274,48 +282,67 @@ namespace IziHardGames.Libs.HttpCommon.Recording
             }
 
 
-            private void BuildRequests()
+            private async Task BuildRequests()
             {
-                var req = entry.agentRequests;
-                var sliceRequest = req.datasAsMem;
+                var req = entry.proxyReadFromClient;
+                var proxyReadFromClientMem = req.datasAsMem;
+                var proxyWriteToClientMem = entry.proxyWriteToClient.datasAsMem;
+                var sliceProxyReadFromClientMem = proxyReadFromClientMem;
                 var memRaw = req.datasAsMem;
 #if DEBUG
                 string s = Encoding.UTF8.GetString(req.datasAsMem.Span.Slice(0, 500));
                 Console.WriteLine(s);
 #endif
-                var header = ReaderHttpBlind.FindHeadersHttp11(in sliceRequest);
-                sliceRequest = sliceRequest.Slice(header.Length);
-
-                if (ReaderHttpBlind.TryFindBody(in header, out int lengthBody))
+                var headerRequest = ReaderHttpBlind.FindHeadersHttp11(in sliceProxyReadFromClientMem);
+                if (ReaderHttpBlind.ValidateHeadersForRequest(in headerRequest))
                 {
-                    sliceRequest = sliceRequest.Slice(lengthBody);
-                }
-                var clientData = sliceRequest;
-                var serverData = entry.originResponses.datasAsMem;
+                    sliceProxyReadFromClientMem = sliceProxyReadFromClientMem.Slice(headerRequest.Length);
 
-                if (ReaderHttpBlind.TryReadStartLine(in header, out StartLineReadResult result))
-                {
-                    Console.WriteLine($"Start Line: {result.ToStringInfo()}");
-                    var flags = result.flags;
-                    if (flags.HasFlag(EStartLine.MethodConnect))
+                    if (ReaderHttpBlind.TryFindBody(in headerRequest, out int lengthBody))
                     {
-                        TlsPlayer tlsPlayer = new TlsPlayer(clientData, serverData);
-                        var decryptedData = tlsPlayer.Decrypt();
-                        if (decryptedData is null) return;
-                        //var session = ParseTlsHandshake(memRaw, ref sliceRequest);
-                        //ParseEncryptedHttp(session, memRaw, ref sliceRequest);
+                        sliceProxyReadFromClientMem = sliceProxyReadFromClientMem.Slice(lengthBody);
                     }
-                    else
+
+                    if (ReaderHttpBlind.TryReadStartLine(in headerRequest, out StartLineReadResult result))
                     {
-                        throw new System.NotImplementedException();
+                        Console.WriteLine($"Start Line: {result.ToStringInfo()}");
+                        var flags = result.flags;
+                        if (flags.HasFlag(EStartLine.MethodConnect))
+                        {
+                            if (false) // когда новый дамп сделаю
+                            {
+                                var headerResponse = ReaderHttpBlind.FindHeadersHttp11(in proxyWriteToClientMem);
+                                if (!ReaderHttpBlind.ValidateHeadersForRequest(in headerResponse)) throw new FormatException();
+                                proxyWriteToClientMem = proxyWriteToClientMem.Slice(headerResponse.Length);
+
+                                if (ReaderHttpBlind.TryFindBody(in headerResponse, out int lengthBodyResponse))
+                                {
+                                    proxyWriteToClientMem = proxyWriteToClientMem.Slice(lengthBodyResponse);
+                                }
+                            }
+                            proxyReadFromClientMem = sliceProxyReadFromClientMem;
+                            TlsPlayerWithProxy tlsPlayer = new TlsPlayerWithProxy(result.Host, proxyReadFromClientMem, proxyWriteToClientMem, entry.proxyWriteToOrigin.datasAsMem, entry.proxyReadFromOrigin.datasAsMem);
+                            var decryptedData = await tlsPlayer.Decrypt();
+                            if (decryptedData is null) return;
+                            //var session = ParseTlsHandshake(memRaw, ref sliceRequest);
+                            //ParseEncryptedHttp(session, memRaw, ref sliceRequest);
+                        }
+                        else
+                        {
+                            throw new System.NotImplementedException();
+                        }
                     }
+                    throw new System.NotImplementedException();
                 }
-                throw new System.NotImplementedException();
+                else
+                {
+                    throw new System.NotImplementedException();
+                }
             }
 
             private void ParseEncryptedHttp(TlsSession session, ReadOnlyMemory<byte> memRaw, ref ReadOnlyMemory<byte> sliceRequest)
             {
-                var serverCert = session.server.cert;
+                var serverCert = session.proxyToClient.Cert;
 
                 SslServerAuthenticationOptions optionsSever = new SslServerAuthenticationOptions()
                 {

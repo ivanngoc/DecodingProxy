@@ -10,6 +10,7 @@ namespace IziHardGames.Libs.Buffers.Abstracts
         public virtual void SetSource(SourceAdapter source)
         {
             this.source = source;
+            source.CanRead = true;
         }
         public virtual void Dispose()
         {

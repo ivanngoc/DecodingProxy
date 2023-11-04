@@ -1,0 +1,45 @@
+﻿<doc>
+  <Scheme name="HttpProxy">
+    <item action="Read" SourceType="Frame" SourceName="HttpConnect"></item>
+    <item action="Read" SourceType="Frame" SourceName="SslFrame" Repeat="true"></item>
+  </Scheme>
+  <Frame name="HttpConnect" LengthType="Dynamic">
+    <Field type="string" name="HttpConnect.StartLine" Size="?" AdvanceMode="StringCompare" ConditionType="ClosedBy" ConditionValue="\r\n"></Field>
+    <Field type="string" vector="True" name="HttpConnect.Headers" Size="?" AdvanceMode="StringCompare" ConditionType="ClosedBy" Separator="\r\n" Repeat="True" Enclose="\r\n\r\n"></Field>
+    <Field type="slice" name="HttpConnect.Body" Size="?" AdvanceMode="Func" Repeat="False" ConditionType="Func" ConditionValue="ReadBodyHttp11"></Field>
+  </Frame>
+
+  <Frame name="SslFrame" LengthType="Dynamic" shortPath="">
+    <Item name="SslFrame.TlsRecord" shortPath="SslFrame.TlsRecord" Size="5" LengthType="Defined">
+      <Field type="byte" name="SslFrame.TlsRecord.RecordType" CreateLink="True" Size="1"></Field>
+      <Item name="SslFrame.TlsRecord.ProtocolVersion" Size="2" LengthType="Defined">
+        <Field type="byte" name="ProtocolVersion.major" Size="1"></Field>
+        <Field type="byte" name="ProtocolVersion.minor" Size="1"></Field>
+      </Item>
+      <Field name="SslFrame.TlsRecord.Length" CreateLink="True" size="2" type="ushort"></Field>
+      <Item name="SslFrame.TlsRecord.Payload" Size="$SslFrame.TlsRecord.Length" LengthType="Linked">
+        <Switch name="" value="$SslFrame.TlsRecord.RecordType">
+          <CaseItem value="0x16">
+            <List Condition="SslFrame.TlsRecord.Payload.Length > 0">
+            <Item name="SslFrame.TlsRecord.Payload.HandshakeHeader" Size="4" LengthType="Defined">
+              <Field name="SslFrame.TlsRecord.Payload.HandshakeHeader.messageType" type="byte" size="1"></Field>
+              <Field name="$SslFrame.TlsRecord.Payload.HandshakeHeader.Length" CreateLink="True" Cast="True" type="uint" size="3"></Field>
+              <Switch value="$SslFrame.TlsRecord.Payload.HandshakeHeader.messageType">
+                <CaseItem value="0x00">
+                </CaseItem>
+                <CaseItem value="0x01">
+                </CaseItem>
+                <CaseItem value="default">
+                </CaseItem>
+              </Switch>
+            </Item>
+            </List>
+            <Field name="SslFrame.TlsRecord.Payload.Data" type="slice" size="$SslFrame.TlsRecord.Payload.HandshakeHeader.Length"></Field>
+          </CaseItem>
+          <CaseItem value="0x17"></CaseItem>
+          <CaseItem value="default"></CaseItem>
+        </Switch>
+      </Item>
+    </Item>
+  </Frame>
+</doc>

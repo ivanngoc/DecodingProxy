@@ -143,7 +143,7 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<byte> FindSplit(in this ReadOnlySpan<byte> span, byte byteChar, int index)
+        public static ReadOnlySpan<byte> FindSplit(this ReadOnlySpan<byte> span, byte byteChar, int index)
         {
             int offset = 0;
             int count = 0;

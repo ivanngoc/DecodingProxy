@@ -13,6 +13,7 @@ using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Libs.Binary.Readers;
 using DevConsole.Shared.Consoles;
 using IziHardGames.Libs.Cryptography.Shared.Headers;
+using IziHardGames.Tls;
 
 namespace IziHardGames.Tests
 {
@@ -44,7 +45,6 @@ namespace IziHardGames.Tests
                     await devConsoleControl.Start().ConfigureAwait(false);
                     ReportPublisher.ReportFunc = devConsoleControl.SendToServer;
                 }
-
                 HttpRecordAnalyzer analyzer = new HttpRecordAnalyzer();
                 await analyzer.Run().ConfigureAwait(false);
             }

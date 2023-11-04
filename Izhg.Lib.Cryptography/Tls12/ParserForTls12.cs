@@ -8,58 +8,62 @@ namespace IziHardGames.Libs.Cryptography.Readers.Tls12
 {
     public static class ParserForTls12
     {
-        public readonly ref struct FrameParseResult
+        internal readonly struct FrameParseResult
         {
             public readonly TlsRecord record;
             public readonly HandshakeHeader handsakeHeader;
             public readonly ReadOnlyMemory<byte> payload;
+            public readonly ReadOnlyMemory<byte> wholeFrame;
 
-            public FrameParseResult(in TlsRecord record, in HandshakeHeader header, in ReadOnlyMemory<byte> payload) : this()
+            public FrameParseResult(in TlsRecord record, in HandshakeHeader header, in ReadOnlyMemory<byte> payload, in ReadOnlyMemory<byte> wholeFrame) : this()
             {
                 //this.handshakeRecord = default;
                 this.record = record;
                 handsakeHeader = header;
                 this.payload = payload;
+                this.wholeFrame = wholeFrame;
             }
 
-            public FrameParseResult(in TlsRecord record, in ReadOnlyMemory<byte> payload) : this()
+            public FrameParseResult(in TlsRecord record, in ReadOnlyMemory<byte> payload, in ReadOnlyMemory<byte> wholeFrame) : this()
             {
                 //this.handshakeRecord = default;
                 handsakeHeader = default;
                 this.record = record;
                 this.payload = payload;
+                this.wholeFrame = wholeFrame;
             }
 
-            internal static FrameParseResult FromHandshake(in TlsRecord record, ref ReadOnlyMemory<byte> data)
+            internal static FrameParseResult FromHandshake(in TlsRecord record, ref ReadOnlyMemory<byte> data, in ReadOnlyMemory<byte> wholeFrame)
             {
                 HandshakeHeader header = BufferReader.ToStruct<HandshakeHeader>(in data);
                 int length = record.Length;
                 var payload = data.Slice(0, length);
                 data = data.Slice(length);
-                return new FrameParseResult(in record, in header, in payload);
+                var v = new FrameParseResult(in record, in header, in payload, in wholeFrame);
+                return v;
             }
 
-            internal static FrameParseResult FromChangeCipherSpec(in TlsRecord record, ref ReadOnlyMemory<byte> data)
+            internal static FrameParseResult FromChangeCipherSpec(in TlsRecord record, ref ReadOnlyMemory<byte> data, in ReadOnlyMemory<byte> wholeFrame)
             {
                 int length = record.Length;
                 var payload = data.Slice(0, length);
                 data = data.Slice(length);
-                return new FrameParseResult(in record, in payload);
+                return new FrameParseResult(in record, in payload, in wholeFrame);
             }
 
-            internal static FrameParseResult FromAlertRecord(in TlsRecord header, ref ReadOnlyMemory<byte> data)
+            internal static FrameParseResult FromAlertRecord(in TlsRecord header, ref ReadOnlyMemory<byte> data, in ReadOnlyMemory<byte> wholeFrame)
             {
-                return FromChangeCipherSpec(in header, ref data);
+                return FromChangeCipherSpec(in header, ref data, in wholeFrame);
             }
 
-            internal static FrameParseResult FromApplicationData(in TlsRecord header, ref ReadOnlyMemory<byte> data)
+            internal static FrameParseResult FromApplicationData(in TlsRecord header, ref ReadOnlyMemory<byte> data, in ReadOnlyMemory<byte> wholeFrame)
             {
-                return FromChangeCipherSpec(in header, ref data);
+                return FromChangeCipherSpec(in header, ref data, in wholeFrame);
             }
 
             public string ToStringInfo()
             {
-                if (record.TypeRecord == ETlsTypeRecord.Handshake)
+                if (record.TypeProtocol == ETlsProtocol.Handshake)
                 {
                     return $"Record:[{record.ToStringInfo()}]; Handshake:[{handsakeHeader.ToStringInfo()}]";
                 }
@@ -67,20 +71,21 @@ namespace IziHardGames.Libs.Cryptography.Readers.Tls12
             }
         }
 
-        public static bool TryParse(ref ReadOnlyMemory<byte> data, out FrameParseResult result)
+        internal static bool TryParse(ref ReadOnlyMemory<byte> data, out FrameParseResult result)
         {
             if (data.Length > 0)
             {
                 TlsRecord header = BufferReader.ToStruct<TlsRecord>(in data);
                 if (header.Validate())
                 {
+                    var wholeFrame = data.Slice(0, ConstantsForTls.SIZE_RECORD + header.Length);
                     data = data.Slice(ConstantsForTls.SIZE_RECORD);
-                    switch (header.TypeRecord)
+                    switch (header.TypeProtocol)
                     {
-                        case ETlsTypeRecord.Handshake: result = FrameParseResult.FromHandshake(in header, ref data); return true;
-                        case ETlsTypeRecord.ChangeCipherSpec: result = FrameParseResult.FromChangeCipherSpec(in header, ref data); return true;
-                        case ETlsTypeRecord.AlertRecord: result = FrameParseResult.FromAlertRecord(in header, ref data); return true;
-                        case ETlsTypeRecord.ApplicationData: result = FrameParseResult.FromApplicationData(in header, ref data); return true;
+                        case ETlsProtocol.Handshake: result = FrameParseResult.FromHandshake(in header, ref data, in wholeFrame); return true;
+                        case ETlsProtocol.ChangeCipherSpec: result = FrameParseResult.FromChangeCipherSpec(in header, ref data, in wholeFrame); return true;
+                        case ETlsProtocol.AlertRecord: result = FrameParseResult.FromAlertRecord(in header, ref data, in wholeFrame); return true;
+                        case ETlsProtocol.ApplicationData: result = FrameParseResult.FromApplicationData(in header, ref data, in wholeFrame); return true;
                         default: throw new ArgumentOutOfRangeException();
                     }
                 }
@@ -88,20 +93,6 @@ namespace IziHardGames.Libs.Cryptography.Readers.Tls12
             result = default;
             return false;
         }
-        public static void Parse(ref ReadOnlyMemory<byte> data, out FrameParseResult result)
-        {
-            TlsRecord header = BufferReader.ToStruct<TlsRecord>(in data);
-            data = data.Slice(ConstantsForTls.SIZE_RECORD);
-            switch (header.TypeRecord)
-            {
-                case ETlsTypeRecord.Handshake: result = FrameParseResult.FromHandshake(in header, ref data); return;
-                case ETlsTypeRecord.ChangeCipherSpec: result = FrameParseResult.FromChangeCipherSpec(in header, ref data); return;
-                case ETlsTypeRecord.AlertRecord: result = FrameParseResult.FromAlertRecord(in header, ref data); return;
-                case ETlsTypeRecord.ApplicationData: result = FrameParseResult.FromApplicationData(in header, ref data); return;
-                default: throw new ArgumentOutOfRangeException();
-            }
-        }
-
         /// <summary>
         /// [1] Sender:Client
         /// </summary>

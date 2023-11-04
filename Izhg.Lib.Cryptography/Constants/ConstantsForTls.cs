@@ -41,9 +41,9 @@ namespace IziHardGames.Libs.Cryptography
 
         public class ALPN
         {
-            public readonly static byte[] h3 = new byte[] { 0x68, 0x33 };
-            public readonly static byte[] h2 = new byte[] { 0x68, 0x32 };
-            public readonly static byte[] http11 = new byte[] { 0x68, 0x74, 0x74, 0x70, 0x2f, 0x31, 0x2e, 0x31 };
+            public readonly static byte[] h3 = new byte[] { 0x68, 0x33 };                                           //"h3"
+            public readonly static byte[] h2 = new byte[] { 0x68, 0x32 };                                           //"h2"
+            public readonly static byte[] http11 = new byte[] { 0x68, 0x74, 0x74, 0x70, 0x2f, 0x31, 0x2e, 0x31 };   //"http/1.1"
         }
 
         /// <summary>

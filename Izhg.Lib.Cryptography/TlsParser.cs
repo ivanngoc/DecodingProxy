@@ -22,7 +22,7 @@ namespace IziHardGames.Libs.Cryptography.Readers
                 default: throw new ArgumentOutOfRangeException(value.ToString());
             }
         }
-        public static X509Certificate2Collection ParseServerCert(in FrameParseResult handshakeRecord, in ReadOnlyMemory<byte> payload)
+        internal static X509Certificate2Collection ParseServerCert(in FrameParseResult handshakeRecord, in ReadOnlyMemory<byte> payload)
         {
             if (!handshakeRecord.handsakeHeader.ValidateAsServerCertificate()) throw new ArgumentException("Header is not certificate");
             X509Certificate2Collection result = new X509Certificate2Collection();

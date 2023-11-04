@@ -221,6 +221,16 @@ namespace HttpDecodingProxy.ForHttp
             lengthBody = HttpBody.FindBodyLength(in header);
             return lengthBody > 0;
         }
+
+        public static bool ValidateHeadersForRequest(in ReadOnlyMemory<byte> headerRequest)
+        {
+            return (
+                Strings.IsStartWithCI(in headerRequest, ConstantsForHttp.Methods.charsStartLineConnect) ||
+                Strings.IsStartWithCI(in headerRequest, ConstantsForHttp.Methods.charsStartLineGet) ||
+                Strings.IsStartWithCI(in headerRequest, ConstantsForHttp.Methods.charsStartLinePost) ||
+                Strings.IsStartWithCI(in headerRequest, ConstantsForHttp.Methods.charsStartLinePut)
+                );
+        }
     }
 
     public struct StartLineReadResult

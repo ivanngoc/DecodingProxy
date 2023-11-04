@@ -37,5 +37,6 @@ namespace IziHardGames.Libs.Cryptography.Tls
         EXTENSION_H2 = 0x68_32,                         //26674
         //64251-65279 	Unassigned
         EXTENSION_RENEGOTIATION_INFO = 0xff_01,         //65281
+        EncryptedClientHello = 65037,   // https://support.mozilla.org/ca/questions/1425848
     }
 }

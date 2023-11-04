@@ -1,0 +1,27 @@
+﻿<NodeProxy>
+  <Schema>
+    <Pipe Title="Standard Tcp">
+      <Head Type="NodeTcpAccept" AdvanceMode="Demux">
+        Go straight To Special NodeDemux (Hard Coded As Next in NodeTcpAccept)
+        <Demux>
+          <Node Type ="NodeTcpRead" AdvanceMode="Direct">
+            <Node Type="NodeGate">
+              Find Appropriate Node. Choose Mode To Advance.
+              <Switch Condition="ResultIs">
+                <Case Value="HTTP_CONNECT">
+                  If Result Is HTTP_CONNECT than Proceed With Node
+                  <Node Type="NodeHttpConnect"></Node>
+                </Case>
+                <Case Value ="HTTP11">
+                  <Node Type="NodeReadHttp11"></Node>
+                </Case>
+              </Switch>
+            </Node>
+          </Node>
+          <Node Type="NodeTcpWrite">
+          </Node>
+        </Demux>
+      </Head>
+    </Pipe>
+  </Schema>
+</NodeProxy>

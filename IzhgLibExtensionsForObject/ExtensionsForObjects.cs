@@ -19,16 +19,16 @@ namespace ProxyLibs.Extensions
         {
             return (T)s.Clone();
         }
-        public static T DeepCopy<T>(this T s) where T : class
-        {
-            using (var ms = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, s);
-                ms.Position = 0;
-                return (T)formatter.Deserialize(ms);
-            }
-        }
+        //public static T DeepCopy<T>(this T s) where T : class
+        //{
+        //    using (var ms = new MemoryStream())
+        //    {
+        //        var formatter = new BinaryFormatter();
+        //        formatter.Serialize(ms, s);
+        //        ms.Position = 0;
+        //        return (T)formatter.Deserialize(ms);
+        //    }
+        //}
 
         public static T DeepCopyReflection<T>(this T input) where T : class
         {

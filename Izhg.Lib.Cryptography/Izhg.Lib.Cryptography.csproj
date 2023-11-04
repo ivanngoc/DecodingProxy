@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -13,6 +13,7 @@
     <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
     <ProjectReference Include="..\IzhgLibLogging\Izhg.Lib.Logging.csproj" />
   </ItemGroup>
 

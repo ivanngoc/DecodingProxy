@@ -151,13 +151,12 @@ namespace IziHardGames.Tls
             throw new System.NotImplementedException();
         }
 
-        public static void CreateShared(string pathForged, string pathOriginal)
+        public static void CreateSharedCa()
         {
             var pathCert = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_CERT.pem";
             var pathKey = "C:\\Users\\ngoc\\Documents\\[Projects] C#\\IziHardGamesProxy\\ProxyForDecoding\\cert\\IziHardGames_CA_KEY.pem";
             X509Certificate2 caCert = Cert.FromFile(pathCert, pathKey);
             sharedCa = caCert;
-            Shared = new CertManager(pathForged, pathOriginal);
         }
 
         public static X509Certificate2 GenerateCertCA(X509Certificate cert, string subject = "CN=myauthority.ru")
@@ -612,7 +611,8 @@ namespace IziHardGames.Tls
                 {
                     if (Shared == null)
                     {
-                        CertManager.CreateShared(@"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original");
+                        CertManager.CreateSharedCa();
+                        Shared = new CertManager(@"C:\Users\ngoc\Documents\Builds\cert cache forged", @"C:\Users\ngoc\Documents\Builds\cert cache original");
                     }
                 }
             }

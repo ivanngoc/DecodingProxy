@@ -29,4 +29,16 @@ namespace IziHardGames.Libs.NonEngine.Memory
             return shared;
         }
     }
+
+
+    public static class PoolUtil
+    {
+        public static T Rent<T>() where T : class, IDisposable, IPoolBindTrait<T>, new()
+        {
+            var pool = PoolObjectsConcurent<T>.Shared;
+            var item = pool.Rent();
+            item.BindToPool(pool);
+            return item;
+        }
+    }
 }

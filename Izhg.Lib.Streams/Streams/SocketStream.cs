@@ -8,7 +8,6 @@ using IziHardGames.Libs.Streams.Contracts;
 
 namespace IziHardGames.Libs.Streams
 {
-
     public class SocketStream : Stream, IStream
     {
         public override bool CanRead { get => true; }

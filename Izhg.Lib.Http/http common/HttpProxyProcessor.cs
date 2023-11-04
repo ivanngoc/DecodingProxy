@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 using System.Web;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.Async;
+using IziHardGames.Libs.Cryptography.Defaults;
 using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Libs.HttpCommon.Helpers;
 using IziHardGames.Libs.HttpCommon.Monitoring;
@@ -57,13 +59,18 @@ namespace IziHardGames.Libs.HttpCommon.Common
         public static async Task HandleSocket(HttpConsumer consumer, Socket socketClient, CancellationToken ct = default)
         {
             Guid guid = Guid.NewGuid();
+            Stream currentStreamClient = default;
+            Stream currentStreamOrigin = default;
             SocketStream socketStreamClient = PoolObjectsConcurent<SocketStream>.Shared.Rent();
             socketStreamClient.Initilize(socketClient);
+            currentStreamClient = socketStreamClient;
             StreamDemultiplexer demuxClient = PoolObjectsConcurent<StreamDemultiplexer>.Shared.Rent();
             demuxClient.Initilize(socketStreamClient);
+            currentStreamClient = demuxClient;
             //DEBUG
             StreamForRecording recordAgent = PoolObjectsConcurent<StreamForRecording>.Shared.Rent();
             recordAgent.Initilize($"{guid}", dir, demuxClient);
+            currentStreamClient = demuxClient;
             var keyReaderRecordClient = demuxClient.RegistReader(recordAgent.actionRecordReader);
             var keyWriterRecordClient = demuxClient.RegistWriter(recordAgent.actionRecordWriter);
 
@@ -118,21 +125,22 @@ namespace IziHardGames.Libs.HttpCommon.Common
 
                 SocketStream socketStreamOrigin = PoolObjectsConcurent<SocketStream>.Shared.Rent();
                 socketStreamOrigin.Initilize(socketOrigin);
+                currentStreamOrigin = socketStreamOrigin;
                 StreamDemultiplexer demuxOrigin = PoolObjectsConcurent<StreamDemultiplexer>.Shared.Rent();
                 demuxOrigin.Initilize(socketStreamOrigin);
-
+                currentStreamOrigin = demuxOrigin;
                 //DEBUG
                 StreamForRecording recordOrigin = PoolObjectsConcurent<StreamForRecording>.Shared.Rent();
                 recordOrigin.Initilize($"{guid}", dir, demuxOrigin);
                 var keyReaderRecordOrigin = demuxOrigin.RegistReader(recordOrigin.actionRecordReader);
                 var keyWriterRecordOrigin = demuxOrigin.RegistWriter(recordOrigin.actionRecordWriter);
-
+                currentStreamOrigin = demuxOrigin;
 
 
 
                 if (flags.HasFlag(EStartLine.MethodConnect))
                 {
-                    var sendedToClient = await socketClient.SendAsync(ConstantsForHttp.Responses.bytesOk11, SocketFlags.None).ConfigureAwait(false);
+                    await currentStreamClient.WriteAsync(ConstantsForHttp.Responses.bytesOk11, ct).ConfigureAwait(false);
                     Console.WriteLine($"OK200 Sended");
 
                     TlsHandshakeReadOperation tlsReaderClient = PoolObjectsConcurent<TlsHandshakeReadOperation>.Shared.Rent();
@@ -167,15 +175,7 @@ namespace IziHardGames.Libs.HttpCommon.Common
                     {
                         alpnList.Add(SslApplicationProtocol.Http11);
                     }
-
-                    SslClientAuthenticationOptions optionsClient = new SslClientAuthenticationOptions()
-                    {
-                        TargetHost = host,
-                        ApplicationProtocols = alpnList,
-                        EnabledSslProtocols = clientProtocolsSsl,
-                        CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
-                        EncryptionPolicy = EncryptionPolicy.RequireEncryption,
-                    };
+                    SslClientAuthenticationOptions optionsClient = SslOptionsFactory.CreateOptionsForClient(host, clientProtocolsSsl, alpnList);
                     ProtocolType clientProtocol = ProtocolType.Tcp;
 
                     if (clientProtocol == ProtocolType.Tcp)
@@ -209,14 +209,7 @@ namespace IziHardGames.Libs.HttpCommon.Common
                         X509Certificate2 certOrigin = (X509Certificate2)sslStreamOrigin.RemoteCertificate!;
                         certManager.Test(certOrigin);
 
-                        SslServerAuthenticationOptions optionsSever = new SslServerAuthenticationOptions()
-                        {
-                            ServerCertificate = await certManager.ForgedGetOrCreateCertFromCacheAsync(certOrigin, caCert).ConfigureAwait(false),
-                            EncryptionPolicy = EncryptionPolicy.RequireEncryption,
-                            EnabledSslProtocols = clientProtocolsSsl,
-                            CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
-                            ApplicationProtocols = appProtocols,
-                        };
+                        SslServerAuthenticationOptions optionsSever = await SslOptionsFactory.CreateOptionsForServer(certManager, clientProtocolsSsl, appProtocols, caCert, certOrigin).ConfigureAwait(false);
 
                         if (accepted == SslApplicationProtocol.Http3)
                         {
@@ -356,5 +349,8 @@ namespace IziHardGames.Libs.HttpCommon.Common
             PoolObjectsConcurent<StreamDemultiplexer>.Shared.Return(demuxClient);
             PoolObjectsConcurent<StreamForRecording>.Shared.Return(recordAgent);
         }
+
+
+
     }
 }

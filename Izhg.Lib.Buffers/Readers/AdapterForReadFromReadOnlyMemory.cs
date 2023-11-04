@@ -3,13 +3,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Core.Buffers;
 using IziHardGames.Libs.Buffers.Abstracts;
+using IziHardGames.Libs.Buffers.Sources;
 using IziHardGames.Libs.NonEngine.Memory;
 
-namespace IziHardGames.Libs.Streams
+namespace IziHardGames.Libs.Buffers.Readers
 {
-    public class AdaptedReaderForReadOnlyMemory : AdapterForRead, IPoolBind<AdaptedReaderForReadOnlyMemory>
+    public class AdapterForReadFromReadOnlyMemory : AdapterForRead, IPoolBind<AdapterForReadFromReadOnlyMemory>
     {
-        private IPoolReturn<AdaptedReaderForReadOnlyMemory>? pool;
+        private IPoolReturn<AdapterForReadFromReadOnlyMemory>? pool;
         private SourceAdapterForReadOnlyMemory? sourceAdapter;
         protected int offset;
         protected int lengthLeft;
@@ -17,13 +18,14 @@ namespace IziHardGames.Libs.Streams
         public override void SetSource(SourceAdapter source)
         {
             base.SetSource(source);
-            this.sourceAdapter = (source as SourceAdapterForReadOnlyMemory) ?? throw new NullReferenceException($"Expected typeof:{typeof(SourceAdapterForReadOnlyMemory).FullName} But Recived:{source.GetType().FullName}");
+            sourceAdapter = source as SourceAdapterForReadOnlyMemory ?? throw new NullReferenceException($"Expected typeof:{typeof(SourceAdapterForReadOnlyMemory).FullName} But Recived:{source.GetType().FullName}");
+            lengthLeft = sourceAdapter.source.Length;
         }
 
-        internal static AdapterForRead GetOrCreate()
+        public static AdapterForRead GetOrCreate()
         {
-            var pool = PoolObjectsConcurent<AdaptedReaderForReadOnlyMemory>.Shared;
-            AdaptedReaderForReadOnlyMemory item = pool.Rent();
+            var pool = PoolObjectsConcurent<AdapterForReadFromReadOnlyMemory>.Shared;
+            AdapterForReadFromReadOnlyMemory item = pool.Rent();
             item.BindToPool(pool);
             return item;
         }
@@ -35,15 +37,15 @@ namespace IziHardGames.Libs.Streams
         }
         public override int Read(in Span<byte> buffer)
         {
-            return CopyUtil.Copy(sourceAdapter!.source, this.offset, lengthLeft, in buffer);
+            return CopyUtil.Copy(sourceAdapter!.source, offset, lengthLeft, in buffer);
         }
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            return ValueTask.FromResult<int>(CopyUtil.Copy(sourceAdapter!.source, this.offset, lengthLeft, buffer.Span));
+            return ValueTask.FromResult(CopyUtil.Copy(sourceAdapter!.source, offset, lengthLeft, buffer.Span));
         }
         #endregion
 
-        public void BindToPool(IPoolReturn<AdaptedReaderForReadOnlyMemory> pool)
+        public void BindToPool(IPoolReturn<AdapterForReadFromReadOnlyMemory> pool)
         {
             this.pool = pool;
         }

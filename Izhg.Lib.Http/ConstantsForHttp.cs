@@ -127,6 +127,10 @@ namespace HttpDecodingProxy.ForHttp
         public static class Methods
         {
             public const string CONNECET = "CONNECT";
+            public static char[] charsStartLineConnect = new char[] { 'C', 'O', 'N', 'N', 'E', 'C', 'T', ' ' };
+            public static char[] charsStartLineGet = new char[] { 'G', 'E', 'T', ' ' };
+            public static char[] charsStartLinePost = new char[] { 'P', 'O', 'S', 'T', ' ' };
+            public static char[] charsStartLinePut = new char[] { 'P', 'U', 'T', ' ' };
         }
 
         public static class Events

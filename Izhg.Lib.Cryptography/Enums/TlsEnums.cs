@@ -5,6 +5,14 @@
     /// </summary>
     public class TlsEnums
     {
+        /// <summary>
+        /// https://www.rfc-editor.org/rfc/rfc5246#appendix-A.2
+        /// </summary>
+        public enum EChangeCipherSpec : byte
+        {
+            change_cipher_spec = 1,
+        }
+
         public enum ContentType : byte
         {
             change_cipher_spec = 20,
