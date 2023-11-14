@@ -12,10 +12,18 @@ namespace IziHardGames.NodeProxies.Graphs
 {
     internal sealed class ProxyNodeAdvancer : INodeAdvancer
     {
-        private Node? startNode;
-        private readonly RegistryForAdvancing registryForAdvancing = new RegistryForAdvancing();
-        private IziNodeRelations? nodeRelations;
+        public readonly RegistryForAdvancing registryForAdvancing = new RegistryForAdvancing();
+        public readonly StdStore<Node>? store = new StdStore<Node>();
 
+        private IziNodeRelations? nodeRelations;
+        private IziGraph? graph;
+        private Node? startNode;
+
+        public void FromGraph<T>(T graph) where T : IIziGraph
+        {
+            var iziGraph = this.graph = graph as IziGraph;
+            iziGraph!.associations[typeof(Node)] = store;
+        }
         public void SetRelations<T>(T relations) where T : IIziNodesRelations
         {
             this.nodeRelations = relations as IziNodeRelations ?? throw new ArgumentException();
@@ -26,20 +34,30 @@ namespace IziHardGames.NodeProxies.Graphs
             NodeSmartProxyTcp node = new NodeSmartProxyTcp();
             node.SetSocket(socket);
             node.ContinuationSetSmart();
-            return Iterate(node, ct);
+            IziNode iziNode = graph!.GetNewNode();
+            Associate(iziNode, node);
+            return Iterate(iziNode, ct);
         }
 
-        internal Task Iterate(Node start, CancellationToken ct)
+        private void Associate(IziNode iziNode, Node node)
+        {
+            store!.Associate(iziNode, node);
+            node.id = iziNode.id;
+        }
+
+        internal Task Iterate(IziNode start, CancellationToken ct)
         {
             return Task.Run(async () =>
             {
-                var node = start;
+                var iziNode = start;
+                var node = store![iziNode];
+
                 while (!ct.IsCancellationRequested)
                 {
                     var traits = node.GetTraits();
                     var flags = node.GetRunFlags();
 
-                    nodeRelations.GetRelations(node);
+                    var relations = nodeRelations![iziNode];
 
                     if (flags == (ENodeRunFlags.NoTransition | ENodeRunFlags.Sustainable | ENodeRunFlags.Async))
                     {
@@ -70,13 +88,14 @@ namespace IziHardGames.NodeProxies.Graphs
 
                     foreach (var next in adv.NextNodes)
                     {
-                        nodeRelations.SetRelation(node, next, (int)ERelations.Next);
+                        var nextIziNode = graph!.GetNewNode();
+                        Associate(nextIziNode, next);
+                        nodeRelations.CreateRelationship(iziNode, nextIziNode, (int)ERelations.Next);
                         await Iterate(start, ct).ConfigureAwait(false);
                     }
                 }
             });
         }
-
         internal static ProxyNodeAdvancer GetNew()
         {
             return new ProxyNodeAdvancer();

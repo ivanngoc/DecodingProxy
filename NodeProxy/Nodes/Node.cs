@@ -79,7 +79,7 @@ namespace IziHardGames.NodeProxies.Nodes
         /// </summary>
         public bool isConveyorStage;
         public NodeIterator iterator;
-
+        internal int id;
         public readonly ETraits traits;
         public readonly ENodeRunFlags flags;
 

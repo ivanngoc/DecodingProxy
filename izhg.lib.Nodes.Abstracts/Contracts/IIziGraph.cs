@@ -18,6 +18,12 @@
     {
 
     }
+    public interface IIziNodesRegistry<T> where T : IIziNode
+    {
+        T this[int id] { get; set; }
+        void Add(T node);
+    }
+
     public interface IIziNodesRelations
     {
 
@@ -57,6 +63,7 @@
     /// </summary>
     public interface INodeAdvancer
     {
+        public void FromGraph<T>(T graph) where T : IIziGraph;
         public void SetRelations<T>(T nodeRelations) where T : IIziNodesRelations;
     }
 
