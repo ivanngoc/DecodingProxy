@@ -125,5 +125,22 @@ namespace System
             }
             return new string(chars);
         }
+
+        /// <summary>
+        /// Reverse of <see cref="ToHexStringFormated(in ReadOnlyMemory{byte})"/>
+        /// </summary>
+        /// <param name="formatted"></param>
+        /// <returns></returns>
+        public static byte[] ToBytes(string formatted)
+        {
+            string[] splits = formatted.Split(' ');
+            byte[] bytes = new byte[splits.Length];
+            for (int i = 0; i < splits.Length; i++)
+            {
+                var span = splits[i].AsSpan().Slice(2, 2);
+                bytes[i] = byte.Parse(span, Globalization.NumberStyles.HexNumber);
+            }
+            return bytes;
+        }
     }
 }

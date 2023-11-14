@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace IziHardGames.Libs.Binary.Readers
-{   
+{
     public static class BufferReader
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining), LittleEndian]
@@ -49,6 +50,16 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[1] = v1;
             return result;
         }
+        [MethodImpl(MethodImplOptions.AggressiveInlining), NetworkByteOrder]
+        public static unsafe ushort ToUshortNetworkOrder(byte v1, byte v2)
+        {
+            ushort result = default;
+            byte* pointer = (byte*)&result;
+            pointer[0] = v1;
+            pointer[1] = v2;
+            return result;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe ushort ToUshort(byte v1, byte v2)
         {
@@ -58,6 +69,8 @@ namespace IziHardGames.Libs.Binary.Readers
             pointer[1] = v1;
             return result;
         }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
         public static unsafe ushort ToUshort(in ReadOnlySpan<byte> bytes)
         {
@@ -75,6 +88,18 @@ namespace IziHardGames.Libs.Binary.Readers
             byte* pointer = (byte*)&result;
             pointer[0] = bytes[1];
             pointer[1] = bytes[0];
+            bytes = bytes.Slice(2);
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), ToBigEndian]
+        public static unsafe ushort ToUshortConsume(ref ReadOnlyMemory<byte> bytes)
+        {
+            var span = bytes.Span;
+            ushort result = default;
+            byte* pointer = (byte*)&result;
+            pointer[0] = span[1];
+            pointer[1] = span[0];
             bytes = bytes.Slice(2);
             return result;
         }
@@ -149,6 +174,38 @@ namespace IziHardGames.Libs.Binary.Readers
             ReadOnlyMemory<byte> result = slice.Slice(0, length);
             slice = slice.Slice(length);
             return result;
+        }
+
+        public static byte ConsumeByte(ref ReadOnlyMemory<byte> slice)
+        {
+            var result = slice.Span[0];
+            slice = slice.Slice(1);
+            return result;
+        }
+
+        public static ReadOnlySpan<byte> ConsumeIPv4AsReadOnlySpan(ref ReadOnlyMemory<byte> slice)
+        {
+            var result = slice.Slice(0, 4).Span;
+            slice = slice.Slice(4);
+            return result;
+        }
+        public static ReadOnlySpan<byte> ConsumeIPv4AsLong(ref ReadOnlyMemory<byte> slice)
+        {
+            var result = slice.Slice(0, 4).Span;
+            slice = slice.Slice(4);
+            return result;
+        }
+        public static IPAddress ConsumeIPv4AsIPAddress(ref ReadOnlyMemory<byte> slice)
+        {
+            var span = slice.Slice(0, 4).Span;
+            slice = slice.Slice(4);
+            return new IPAddress(span);
+        }
+        public static IPAddress ConsumeIPv6AsIPAddress(ref ReadOnlyMemory<byte> slice)
+        {
+            var span = slice.Slice(0, 16).Span;
+            slice = slice.Slice(16);
+            return new IPAddress(span);
         }
     }
 }

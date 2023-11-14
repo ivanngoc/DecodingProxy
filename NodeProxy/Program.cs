@@ -1,11 +1,15 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System;
-using IziHardGames.NodeProxy;
+using IziHardGames.NodeProxies.Version1;
+using IziHardGames.NodeProxies.Nodes;
+using IziHardGames.NodeProxies.Nodes.Tls;
 
 Console.WriteLine("Hello, World!");
 
-
-var http = Proxy.StartTcp(49702);
+await NodeTlsHandshakeFromClient.Test();
+Console.ReadLine();
+var http = NodeProxy.RunSmartTcp(63401);
+//var http = Proxy.RunSmartTcp(60121);
 //var https = Proxy.StartTcp(60121);
 
 await http.ConfigureAwait(false);

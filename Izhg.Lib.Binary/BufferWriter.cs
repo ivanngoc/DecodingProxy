@@ -4,6 +4,42 @@ namespace IziHardGames.Libs.Binary.Writers
 {
     public static class BufferWriter
     {
+        public static unsafe int WirteToBuffer(byte[] item, byte[] dest, int offset)
+        {
+            var slice = new Span<byte>(dest, offset, item.Length);
+            item.AsSpan().CopyTo(slice);
+            return item.Length;
+        }
+        public static unsafe int WirteToBuffer<T>(T item, byte[] bytes, int offset) where T : unmanaged
+        {
+            int length = sizeof(T);
+            byte* pointer = (byte*)&item;
+            for (int i = 0; i < length; i++)
+            {
+                bytes[offset + i] = pointer[i];
+            }
+            return length;
+        }
+        public static unsafe int WirteToBufferUshort(ushort value, byte[] bytes, int offset)
+        {
+            return WirteToBufferReverseEndians(value, bytes, offset);
+        }
+        public static unsafe int WirteToBufferInt(int value, byte[] bytes, int offset)
+        {
+            return WirteToBufferReverseEndians(value, bytes, offset);
+        }
+        public static unsafe int WirteToBufferReverseEndians<T>(T item, byte[] bytes, int offset) where T : unmanaged
+        {
+            int length = sizeof(T);
+            int lastIndex = length - 1;
+            byte* pointer = (byte*)&item;
+
+            for (int i = 0; i < length; i++)
+            {
+                bytes[offset + i] = pointer[lastIndex - i];
+            }
+            return length;
+        }
         public static void ToReadOnlySpan<T>(this T item, out ReadOnlySpan<byte> readOnlyMemory) where T : unmanaged
         {
             throw new NotImplementedException();
@@ -11,6 +47,18 @@ namespace IziHardGames.Libs.Binary.Writers
         public static void ToReadOnlyMemory<T>(this T item, out ReadOnlyMemory<byte> readOnlyMemory) where T : unmanaged
         {
             throw new NotImplementedException();
+        }
+
+        public unsafe static byte[] ToArray<T>(T item) where T : unmanaged
+        {
+            int length = sizeof(T);
+            byte[] bytes = new byte[length];
+            byte* pointer = (byte*)&item;
+            for (int i = 0; i < length; i++)
+            {
+                bytes[i] = pointer[i];
+            }
+            return bytes;
         }
     }
 

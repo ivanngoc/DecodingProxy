@@ -18,10 +18,17 @@ namespace IziHardGames.Libs.Cryptography.Shared.Headers
         [FieldOffset(1)] private readonly ProtocolVersion pv;
         [FieldOffset(1)] private readonly ushort protocolVersion;
         [FieldOffset(3)] private readonly ushort lengthFollows;
-        public ETlsProtocol TypeProtocol => (ETlsProtocol)type;
         public ushort Length => BufferReader.ReverseEndians(lengthFollows);
         public ushort ProtocolVersion => BufferReader.ReverseEndians(protocolVersion);
+        public ETlsProtocol TypeProtocol => (ETlsProtocol)type;
         public ETlsProtocolVersion Version => (ETlsProtocolVersion)ProtocolVersion;
+
+        public bool IsTls()
+        {
+            return Validate()
+                && (Version == ETlsProtocolVersion.Tls13 || Version == ETlsProtocolVersion.Tls12 || Version == ETlsProtocolVersion.Tls11 || Version == ETlsProtocolVersion.Tls10)
+                && Length > 0;
+        }
         public bool Validate()
         {
             return TypeProtocol == ETlsProtocol.Handshake || TypeProtocol == ETlsProtocol.ChangeCipherSpec || TypeProtocol == ETlsProtocol.ApplicationData || TypeProtocol == ETlsProtocol.AlertRecord;

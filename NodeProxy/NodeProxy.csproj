@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj" />
+    <ProjectReference Include="..\izhg.lib.Nodes.RefTypes\izhg.lib.Nodes.RefTypes.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
+    <ProjectReference Include="..\SOCKS\SOCKS.csproj" />
     <ProjectReference Include="..\XmlGraph\XmlGraph.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="TestData\" />
   </ItemGroup>
 </Project>

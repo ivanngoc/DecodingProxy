@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGaems.Nodes.ValueTypes.Lib</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj" />
+  </ItemGroup>
+
+</Project>

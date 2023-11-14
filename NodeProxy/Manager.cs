@@ -1,4 +1,4 @@
-﻿namespace IziHardGames.NodeProxy
+﻿namespace IziHardGames.NodeProxies
 {
     public class Manager
     {

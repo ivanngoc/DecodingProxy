@@ -45,70 +45,72 @@ namespace IziHardGames.Libs.Cryptography.Recording
         }
         public override int Read(Span<byte> buffer)
         {
+#if DEBUG
             lock (lockerShared)
             {
-#if DEBUG
                 TlsFrame frameDebug = default;
 #endif
-                int lengthToRead = default;
-                bool isPartialRead = false;
-                lock (queue)
+            int lengthToRead = default;
+            bool isPartialRead = false;
+            lock (queue)
+            {
+                if (currentRead is null)
                 {
-                    if (currentRead is null)
+                    REPEAT:
+                    if (queue.TryDequeue(out TlsFrame result))
                     {
-                        REPEAT:
-                        if (queue.TryDequeue(out TlsFrame result))
-                        {
-                            if (result.IsRequestHello()) goto REPEAT;
+                        if (result.IsRequestHello()) goto REPEAT;
 #if DEBUG
                             frameDebug = result;
 #endif
-                            int length = result.dataWholeFrame.Length;
-                            lengthToRead = length > buffer.Length ? buffer.Length : length;
-                            isPartialRead = length > lengthToRead;
-                            if (isPartialRead)
-                            {
-                                currentRead = result;
-                                var slice = result.GetMemSLice(0, lengthToRead);
-                                slice.Span.CopyTo(buffer);
-                                offsetRead = lengthToRead;
-                            }
-                            else
-                            {
-                                result.dataWholeFrame.Span.CopyTo(buffer);
-                            }
-                        }
-                    }
-                    else
-                    {
-#if DEBUG
-                        frameDebug = currentRead;
-#endif
-                        int lengthFrame = currentRead.dataWholeFrame.Length;
-                        int lengthLeftToRead = lengthFrame - offsetRead;
-                        lengthToRead = lengthLeftToRead > buffer.Length ? buffer.Length : lengthLeftToRead;
-                        isPartialRead = lengthLeftToRead > lengthToRead;
-
+                        int length = result.dataWholeFrame.Length;
+                        lengthToRead = length > buffer.Length ? buffer.Length : length;
+                        isPartialRead = length > lengthToRead;
                         if (isPartialRead)
                         {
-                            ReadOnlyMemory<byte> mem = currentRead.GetMemSLice(this.offsetRead, lengthToRead);
-                            offsetRead += lengthToRead;
-                            mem.Span.CopyTo(buffer);
+                            currentRead = result;
+                            var slice = result.GetMemSLice(0, lengthToRead);
+                            slice.Span.CopyTo(buffer);
+                            offsetRead = lengthToRead;
                         }
                         else
                         {
-                            var mem = currentRead.GetMemSLice(this.offsetRead, lengthLeftToRead);
-                            mem.Span.CopyTo(buffer);
-                            offsetRead = default;
-                            currentRead = default;
+                            result.dataWholeFrame.Span.CopyTo(buffer);
                         }
                     }
                 }
+                else
+                {
+#if DEBUG
+                        frameDebug = currentRead;
+#endif
+                    int lengthFrame = currentRead.dataWholeFrame.Length;
+                    int lengthLeftToRead = lengthFrame - offsetRead;
+                    lengthToRead = lengthLeftToRead > buffer.Length ? buffer.Length : lengthLeftToRead;
+                    isPartialRead = lengthLeftToRead > lengthToRead;
+
+                    if (isPartialRead)
+                    {
+                        ReadOnlyMemory<byte> mem = currentRead.GetMemSLice(this.offsetRead, lengthToRead);
+                        offsetRead += lengthToRead;
+                        mem.Span.CopyTo(buffer);
+                    }
+                    else
+                    {
+                        var mem = currentRead.GetMemSLice(this.offsetRead, lengthLeftToRead);
+                        mem.Span.CopyTo(buffer);
+                        offsetRead = default;
+                        currentRead = default;
+                    }
+                }
+            }
 #if DEBUG
                 Console.WriteLine($"Readed:{lengthToRead}. IsPartial:{isPartialRead}. {frameDebug.ToStringInfoAsClient()}");
 #endif
-                return lengthToRead;
+            return lengthToRead;
+#if DEBUG
             }
+#endif
         }
         public override int ReadByte()
         {

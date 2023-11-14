@@ -1,17 +1,30 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System;
 using System.Net.Sockets;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
-using IziHardGames.NodeProxy.Pipes;
-using IziHardGames.NodeProxy.Nodes;
+using IziHardGames.NodeProxies.Pipes;
+using IziHardGames.NodeProxies.Nodes;
+using IziHardGames.NodeProxies.Graphs;
 
-namespace IziHardGames.NodeProxy
+namespace IziHardGames.NodeProxies.Version1
 {
-    public static class Proxy
+    public static class NodeProxy
     {
+        public static async Task RunSmartTcp(int port, CancellationToken ct = default)
+        {
+            Console.WriteLine($"Begin Run smart tcp");
+            TcpListener tcpListener = new TcpListener(System.Net.IPAddress.Any, port);
+            tcpListener.Start();
+            while (!ct.IsCancellationRequested)
+            {
+                              var socket = await tcpListener.AcceptSocketAsync().ConfigureAwait(false);
+                Console.WriteLine($"Socket accepted");
+                var graph = ProxyGraph.GetNew();
+                await graph.RunAsync(socket);
+            }
+        }
         public static async Task StartTcp(int port, CancellationToken ct = default)
         {
             CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -26,7 +39,7 @@ namespace IziHardGames.NodeProxy
             {
                 Pipe pipe = new Pipe(schema);
                 pipes.Add(pipe);
-                NodeTcpAccept nodeTcpAccept = Manager.Get<NodeTcpAccept>();
+                NodeTcpAcceptStart nodeTcpAccept = Manager.Get<NodeTcpAcceptStart>();
                 pipe.Head = nodeTcpAccept;
                 nodeTcpAccept.Bind(await tcpListener.AcceptSocketAsync(ct).ConfigureAwait(false));
                 pipe.Start(ct);

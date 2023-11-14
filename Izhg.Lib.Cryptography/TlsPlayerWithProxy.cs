@@ -191,7 +191,7 @@ namespace IziHardGames.Libs.Cryptography.Recording
                 results.Add(frame);
             }
         }
-        [HandshakeAnalyz(Side = ESide.Client), Map("Read Tls Frames")]
+        [HandshakeAnalyz(Side = ESide.Client), Map("Read Tls Frames. Пока самый полный")]
         private void ParseClientFrames(List<TlsFrame> framesProxyReadFromClient, TlsSessionClient proxyFromClient)
         {
             foreach (var frame in framesProxyReadFromClient)

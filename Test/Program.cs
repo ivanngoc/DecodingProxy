@@ -14,6 +14,15 @@ using IziHardGames.Libs.Binary.Readers;
 using DevConsole.Shared.Consoles;
 using IziHardGames.Libs.Cryptography.Shared.Headers;
 using IziHardGames.Tls;
+using IziHardGames.Socks5;
+using IziHardGames.Proxy.Http;
+using IziHardGames.Libs.Concurrency;
+using IziHardGames.Libs.HttpCommon.Common;
+using Microsoft.Extensions.Logging;
+using System.Net.Sockets;
+using System.Threading;
+using IziHardGames.Libs.HttpCommon;
+using IziHardGames.Proxy.Recoreder;
 
 namespace IziHardGames.Tests
 {
@@ -22,6 +31,13 @@ namespace IziHardGames.Tests
         private static readonly object locker = new object();
         public static async Task Main(params string[] args)
         {
+            Console.WriteLine("Begin Test");
+
+            if (false)
+            {
+                await ServerForSocks5.Test();
+                Console.WriteLine();
+            }
             if (false)
             {
                 ConsoleClient consoleClient = new ConsoleClient();
@@ -37,7 +53,7 @@ namespace IziHardGames.Tests
                 }
             }
 
-            if (true)
+            if (false)
             {
                 if (false)
                 {
@@ -108,7 +124,10 @@ namespace IziHardGames.Tests
                 //await TestHttp2.RunHttp2();
                 await DoAsync();
             }
-
+            if (true)
+            {
+                await RunHttps(63401);
+            }
         }
 
 
@@ -148,6 +167,20 @@ namespace IziHardGames.Tests
         static void Green(string msg)
         {
             Log(msg, ConsoleColor.Green);
+        }
+
+        private static async Task RunHttps(int port, CancellationToken ct = default)
+        {
+            TcpListener listener = new TcpListener(IPAddress.Any, port);
+            listener.Start();
+            HttpConsumer httpConsumer = new HttpConsumer();
+            httpConsumer.SetManager(new ManagerForHttpSessionDefault());
+
+            while (!ct.IsCancellationRequested)
+            {
+                var socket = await listener.AcceptSocketAsync(ct).ConfigureAwait(false);
+                Task task = HttpProxyProcessor.HandleSocket(httpConsumer, socket);
+            }
         }
     }
 }

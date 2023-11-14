@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using IziHardGames.NodeProxy.Nodes;
+using IziHardGames.NodeProxies.Nodes;
 
-namespace IziHardGames.NodeProxy.Pipes
+namespace IziHardGames.NodeProxies.Pipes
 {
     internal class Pipe
     {

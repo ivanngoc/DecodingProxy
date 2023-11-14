@@ -21,6 +21,7 @@
     <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj" />
     <ProjectReference Include="..\ProxyForRecording\ProxyForRecording.csproj" />
     <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
+    <ProjectReference Include="..\SOCKS\SOCKS.csproj" />
   </ItemGroup>
 
 </Project>
