@@ -1,5 +1,10 @@
 ﻿namespace IziHardGames.Graphs.Abstractions.Lib
 {
+    public interface IIdProvider
+    {
+
+    }
+
     public interface IIziNode
     {
 
@@ -10,6 +15,15 @@
     }
 
     public interface IIziGraph
+    {
+
+    }
+    public interface IIziNodesRelations
+    {
+
+    }
+
+    public interface IIziNodesAssociationsStore
     {
 
     }
@@ -38,11 +52,12 @@
 
     }
     /// <summary>
-    /// State-machine to advance through <see cref="IIziGraph"/> or <see cref="IIziNode"/>
+    /// State-machine to advance through <see cref="IIziGraph"/> or <see cref="IIziNode"/>.<br/>
+    /// Имплементация объекта который будет обходить граф или двигаться по цепочки <see cref="IIziNode"/>
     /// </summary>
-    public interface INodeIterator
+    public interface INodeAdvancer
     {
-
+        public void SetRelations<T>(T nodeRelations) where T : IIziNodesRelations;
     }
 
 }

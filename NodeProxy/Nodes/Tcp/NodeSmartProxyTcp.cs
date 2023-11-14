@@ -95,7 +95,7 @@ namespace IziHardGames.NodeProxies.Nodes
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
         }

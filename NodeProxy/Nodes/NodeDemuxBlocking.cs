@@ -29,7 +29,7 @@ namespace IziHardGames.NodeProxies.Nodes
 
         }
 
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Awaitable;
         }
@@ -59,7 +59,7 @@ namespace IziHardGames.NodeProxies.Nodes
         {
 
         }
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Sustainable | ENodeRunFlags.Sync;
         }

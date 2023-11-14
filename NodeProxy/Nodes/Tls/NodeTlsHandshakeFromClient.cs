@@ -68,7 +68,7 @@ namespace IziHardGames.NodeProxies.Nodes.Tls
             }
             END: return;
         }
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Sync;
         }

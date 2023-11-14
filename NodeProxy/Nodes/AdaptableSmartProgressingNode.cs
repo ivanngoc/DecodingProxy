@@ -89,7 +89,7 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             throw new System.NotImplementedException();
         }
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Sustainable | ENodeRunFlags.Async;
         }

@@ -20,7 +20,7 @@ namespace IziHardGames.NodeProxies.Nodes
         private long totalBytesWrite;
         private TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>();
 
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
         }

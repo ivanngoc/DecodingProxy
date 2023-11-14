@@ -42,7 +42,7 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
             await tcpClient!.ConnectAsync(iPAddress!, port).ConfigureAwait(false);
         }
 
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
         }

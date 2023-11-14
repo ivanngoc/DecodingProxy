@@ -14,7 +14,7 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             return control.AwaitDisconnect(ct);
         }
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Awaitable;
         }

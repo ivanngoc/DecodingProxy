@@ -53,7 +53,7 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
             this.completion = task;
         }
 
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Sustainable | ENodeRunFlags.Async;
         }

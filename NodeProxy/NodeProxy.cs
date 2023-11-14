@@ -7,6 +7,7 @@ using System.Linq;
 using IziHardGames.NodeProxies.Pipes;
 using IziHardGames.NodeProxies.Nodes;
 using IziHardGames.NodeProxies.Graphs;
+using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 
 namespace IziHardGames.NodeProxies.Version1
 {
@@ -19,10 +20,10 @@ namespace IziHardGames.NodeProxies.Version1
             tcpListener.Start();
             while (!ct.IsCancellationRequested)
             {
-                              var socket = await tcpListener.AcceptSocketAsync().ConfigureAwait(false);
+                var socket = await tcpListener.AcceptSocketAsync().ConfigureAwait(false);
                 Console.WriteLine($"Socket accepted");
-                var graph = ProxyGraph.GetNew();
-                await graph.RunAsync(socket);
+                var graph = IziGraph.GetNew(ProxyNodeAdvancer.GetNew());
+                await (graph.Advancer as ProxyNodeAdvancer)!.RunAsync(socket, ct);
             }
         }
         public static async Task StartTcp(int port, CancellationToken ct = default)

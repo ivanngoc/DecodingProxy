@@ -85,7 +85,7 @@ namespace IziHardGames.NodeProxies.Nodes
 
         protected Node()
         {
-            flags = GetFlags();
+            flags = GetRunFlags();
         }
 
         internal void SetNext(Node next)
@@ -135,7 +135,7 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             throw new NotImplementedException();
         }
-        public virtual ENodeRunFlags GetFlags()
+        public virtual ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.ErrorNotOverrided;
         }
@@ -220,7 +220,7 @@ namespace IziHardGames.NodeProxies.Nodes
     }
     internal class NodeMuxNonBlocking : NodeMux
     {
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Sync | ENodeRunFlags.Sustainable;
         }

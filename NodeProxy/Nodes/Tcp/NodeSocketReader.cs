@@ -39,7 +39,7 @@ namespace IziHardGames.NodeProxies.Nodes
                 }
             }
         }
-        public override ENodeRunFlags GetFlags()
+        public override ENodeRunFlags GetRunFlags()
         {
             return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
         }
