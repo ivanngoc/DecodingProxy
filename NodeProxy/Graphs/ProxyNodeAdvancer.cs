@@ -7,6 +7,7 @@ using IziHardGames.Graphs.Abstractions.Lib;
 using System.Threading;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IziHardGames.NodeProxies.Graphs
 {
@@ -29,7 +30,15 @@ namespace IziHardGames.NodeProxies.Graphs
             this.nodeRelations = relations as IziNodeRelations ?? throw new ArgumentException();
         }
 
-        public Task RunAsync(Socket socket, CancellationToken ct)
+        public Task RunAsyncV2(Socket socket, CancellationToken ct)
+        {
+            NodeSocket node = new NodeSocket();
+            node.SetSocket(socket);
+            IziNode iziNode = graph!.GetNewNode();
+            Associate(iziNode, node);
+            return Iterate(iziNode, ct);
+        }
+        public Task RunAsyncV1(Socket socket, CancellationToken ct)
         {
             NodeSmartProxyTcp node = new NodeSmartProxyTcp();
             node.SetSocket(socket);
@@ -59,7 +68,7 @@ namespace IziHardGames.NodeProxies.Graphs
 
                     var relations = nodeRelations![iziNode];
 
-                    if (flags == (ENodeRunFlags.NoTransition | ENodeRunFlags.Sustainable | ENodeRunFlags.Async))
+                    if (flags == (ENodeRunFlags.NoAdvancing | ENodeRunFlags.Sustainable | ENodeRunFlags.Async))
                     {
                         break;
                     }
@@ -73,45 +82,89 @@ namespace IziHardGames.NodeProxies.Graphs
                     }
                     else if (flags == (ENodeRunFlags.Sync | ENodeRunFlags.Sustainable))
                     {
-                        var t1 = RunSync(node, ct);
+                        var t1 = Node.RunSync(node, ct);
                     }
                     else if (flags == (ENodeRunFlags.Async | ENodeRunFlags.Sustainable))
                     {
-                        var t1 = RunAsync(node, ct);
+                        var t1 = Node.RunAsync(node, ct);
                     }
                     else
                     {
                         throw new System.NotImplementedException($"Flag as Value decimical:{(int)node.flags}; as enum:{node.flags}");
                     }
 
-                    var adv = registryForAdvancing.GetAdvancing(node);
-
-                    foreach (var next in adv.NextNodes)
+                    if (!flags.HasFlag(ENodeRunFlags.NoAdvancing) && !node.DynamicStates.HasFlag(EDynamicStates.AwaitNextNode))
                     {
-                        var nextIziNode = graph!.GetNewNode();
-                        Associate(nextIziNode, next);
-                        nodeRelations.CreateRelationship(iziNode, nextIziNode, (int)ERelations.Next);
-                        await Iterate(start, ct).ConfigureAwait(false);
+                        var adv = registryForAdvancing.GetAdvancing(default, node, graph);
+                        if (adv.NextNodes.Count() > 0)
+                        {
+                            foreach (var next in adv.NextNodes)
+                            {
+                                var nextNode = next.node;
+                                var relation = next.relation;
+                                var nextIziNode = graph!.GetNewNode();
+                                nextNode.id = nextIziNode.id;
+                                Associate(nextIziNode, nextNode);
+                                nodeRelations.CreateRelationship(iziNode, nextIziNode, (int)relation);
+
+                                if (next.relation.HasFlag(ERelations.FragPeek))
+                                {
+                                    (nextNode as IFragsPeeker)!.SetSourceForShowing(node as IFragsShowing ?? throw new NullReferenceException());
+                                }
+                                await Iterate(nextIziNode, ct).ConfigureAwait(false);
+                            }
+                        }
+                        else
+                        {
+                            throw new System.NotImplementedException("No Advancing founded Without NoAdvancing flag raised");
+                        }
                     }
                 }
             });
         }
+
+        public async Task CascadeUpdateBackward(Node start)
+        {
+            throw new System.NotImplementedException();
+        }
+
         internal static ProxyNodeAdvancer GetNew()
         {
             return new ProxyNodeAdvancer();
         }
     }
+    internal sealed class AdvanceResult : IDisposable
+    {
+        private readonly List<NextNode> nextNodes = new List<NextNode>();
+        public IEnumerable<NextNode> NextNodes => nextNodes;
+        public int variant;
 
-    internal sealed class RegistryForAdvancing : IIziNodeAdvancingSearcher
-    {
-        internal Advancing GetAdvancing(Node node)
+        public void Dispose()
         {
-            throw new NotImplementedException();
+            nextNodes.Clear();
         }
+
+        internal void Add(NextNode nextNodeControl)
+        {
+            nextNodes.Add(nextNodeControl);
+        }
+        public AdvanceResult AsVariant(int variant)
+        {
+            this.variant = variant;
+            return this;
+        }
+
     }
-    internal sealed class Advancing
+
+    internal struct NextNode
     {
-        private readonly List<Node> nextNodes = new List<Node>();
-        public IEnumerable<Node> NextNodes => nextNodes;
+        public Node node;
+        public ERelations relation;
+
+        public NextNode(Node node, ERelations relation)
+        {
+            this.node = node;
+            this.relation = relation;
+        }
     }
 }

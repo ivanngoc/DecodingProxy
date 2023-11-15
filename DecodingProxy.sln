@@ -97,6 +97,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.Nodes.RefTypes", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.Nodes.ValueTypes", "izhg.lib.Nodes.ValueTypes\izhg.lib.Nodes.ValueTypes.csproj", "{C66B43E4-893F-4016-A435-CF32A69DA773}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataRecording", "izhg.lib.DataRecording\izhg.lib.DataRecording.csproj", "{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataRecording.ToDataBase", "izhg.lib.DataRecording.ToDataBase\izhg.lib.DataRecording.ToDataBase.csproj", "{7F95C560-E18F-4EE7-9A85-AAC7721518AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.PostgreSQL", "izhg.lib.DataBase.PostgreSQL\izhg.lib.DataBase.PostgreSQL.csproj", "{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.Abstractions.NetStd21", "izhg.lib.DataBase.Abstractions.NetStd21\izhg.lib.DataBase.Abstractions.NetStd21.csproj", "{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.Abstractions", "izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj", "{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -291,6 +301,26 @@ Global
 		{C66B43E4-893F-4016-A435-CF32A69DA773}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C66B43E4-893F-4016-A435-CF32A69DA773}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C66B43E4-893F-4016-A435-CF32A69DA773}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F95C560-E18F-4EE7-9A85-AAC7721518AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F95C560-E18F-4EE7-9A85-AAC7721518AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F95C560-E18F-4EE7-9A85-AAC7721518AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F95C560-E18F-4EE7-9A85-AAC7721518AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

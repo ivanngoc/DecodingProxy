@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace IziHardGames.NodeProxies.Nodes
         private long totalBytesRead;
         private long totalBytesWrite;
         private TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>();
+
 
         public override ENodeRunFlags GetRunFlags()
         {
@@ -81,6 +83,11 @@ namespace IziHardGames.NodeProxies.Nodes
         internal override async Task AwaitCompletion(CancellationToken ct)
         {
             await AwaitDisconnect(ct).ConfigureAwait(false); ;
+        }
+        public override void Dispose()
+        {
+            base.Dispose();
+            socket = default;
         }
     }
 }

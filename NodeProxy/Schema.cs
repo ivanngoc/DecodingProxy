@@ -5,30 +5,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using IziHardGames.Graphs.Abstractions.Lib;
 using IziHardGames.Libs.XmlGraph.Schemas;
 using IziHardGames.NodeProxies.Nodes;
 
 namespace IziHardGames.NodeProxies
-{
-    internal class NodeIterator : INodeIterator
-    {
-        public List<Node> nodes = new List<Node>();
-
-        public void IterateNext(Node from)
-        {
-
-        }
-        public void IterateFromTo(Node from, Node to)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        internal async Task IterateNextAsync(Node node, CancellationToken ct)
-        {
-            nodes.Add(node);
-            await node.ExecuteAsync(ct).ConfigureAwait(false);
-        }
-    }
+{    
     internal class Schema
     {
         internal static async Task<Schema> FromFileXML(string path)

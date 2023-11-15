@@ -68,8 +68,11 @@ namespace IziHardGames.NodeProxies.Nodes
     }
     internal abstract class Node : IIziNode, IDisposable
     {
-        public virtual Node? Next { get; set; }
-        public virtual Node? Previous { get; set; }
+        public readonly ETraits traits;
+        public readonly ENodeRunFlags flags;
+
+
+        protected EDynamicStates dynamicStates;
         private bool isDisposed = true;
         public bool isAsync;
         /// <summary>
@@ -78,10 +81,12 @@ namespace IziHardGames.NodeProxies.Nodes
         /// Стадия конвейера
         /// </summary>
         public bool isConveyorStage;
-        public NodeIterator iterator;
         internal int id;
-        public readonly ETraits traits;
-        public readonly ENodeRunFlags flags;
+
+
+        public virtual Node? Next { get; set; }
+        public virtual Node? Previous { get; set; }
+        public EDynamicStates DynamicStates => dynamicStates;
 
         protected Node()
         {
@@ -90,7 +95,7 @@ namespace IziHardGames.NodeProxies.Nodes
 
         internal void SetNext(Node next)
         {
-            if (this.flags.HasFlag(ENodeRunFlags.NoTransition)) throw new ArgumentException($"{GetType().FullName}. this Node has flag no transition thats why there can't be any next node");
+            if (this.flags.HasFlag(ENodeRunFlags.NoAdvancing)) throw new ArgumentException($"{GetType().FullName}. this Node has flag no transition thats why there can't be any next node");
             this.Next = next;
             next.SetPrevious(this);
         }
@@ -153,7 +158,7 @@ namespace IziHardGames.NodeProxies.Nodes
             {
                 var flags = start.flags;
                 Console.WriteLine($"Node.Itterate(); Current:{node.GetType().Name} flags:{Node.FlagsToInfo(flags)}");
-                if (flags.HasFlag(ENodeRunFlags.NoTransition)) throw new FormatException($"This method not allowed no transitions");
+                if (flags.HasFlag(ENodeRunFlags.NoAdvancing)) throw new FormatException($"This method not allowed no transitions");
 
                 if (flags == (ENodeRunFlags.Awaitable))
                 {
@@ -186,24 +191,28 @@ namespace IziHardGames.NodeProxies.Nodes
         protected static string FlagsToInfo(ENodeRunFlags flags)
         {
             string result = string.Empty;
-            if (flags == ENodeRunFlags.NoTransition) return nameof(ENodeRunFlags.NoTransition);
+            if (flags == ENodeRunFlags.NoAdvancing) return nameof(ENodeRunFlags.NoAdvancing);
             if (flags.HasFlag(ENodeRunFlags.Sync)) result += nameof(ENodeRunFlags.Sync) + ';';
             if (flags.HasFlag(ENodeRunFlags.Async)) result += nameof(ENodeRunFlags.Async) + ';';
             if (flags.HasFlag(ENodeRunFlags.Sustainable)) result += nameof(ENodeRunFlags.Sustainable) + ';';
             if (flags.HasFlag(ENodeRunFlags.Awaitable)) result += nameof(ENodeRunFlags.Awaitable) + ';';
-            if (flags.HasFlag(ENodeRunFlags.NoTransition)) result += nameof(ENodeRunFlags.NoTransition) + ';';
+            if (flags.HasFlag(ENodeRunFlags.NoAdvancing)) result += nameof(ENodeRunFlags.NoAdvancing) + ';';
             return result;
         }
 
-        protected static Task RunSync(Node node, CancellationToken ct = default)
+        internal void SetDynamicFlags(EDynamicStates states)
+        {
+            this.dynamicStates = states;
+        }
+        public static Task RunSync(Node node, CancellationToken ct = default)
         {
             return Task.Run(() => node.ExecuteParallel(ct));
         }
-        protected static Task RunAsync(Node node, CancellationToken ct = default)
+        public static Task RunAsync(Node node, CancellationToken ct = default)
         {
             return Task.Run(async () => await node.ExecuteAsync(ct).ConfigureAwait(false));
         }
-        protected static Task<List<Task>> RunItterate(Node node, Node to, CancellationToken ct = default)
+        public static Task<List<Task>> RunItterate(Node node, Node to, CancellationToken ct = default)
         {
             return Task.Run(() => Itterate(node, to, ct));
         }

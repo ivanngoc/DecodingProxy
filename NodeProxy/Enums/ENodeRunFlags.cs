@@ -10,6 +10,6 @@ namespace IziHardGames.NodeProxies.Nodes
         Async = 1 << 1,
         Sustainable = 1 << 2,
         Awaitable = 1 << 3,
-        NoTransition = 1 << 4,
+        NoAdvancing = 1 << 4,
     }
 }

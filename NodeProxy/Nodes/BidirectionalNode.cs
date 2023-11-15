@@ -5,9 +5,9 @@ using IziHardGames.Libs.Async;
 
 namespace IziHardGames.NodeProxies.Nodes.SOCKS5
 {
-    internal class BidirectionalNode : Node, IFragGiver, IFragReciever
+    internal class BidirectionalNode : Node, IFragReciever
     {
-        protected IFragGiver? agentOut;
+        protected IFragTakable? agentOut;
         protected IFragReciever? agentIn;
         /// <summary>
         /// Данные на входе ноды. Эти данные нода потребляет
@@ -19,7 +19,7 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
         protected readonly Queue<DataFragment> fragmentsToTakeOut = new Queue<DataFragment>();
         protected readonly AsyncSignaler asyncSignaler = new AsyncSignaler();
 
-        public void SetSources(IFragGiver giver, IFragReciever? reciever)
+        public void SetSources(IFragTakable giver, IFragReciever? reciever)
         {
             this.agentOut = giver;
             this.agentIn = reciever;

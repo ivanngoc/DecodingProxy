@@ -24,6 +24,11 @@
         void Add(T node);
     }
 
+    public interface IIziNodesNavigator
+    {
+
+    }
+
     public interface IIziNodesRelations
     {
 

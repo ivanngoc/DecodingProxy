@@ -2,30 +2,15 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using IziHardGames.DataRecording.Abstractions.Lib;
+using IziHardGames.DataRecording.Abstractions.Lib.Headers;
 using IziHardGames.Libs.IO;
 using ProxyLibs.Extensions;
 using Func = System.Func<System.ReadOnlyMemory<byte>, bool>;
 
 namespace IziHardGames.Libs.Streams
 {
-    [StructLayout(LayoutKind.Explicit, Size = 16)]
-    public struct Delimeter
-    {
-        [FieldOffset(0)] public int index;
-        [FieldOffset(4)] public int length;
-        [FieldOffset(8)] public long dateTime;
-        public Delimeter(int index, int length)
-        {
-            this.index = index;
-            this.length = length;
-            this.dateTime = DateTime.Now.Ticks;
-        }
-
-        public string ToStringInfo()
-        {
-            return $"index:{index}; length:{length}; datetime:{new DateTime(dateTime)}";
-        }
-    }
+    
 
     public class StreamForRecording : Stream
     {

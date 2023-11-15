@@ -144,7 +144,7 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
             fragOut = DataFragment.Get(bytes);
             agentIn.RecieveFragment(fragOut);
 
-            как внедриться в контейнер?
+            //как внедриться в контейнер?
 
             var t3 = RunThisToOrigin(ct);
             var t4 = RunOriginToThis(ct);

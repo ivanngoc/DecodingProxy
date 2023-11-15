@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
 
 namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
 {
@@ -13,22 +16,31 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
         private int counter;
         public int GetId()
         {
-            return counter++;
+            var result = Interlocked.Increment(ref counter);
+            return result;
         }
     }
     public sealed class IziGraph : IIziGraph
     {
         public readonly NodeAssociation associations = new NodeAssociation();
-        private readonly IziNodeRelations relations = new IziNodeRelations();
-        private readonly IdProvider idProvider = new IdProvider();
+        public readonly IziNodeNavigator navigator;
+        private readonly IziNodeRelations relations;
+        internal readonly IdProvider idProvider = new IdProvider();
 
-        private IIziNodesRegistry<IziNode> nodes;
+        private IIziNodesRegistry<IziNode>? nodes;
         private INodeAdvancer? advancer;
         public INodeAdvancer Advancer => advancer ?? throw new NullReferenceException();
+
+        public IziGraph()
+        {
+            relations = new IziNodeRelations(this);
+            navigator = new IziNodeNavigator(relations, associations);
+        }
 
         public void SetRegistry(IIziNodesRegistry<IziNode> nodes)
         {
             this.nodes = nodes;
+            navigator.SetRegistry(nodes);
         }
         public void SetAdvancer<T>(T advancer) where T : INodeAdvancer
         {
@@ -53,25 +65,15 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
         }
     }
 
-    public sealed class IziNode : IIziNode
+    public sealed class IziNode : IziGraphItem, IIziNode
     {
-        public int id;
-        /// <summary>
-        /// Index in array layout
-        /// </summary>
-        public int index;
         public static IziNode GetNew()
         {
             return new IziNode();
         }
     }
-    public sealed class IziEdge : IIziEdge
+    public sealed class IziEdge : IziGraphItem, IIziEdge
     {
-        public int id;
-        /// <summary>
-        ///  Index in array layout
-        /// </summary>
-        public int index;
         /// <summary>
         /// Any Value from <see cref="IziNodeRelations.relationsTypesRegistry"/>
         /// </summary>
@@ -79,6 +81,15 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
 
         public IziNode? a;
         public IziNode? b;
+    }
+
+    public abstract class IziGraphItem
+    {
+        public int id;
+        /// <summary>
+        ///  Index in array layout
+        /// </summary>
+        public int index;
     }
 
     // см. izhg.Lib.Collections
@@ -123,11 +134,64 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
         }
     }
 
+    public sealed class IziNodeNavigator : IIziNodesNavigator
+    {
+        private readonly IziNodeRelations relations;
+        private readonly NodeAssociation assiciations;
+        private IIziNodesRegistry<IziNode>? nodes;
+
+        internal IziNodeNavigator(IziNodeRelations relations, NodeAssociation associations)
+        {
+            this.relations = relations;
+            this.assiciations = associations;
+        }
+
+        public T FindDescendant<T>(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T FindDescendant<T>(int id, Func<T, bool> predictate)
+        {
+            throw new System.NotImplementedException();
+        }
+        public T FromSurround<T>(int id, Func<T, bool> predictate)
+        {
+            var store = assiciations[typeof(T)] as StdStore<T> ?? throw new NullReferenceException();
+            var realtions = relations.GetRelations(id);
+
+            foreach (var edge in realtions.Edges)
+            {
+                var data = store[edge.b!];
+                if (predictate(data)) return data;
+            }
+            throw new NullReferenceException($"Not founed id:{id}. typeof({typeof(T).FullName})");
+        }
+
+        public T DescendantsAt<T>(int offset, IziNode startPoint) where T : class, IEnumerable<IziNode>, new()
+        {
+            var selector = IziPool.GetConcurrent<T>();
+            return selector;
+        }
+
+        internal void SetRegistry(IIziNodesRegistry<IziNode> nodes)
+        {
+            this.nodes = nodes;
+        }
+    }
+
     public sealed class IziNodeRelations : IIziNodesRelations
     {
         private readonly Dictionary<int, NodeRelations> relationsPerId = new Dictionary<int, NodeRelations>();
         public NodeRelations this[IziNode node] { get => GerOrCreateRelations(node); }
         public NodeRelations this[int id] { get => GerOrCreateRelations(id); }
+
+        private readonly IziGraph graph;
+        public IziNodeRelations(IziGraph graph)
+        {
+            this.graph = graph;
+        }
+
         private NodeRelations GerOrCreateRelations(IziNode node)
         {
             int id = node.id;
@@ -149,6 +213,10 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
 
         public IziEdge CreateRelationship(IziNode a, IziNode b, int type)
         {
+            IziEdge edge = IziPool.GetConcurrent<IziEdge>();
+            edge.a = a;
+            edge.b = b;
+            edge.id = graph.idProvider.GetId();
             throw new System.NotImplementedException();
         }
         public IziEdge CreateRelationshipTowards(IziNode a, IziNode b, int type)
@@ -161,8 +229,14 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
 
     public sealed class NodeRelations
     {
-        public IziNode node;
-        public readonly List<IziEdge> edges = new List<IziEdge>();
+        public IziNode? node;
+        private readonly List<IziEdge> edges = new List<IziEdge>();
+        public IEnumerable<IziEdge> Edges => edges;
+
+        public void AddEdge(IziEdge iziEdge)
+        {
+            edges.Add(iziEdge);
+        }
     }
 
     public sealed class NodeAssociation : IIziNodesAssociations
@@ -204,6 +278,7 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
             int id = iziNode.id;
             values.Add(id, node);
         }
+        public IEnumerable<T> GetValues() { return values.Values; }
     }
     public class AssociatedDatas<T>
     {

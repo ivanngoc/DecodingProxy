@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
+using IziHardGames.DataRecording.Abstractions.Lib.Headers;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Buffers.Sequences;
 using IziHardGames.Libs.Cryptography;

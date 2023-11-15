@@ -3,6 +3,7 @@
     internal enum EGateProtocol
     {
         None,
+        TooShortToIdentify,
         Unknown,
         HTTP11,
         HTTP_CONNECT,

@@ -6,7 +6,6 @@ namespace IziHardGames.NodeProxies
 {
     public class SchemeBuilderMonada
     {
-        ProxyGraph proxyGraph = new ProxyGraph();
         internal SchemeBuilderMonada Append<T>() where T : Node
         {
             //proxyGraph.Append();

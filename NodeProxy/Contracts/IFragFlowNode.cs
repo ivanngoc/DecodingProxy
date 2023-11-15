@@ -7,7 +7,7 @@
 
         }
 
-        void PullFragmentsFrom<T>(T node) where T : IFragGiver
+        void PullFragmentsFrom<T>(T node) where T : IFragTakable
         {
 
         }

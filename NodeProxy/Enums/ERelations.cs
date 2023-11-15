@@ -41,7 +41,16 @@ namespace IziHardGames.NodeProxies.Nodes
         TransitionAfterComplete = 1 << 6,
         /// <summary>
         /// Not Consuming <see cref="DataFragment"/> But reading 
+        /// <see cref="IFragsShowing"/>
         /// </summary>
         FragPeek = 1 << 7,
+        /// <summary>
+        /// [To] get information from [From] and can stop execution of [From]
+        /// </summary>
+        ControllingObserver = 1 << 8,
+        /// <summary>
+        /// [From] contain references that [To] use
+        /// </summary>
+        RefSource = 1 << 9,
     }
 }

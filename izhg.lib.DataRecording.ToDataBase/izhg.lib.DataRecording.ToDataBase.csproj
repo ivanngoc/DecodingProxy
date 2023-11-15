@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.DataRecording.Abstractions.Lib.ToDataBase</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj" />
+    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -21,8 +21,10 @@ namespace IziHardGames.NodeProxies.Nodes
         public NodeSmartProxyTcp()
         {
             nodeAwaitDissonnect = new NodeAwaitDissonnect(control);
-            reader = new NodeSocketReader(control);
-            writer = new NodeSocketWriter(control);
+            reader = new NodeSocketReader();
+            writer = new NodeSocketWriter();
+            reader.SetControl(control);
+            writer.SetControl(control);
             this.demux = new NodeDemuxNonBlocking();
             this.SetNext(control);
             control.SetNext(demux);
@@ -62,7 +64,7 @@ namespace IziHardGames.NodeProxies.Nodes
             {
                 Console.WriteLine($"NodeType:{node.GetType().Name}\tflags:{Node.FlagsToInfo(node.flags)}");
 
-                if (node.flags == (ENodeRunFlags.NoTransition | ENodeRunFlags.Sustainable | ENodeRunFlags.Async))
+                if (node.flags == (ENodeRunFlags.NoAdvancing | ENodeRunFlags.Sustainable | ENodeRunFlags.Async))
                 {
                     var t1 = RunAsync(node, ct);
                     tasks.Add(t1);

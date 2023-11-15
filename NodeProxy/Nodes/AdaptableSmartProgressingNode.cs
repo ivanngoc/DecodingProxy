@@ -96,7 +96,7 @@ namespace IziHardGames.NodeProxies.Nodes
 
         public override ETraits GetTraits()
         {
-            return ETraits.Advancing;
+            return ETraits.FindAdvancing;
         }
     }
 }

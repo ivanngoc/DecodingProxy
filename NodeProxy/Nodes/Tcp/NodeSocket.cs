@@ -5,14 +5,8 @@ namespace IziHardGames.NodeProxies.Nodes
 {
     internal class NodeSocket : Node
     {
-        protected Socket socket;
-        protected readonly Queue<DataFragment> fragments = new Queue<DataFragment>();
-        protected readonly NodeConnectionControl control;
-
-        public NodeSocket(NodeConnectionControl control) : base()
-        {
-            this.control = control;
-        }
+        protected Socket? socket;
+        public Socket Socket => socket!;
         internal void SetSocket(Socket socket)
         {
             this.socket = socket;

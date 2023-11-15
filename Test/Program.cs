@@ -23,6 +23,7 @@ using System.Net.Sockets;
 using System.Threading;
 using IziHardGames.Libs.HttpCommon;
 using IziHardGames.Proxy.Recoreder;
+using IziHardGames.DataRecording.Abstractions.Lib;
 
 namespace IziHardGames.Tests
 {
@@ -32,6 +33,7 @@ namespace IziHardGames.Tests
         public static async Task Main(params string[] args)
         {
             Console.WriteLine("Begin Test");
+            //IziDataRecorder.ToDataBase = ;
 
             if (false)
             {

@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
+    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
     <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
     <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
