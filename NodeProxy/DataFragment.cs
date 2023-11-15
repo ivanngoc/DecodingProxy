@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Buffers;
 using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.NodeProxies.Nodes.SOCKS5;
+using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
     internal class DataFragment : IDisposable
     {
-        private int owner;
+        private Node owner;
         internal Memory<byte> buffer;
         private int length;
         private byte[]? array;
@@ -25,9 +27,16 @@ namespace IziHardGames.NodeProxies.Nodes
         internal ReadOnlyMemory<byte> ReadOnly => buffer;
         public int Length => length;
 
+        internal static void Destroy(ref DataFragment? dataFragment)
+        {
+            dataFragment!.Dispose();
+            IziPool.ReturnConcurrent(dataFragment);
+            dataFragment = null;
+        }
+
         internal static DataFragment Get(byte[] bytes)
         {
-            DataFragment frag = PoolObjectsConcurent<DataFragment>.Shared.Rent();
+            DataFragment frag = IziPool.GetConcurrent<DataFragment>();
             frag.SetBuffer(bytes);
             frag.SetLength(bytes.Length);
             return frag;
@@ -54,6 +63,11 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             this.length = readed;
             buffer = buffer.Slice(0, readed);
+        }
+
+        internal void SetOwner(Node node)
+        {
+            this.owner = node;
         }
     }
 }

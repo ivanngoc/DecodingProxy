@@ -20,16 +20,19 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
             return result;
         }
     }
-    public sealed class IziGraph : IIziGraph
+    public sealed class IziGraph : IIziGraph, IDisposable
     {
+        public readonly IndexatorSelector indexators = new IndexatorSelector();
         public readonly NodeAssociation associations = new NodeAssociation();
         public readonly IziNodeNavigator navigator;
-        private readonly IziNodeRelations relations;
+        public readonly IziNodeRelations relations;
         internal readonly IdProvider idProvider = new IdProvider();
 
         private IIziNodesRegistry<IziNode>? nodes;
         private INodeAdvancer? advancer;
+
         public INodeAdvancer Advancer => advancer ?? throw new NullReferenceException();
+        public IIziNodesRegistry<IziNode> Nodes => nodes!;
 
         public IziGraph()
         {
@@ -63,6 +66,33 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
             nodes.Add(node);
             return node;
         }
+
+        public void Dispose(EDisposeOptions options)
+        {
+            if (options.HasFlag(EDisposeOptions.Indexers))
+            {
+                indexators.Clear();
+            }
+            else if (options.HasFlag(EDisposeOptions.IndexersContent))
+            {
+                indexators.ClearContent();
+            }
+            throw new System.NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            Dispose(EDisposeOptions.All);
+        }
+    }
+
+    [Flags]
+    public enum EDisposeOptions : int
+    {
+        All = -1,
+        None = 0,
+        Indexers,
+        IndexersContent,
     }
 
     public sealed class IziNode : IziGraphItem, IIziNode
@@ -167,11 +197,53 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
             }
             throw new NullReferenceException($"Not founed id:{id}. typeof({typeof(T).FullName})");
         }
-
         public T DescendantsAt<T>(int offset, IziNode startPoint) where T : class, IEnumerable<IziNode>, new()
         {
-            var selector = IziPool.GetConcurrent<T>();
-            return selector;
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// Еврестический рекурсивный поиск
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public T First<T>(int id, Func<T, bool> predictate)
+        {
+            var store = assiciations[typeof(T)] as StdStore<T> ?? throw new NullReferenceException();
+            var realtions = relations.GetRelations(id);
+
+            foreach (var edge in realtions.Edges)
+            {
+                var data = store[edge.b!];
+                if (predictate(data)) return data;
+                if (TryFirst<T>(edge.b!.id, predictate, store, out var result))
+                {
+                    return result!;
+                }
+            }
+            throw new NullReferenceException($"Not Founded for id:{id}. type:{typeof(T).FullName}");
+        }
+        public bool TryFirst<T>(int id, Func<T, bool> predictate, StdStore<T> store, out T result)
+        {
+            var realtions = relations.GetRelations(id);
+
+            foreach (var edge in realtions.Edges)
+            {
+                var data = store[edge.b!];
+                if (predictate(data))
+                {
+                    result = data;
+                    return true;
+                }
+                if (TryFirst<T>(edge.b!.id, predictate, store, out result))
+                {
+                    return true;
+                }
+            }
+            result = default;
+            return false;
         }
 
         internal void SetRegistry(IIziNodesRegistry<IziNode> nodes)
@@ -285,4 +357,78 @@ namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
         private IziGraph? graph;
         private T[]? datas;
     }
+
+    public sealed class IndexatorSelector
+    {
+        private readonly Dictionary<Type, Indexator> pairs = new Dictionary<Type, Indexator>();
+        public Indexator this[Type ket, Type type] => throw new System.NotImplementedException();
+        public Indexator this[Type type]
+        {
+            get => pairs[type];
+            set => AddOrUpdate(type, value);
+        }
+        internal IndexatorSelector() { }
+        private void AddOrUpdate(Type type, Indexator value)
+        {
+            if (pairs.TryGetValue(type, out var existed))
+            {
+                pairs[type] = value;
+            }
+            else
+            {
+                pairs.Add(type, value);
+            }
+        }
+        internal void ClearContent()
+        {
+            foreach (var item in pairs.Values)
+            {
+                item.Clear();
+            }
+        }
+        internal void Clear()
+        {
+            pairs.Clear();
+        }
+    }
+
+    public abstract class Indexator
+    {
+        public T As<T>() where T : Indexator
+        {
+            return this as T ?? throw new InvalidCastException($"Current type:{GetType().FullName}. targetType:{typeof(T).FullName}");
+        }
+        internal abstract void Clear();
+    }
+
+    public class Indexator<TKey, TValue> : Indexator
+    {
+        private readonly Dictionary<TKey, TValue> pairs = new Dictionary<TKey, TValue>();
+        public TValue this[TKey type]
+        {
+            get => pairs[type];
+            set => AddOrUpdate(type, value);
+        }
+        private void AddOrUpdate(TKey type, TValue value)
+        {
+            if (pairs.TryGetValue(type, out var existed))
+            {
+                pairs[type] = value;
+            }
+            else
+            {
+                pairs.Add(type, value);
+            }
+        }
+        internal override void Clear()
+        {
+            pairs.Clear();
+        }
+        public void Indexing(TKey key, TValue value)
+        {
+            pairs.Add(key, value);
+        }
+        public TValue Get(TKey key) => pairs[key];
+    }
+
 }

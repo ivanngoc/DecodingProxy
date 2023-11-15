@@ -8,6 +8,7 @@ using System.Threading;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using System.Collections.Generic;
 using System.Linq;
+using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
 
 namespace IziHardGames.NodeProxies.Graphs
 {
@@ -52,6 +53,7 @@ namespace IziHardGames.NodeProxies.Graphs
         {
             store!.Associate(iziNode, node);
             node.id = iziNode.id;
+            node.SetGraph(graph!);
         }
 
         internal Task Iterate(IziNode start, CancellationToken ct)
@@ -118,6 +120,7 @@ namespace IziHardGames.NodeProxies.Graphs
                         {
                             throw new System.NotImplementedException("No Advancing founded Without NoAdvancing flag raised");
                         }
+                        IziPool.ReturnConcurrent(adv);
                     }
                 }
             });

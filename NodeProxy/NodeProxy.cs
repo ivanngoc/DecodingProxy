@@ -24,6 +24,7 @@ namespace IziHardGames.NodeProxies.Version1
                 Console.WriteLine($"Socket accepted");
                 var advancer = ProxyNodeAdvancer.GetNew();
                 var graph = IziGraph.GetNew(advancer, new RegistryIziNodes());
+                graph.indexators[typeof(Indexator<string, Node>)] = new Indexator<string, Node>();
                 await (graph.Advancer as ProxyNodeAdvancer)!.RunAsyncV2(socket, ct);
             }
         }

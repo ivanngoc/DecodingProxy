@@ -5,6 +5,7 @@ namespace IziHardGames.NodeProxies.Nodes
 {
     /// <summary>
     /// Позволяет забрать фрагменты
+    /// <see cref="IFragTaker"/>
     /// </summary>
     internal interface IFragTakable
     {

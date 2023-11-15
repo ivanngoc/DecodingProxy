@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace IziHardGames.NodeProxies.Nodes.Tls
 {
-    internal class TlsNode : NodeRead
+    internal class NodeTlsServerAuth : NodeTls
+    {
+
+    }
+    internal class NodeTlsClientAuth : NodeTls
     {
 
     }

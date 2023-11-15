@@ -14,7 +14,13 @@ namespace IziHardGames.NodeProxies.Nodes
         Sustainable = 1 << 1,
         Async = 1 << 2,
         sync = 1 << 3,
+        /// <summary>
+        /// Действует текущий объект
+        /// </summary>
         Active = 1 << 4,
+        /// <summary>
+        /// Действует узел на который ссылаются
+        /// </summary>
         Passive = 1 << 5,
         Changing = 1 << 6,
 
@@ -43,19 +49,19 @@ namespace IziHardGames.NodeProxies.Nodes
         /// <summary>
         /// Отдает/Проталкивает фрагмент в следующий узел
         /// </summary>
-        FragmentPut = FragmentOut | Active | Next,
+        FragmentPut = FragmentOut | Active,
         /// <summary>
-        /// Отдается/"Вскрывается"
+        /// Возвращает результатом объект
         /// </summary>
-        FragmentPush = FragmentOut | Async | Passive,
+        FragmentPush = FragmentOut | Passive | Async,
         /// <summary>
-        /// Вытягивает/Выдать
+        /// Забирает, стягивает из источников
         /// </summary>
-        FragmentPops = FragmentIn | Async | Active,
+        FragmentPops = FragmentIn | Active | Async,
         /// <summary>
         /// Вытягивается
         /// </summary>
-        FragmentPull = FragmentIn | Passive | Previous,
+        FragmentPull = FragmentIn | Passive,
 
 
         FragmentCreating = FragmentDeadend | FragmentOut,
@@ -93,9 +99,12 @@ namespace IziHardGames.NodeProxies.Nodes
         /// </summary>
         FragmentGiving = FragmentAffectOwnership | FragmentPush,
         /// <summary>
-        /// 
+        /// <see cref="IFragTaker"/>
         /// </summary>
         FragmentTaking = FragmentAffectOwnership | FragmentPops,
+
+        FragmentExchange = FragmentGiving | FragmentTaking,
+
     }
 
     [Flags]

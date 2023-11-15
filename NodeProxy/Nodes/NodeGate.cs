@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Cryptography.Shared.Headers;
 using IziHardGames.Socks5.Headers;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using IziHardGames.Libs.Cryptography;
+using IziHardGames.NodeProxies.Nodes.Tls;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
@@ -26,6 +30,8 @@ namespace IziHardGames.NodeProxies.Nodes
 
         internal override async Task ExecuteAsync(CancellationToken ct)
         {
+            graph!.indexators[typeof(Indx)].As<Indx>()[INDX_GATE] = this;
+
             int count = 1;
             do
             {
@@ -58,11 +64,15 @@ namespace IziHardGames.NodeProxies.Nodes
         }
         internal static EGateProtocol DetectProtocol(DataFragment dataFragment)
         {
-            var mem = dataFragment.buffer;
+            var mem = (ReadOnlyMemory<byte>)dataFragment.buffer;
             if (mem.Length >= 5)
             {
-                TlsRecord tlsRecord = BufferReader.ToStruct<TlsRecord>(mem);
-                if (tlsRecord.IsTls()) return EGateProtocol.TLS;
+                var result = NodeTls.DetectTls(dataFragment);
+                if (result!= EGateProtocol.TLS_ERROR)
+                {
+                    return result;
+                }
+                if (result == EGateProtocol.TooShortToIdentify) return result;
                 if (mem.Length > 6)
                 {
                     string str = Encoding.UTF8.GetString(mem.Slice(0, 7).Span).ToUpper();

@@ -5,75 +5,69 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Binary.Writers;
 using IziHardGames.Socks5.Enums;
 using IziHardGames.Socks5.Headers;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using IziHardGames.NodeProxies.Advancing;
 
 namespace IziHardGames.NodeProxies.Nodes.SOCKS5
 {
-    internal class NodeSocks5AsServer : BidirectionalNode
+    internal class NodeSocksGreetAsServer : Node, IFragTaker, IFragProducer
     {
-        private Func<Node, Task>? callback;
-        private Func<Node, CancellationToken, Task<BidirectionalNode>>? requestNextNode;
-        private BidirectionalNode? origin;
-
-        public event Action<Node>? OnDestinationObtained;
+        private NodeSocketOrigin? origin;
+        private NodeGate? nodeGate;
         private IPAddress? destinationIpAddressObtained;
-        private ushort destinationPortObtained;
-
-        public IPAddress DestinationIpAddressObtained => destinationIpAddressObtained ?? throw new NullReferenceException();
-        public ushort DestinationPortObtained => destinationPortObtained;
-
         private IPAddress? destinationIpAddress;
+        private ushort destinationPortObtained;
         private ushort destinationPort;
-        private Task? completion;
 
-        public event Action<DataFragment>? OnDataOutEvent;
-        public event Action<DataFragment>? OnDataInEvent;
-
-        public void SetNextNodeRequester(Func<Node, CancellationToken, Task<BidirectionalNode>>? requestNext)
+        public IFragTakable? SourceToTakeFrom { get; set; }
+        internal void SetOrigin(NodeSocketOrigin origin)
         {
-            this.requestNextNode = requestNext;
+            this.origin = origin;
         }
-        public void SetCallback(Func<Node, Task>? callback)
+        public void SetGate(NodeGate nodeGate)
         {
-            this.callback = callback;
-        }
-        internal void InsertFrag(DataFragment frag)
-        {
-            lock (fragmentsToInsertIn)
-            {
-                fragmentsToInsertIn.Enqueue(frag);
-            }
-        }
-        internal void SetAwaitingCompletionTask(Task task)
-        {
-            this.completion = task;
+            this.nodeGate = nodeGate;
         }
 
-        public override ENodeRunFlags GetRunFlags()
-        {
-            return ENodeRunFlags.Sustainable | ENodeRunFlags.Async;
-        }
         internal override async Task ExecuteAsync(CancellationToken ct)
         {
-            var t1 = CollectFrames(ct);
-            var frag = await TakeFrameFromIn(ct).ConfigureAwait(false);
+            var origin = this.origin!;
+            var index = graph!.indexators[typeof(Indx)].As<Indx>();
+            index[INDX_SOCKS_GREET] = this;
+
+            NodeSocketWriter writer = index[INDX_AGENT_SOCKET_WRITER] as NodeSocketWriter ?? throw new NullReferenceException();
+
+            var nodeSource = graph!.navigator.First<Node>(nodeGate!.id, (x) => x is IFragTakable); // && x.traits.HasFlag()
+            var source = SourceToTakeFrom = nodeSource as IFragTakable ?? throw new NullReferenceException();
+            var iziNodeThis = graph.Nodes[this.id];
+            var iziSource = graph.Nodes[nodeSource.id];
+            var iziWriter = graph.Nodes[writer.id];
+            //graph.relations.CreateRelationship(iziNodeThis, iziSource, (int)(ERelations.TakeFragment));
+            //graph.relations.CreateRelationship(iziSource, iziNodeThis, (int)(ERelations.GiveFragment));
+            //graph.relations.CreateRelationship(iziNodeThis, iziWriter, (int)(ERelations.GiveFragment));
+
+            var frag = await source.TakeFragAsync(ct);
+            frag.SetOwner(this);
+
             var slice = frag.ReadOnly;
             var greet = BufferReader.ToStructConsume<ClientGreetingsSocks5>(ref slice);
             var methods = BufferReader.Consume(greet.numberOfAuthMethods, ref slice);
             if (!methods.Span.Contains((byte)(EAuth.NoAuthRequired))) throw new NotImplementedException($"Only Auth:{EAuth.NoAuthRequired} implemented");
 
+            DataFragment.Destroy(ref frag);
 
             ServerChoice serverChoice = new ServerChoice();
             serverChoice.version = (byte)ESocksType.SOCKS5;
             serverChoice.cauth = (byte)EAuth.NoAuthRequired; // (byte)EAuth.None;
             DataFragment fragOut = DataFragment.Get(BufferWriter.ToArray(serverChoice));
-            agentIn!.RecieveFragment(fragOut);
+            writer.RecieveFragment(fragOut);
 
-            frag = await TakeFrameFromIn(ct).ConfigureAwait(false);
+            frag = await source.TakeFragAsync(ct).ConfigureAwait(false);
             slice = frag.ReadOnly;
 
             var ccr = BufferReader.ToStructConsume<ClientRequest>(ref slice);
@@ -105,20 +99,15 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
                 default: throw new System.NotImplementedException(adr.Type.ToString());
             }
             ushort destinationPort = BufferReader.ToUshortConsume(ref slice);
+            DataFragment.Destroy(ref frag);
+
             this.destinationIpAddressObtained = iPAddress;
             this.destinationPortObtained = destinationPort;
 
-            this.destinationIpAddress = destinationIpAddressObtained;
-            this.destinationPort = destinationPortObtained;
+            this.destinationIpAddress = NodeProxyGlobals.GetDestAddressSocks5(destinationIpAddressObtained);
+            this.destinationPort = NodeProxyGlobals.GetDestPortSocks5(destinationPortObtained);
 
-            OnDestinationObtained?.Invoke(this);
-            // check if need to override destination
-            await callback!(this).ConfigureAwait(false);
-            var origin = this.origin = await requestNextNode!(this, ct).ConfigureAwait(false);
-            this.SetNext(origin);
-
-            // запускаем origin.ExecuteAsync()
-            var t2 = RunAsync(origin);
+            await origin.ConnectAsync(destinationIpAddress, destinationPort).ConfigureAwait(false);
 
             // server reply length+ port length
             int lengthReply = 4 + 2;
@@ -142,44 +131,15 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
             offset += BufferWriter.WirteToBuffer(adrBytes, bytes, offset);
             offset += BufferWriter.WirteToBufferUshort(destinationPort, bytes, offset);
             fragOut = DataFragment.Get(bytes);
-            agentIn.RecieveFragment(fragOut);
-
-            //как внедриться в контейнер?
-
-            var t3 = RunThisToOrigin(ct);
-            var t4 = RunOriginToThis(ct);
-
-            await completion!.ConfigureAwait(false);
+            writer.RecieveFragment(fragOut);
         }
-
-        private Task RunOriginToThis(CancellationToken ct)
+        public override ENodeRunFlags GetRunFlags()
         {
-            return Task.Run(async () =>
-            {
-                while (!ct.IsCancellationRequested)
-                {
-                    var frag = await origin!.TakeFragAsync(ct).ConfigureAwait(false);
-                    OnDataInEvent?.Invoke(frag);
-                    agentIn!.RecieveFragment(frag);
-                }
-            });
+            return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
         }
-        private Task RunThisToOrigin(CancellationToken ct)
+        public override ETraits GetTraits()
         {
-            return Task.Run(async () =>
-               {
-                   while (!ct.IsCancellationRequested)
-                   {
-                       var frag = await TakeFrameFromIn(ct).ConfigureAwait(false);
-                       OnDataOutEvent?.Invoke(frag);
-                       origin!.RecieveFragment(frag);
-                   }
-               });
-        }
-
-        internal void SetSession(SessionControl sessionControl)
-        {
-            throw new NotImplementedException();
+            return ETraits.FragmentCreating | ETraits.FragmentExchange | ETraits.FragmentDestroying;
         }
     }
 }

@@ -9,6 +9,8 @@
         HTTP_CONNECT,
         SOCKS4,
         SOCKS5,
-        TLS,
+        TLS_SERVER,
+        TLS_CLIENT,
+        TLS_ERROR,
     }
 }

@@ -14,6 +14,7 @@ namespace IziHardGames.ObjectPools.Abstractions.Lib.Abstractions
         }
         public static void ReturnConcurrent<T>(T obj) where T : class, new()
         {
+            if (obj is IDisposable disposable) disposable.Dispose();
             PoolObjectsConcurent<T>.Shared.Return(obj);
         }
     }

@@ -5,6 +5,10 @@ using System;
 using System.Collections.Generic;
 using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
+using IziHardGames.NodeProxies.Nodes.SOCKS5;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using IziHardGames.NodeProxies.Nodes.Tls;
 
 namespace IziHardGames.NodeProxies.Graphs
 {
@@ -14,6 +18,8 @@ namespace IziHardGames.NodeProxies.Graphs
 
         internal AdvanceResult GetAdvancing(int variant, Node node, IziGraph graph)
         {
+            var indx = graph!.indexators[typeof(Indx)].As<Indx>();
+
             if (queue.TryGetValue(node, out var nextNode))
             {
                 AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
@@ -37,15 +43,33 @@ namespace IziHardGames.NodeProxies.Graphs
                 }
                 throw new System.NotImplementedException();
             }
-            else if (node is NodeSmartProxyTcp nodeSmartProxyTcp)
+            else if (node is NodeSocksGreetAsServer socks5)
+            {
+                if (variant == default)
+                {
+                    AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
+                    NodeGate nodeGate = new NodeGate();
+                    result.Add(new NextNode(nodeGate, ERelations.Next));
+                    return result;
+                }
+            }
+            else if (node is NodeTlsClientAuth tlsClient)
             {
 
+            }
+            else if (node is NodeTlsServerAuth tlsServ)
+            {
+
+            }
+            else if (node is NodeSmartProxyTcp nodeSmartProxyTcp)
+            {
                 throw new System.NotImplementedException();
             }
             else
             {
                 throw new System.NotImplementedException($"type:{node.GetType().FullName}");
             }
+            throw new System.NotImplementedException();
         }
 
         internal RegistryForAdvancing QueueNode(Node a, Node b, ERelations relations)

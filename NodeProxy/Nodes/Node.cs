@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Graphs.Abstractions.Lib;
+using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
@@ -81,8 +82,10 @@ namespace IziHardGames.NodeProxies.Nodes
         /// Стадия конвейера
         /// </summary>
         public bool isConveyorStage;
-        internal int id;
 
+        internal int id;
+        internal string idString;
+        protected IziGraph? graph;
 
         public virtual Node? Next { get; set; }
         public virtual Node? Previous { get; set; }
@@ -107,6 +110,10 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             if (!isDisposed) throw new ObjectDisposedException($"Object must be disposed before use!");
             isDisposed = false;
+        }
+        public void SetGraph(IziGraph graph)
+        {
+            this.graph = graph;
         }
         internal virtual void Execute()
         {

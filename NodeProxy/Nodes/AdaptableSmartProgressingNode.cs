@@ -35,7 +35,7 @@ namespace IziHardGames.NodeProxies.Nodes
 
                 switch (protocol)
                 {
-                    case EGateProtocol.TLS:
+                    case EGateProtocol.TLS_CLIENT:
                         {
                             /// <see cref="NodeTlsHandshakeFromClient"/>   
                             throw new System.NotImplementedException();
