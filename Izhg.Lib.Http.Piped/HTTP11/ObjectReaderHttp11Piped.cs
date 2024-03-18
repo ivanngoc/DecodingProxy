@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Pipelines;
 using IziHardGames.Proxy.Sniffing.ForHttp;
 

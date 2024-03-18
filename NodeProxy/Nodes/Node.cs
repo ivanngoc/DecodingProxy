@@ -11,62 +11,6 @@ using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
-
-    internal class NodeStart : Node
-    {
-
-    }
-    internal class NodeEnd : Node
-    {
-
-    }
-
-    /// <summary>
-    /// Control Tcp connection
-    /// </summary>
-    internal class NodeTcpAcceptStart : NodeDemuxBlocking
-    {
-        private Socket? socket;
-        private NodeRead read;
-        private NodeWrite write;
-
-        public NodeTcpAcceptStart(NodeRead read, NodeWrite write, NodeTcpAcceptEnd end) : base()
-        {
-            this.read = read;
-            this.write = write;
-            outes.Add(read);
-            outes.Add(write);
-            Next = end;
-        }
-        internal void Bind(Socket socket)
-        {
-            this.socket = socket;
-        }
-    }
-
-    internal class NodeTcpAcceptEnd : NodeMux
-    {
-
-    }
-
-    internal abstract class NodeWrite : Node
-    {
-
-    }
-    internal abstract class NodeRead : Node
-    {
-
-    }
-
-    internal class NodeTcpWrite : NodeWrite
-    {
-
-    }
-
-    internal class NodeTcpRead : NodeRead
-    {
-
-    }
     internal abstract class Node : IIziNode, IDisposable
     {
         public readonly ETraits traits;
@@ -223,77 +167,13 @@ namespace IziHardGames.NodeProxies.Nodes
         {
             return Task.Run(() => Itterate(node, to, ct));
         }
-    }
-
-    internal class NodeProtocolDetection : Node
-    {
-
-    }
-
-    internal abstract class NodeBuffer : Node
-    {
-
-    }
-    internal class NodeMuxNonBlocking : NodeMux
-    {
-        public override ENodeRunFlags GetRunFlags()
+        /// <summary>
+        /// All references obtained. Node is ready to execute
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool Validate()
         {
-            return ENodeRunFlags.Sync | ENodeRunFlags.Sustainable;
+            return true;
         }
-        internal override void ExecuteParallel(CancellationToken ct = default)
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// Multiple Ins
-    /// Single Out
-    /// </summary>
-    internal class NodeMux : Node
-    {
-        protected readonly List<Node> ins = new List<Node>();
-        public void AddIn(Node inNode)
-        {
-            ins.Add(inNode);
-        }
-    }
-    internal class NodeEnumerator : Node
-    {
-        private IEnumerator<Node> enumerator;
-
-        public NodeEnumerator(IEnumerator<Node> outes)
-        {
-            this.enumerator = outes;
-        }
-        public override Node? Next { set => throw new System.NotSupportedException(); get => MoveNext(); }
-        private Node? MoveNext()
-        {
-            if (enumerator.MoveNext())
-            {
-                return enumerator.Current;
-            }
-            throw new System.NotImplementedException();
-        }
-    }
-    internal class NodeData
-    {
-
-    }
-    internal class NodeResult
-    {
-        private string result;
-        public bool Is(string compare)
-        {
-            return string.Compare(result, compare, StringComparison.InvariantCultureIgnoreCase) == 0;
-        }
-    }
-    internal class NodeReadHttp11 : Node
-    {
-
-    }
-    internal class NodeHttpConnect : Node
-    {
-
     }
 }

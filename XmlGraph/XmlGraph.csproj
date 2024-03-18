@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.XmlGraph</RootNamespace>
+    <ProjectName>XmlGraph</ProjectName>
+    <ProjectGuid>bc2c1595-1c32-4867-80ab-600657c0d5d1</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <Folder Include="Abstractions\" />
   </ItemGroup>
-
 </Project>

@@ -6,7 +6,7 @@ using Enumerator = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromClientE
 using EnumeratorServer = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromServerExtensionsEnumerator;
 using System;
 using System.Collections.Generic;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Libs.Cryptography.Attributes;
 using IziHardGames.Libs.Cryptography.Tls;

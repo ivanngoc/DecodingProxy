@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGaems.Nodes.ValueTypes.Lib</RootNamespace>
+    <ProjectName>izhg.lib.Nodes.ValueTypes</ProjectName>
+    <ProjectGuid>37cafc22-e969-4d8f-8232-4d1ce661ba86</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj" />
+    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj">
+      <Guid>186c0734-4ff8-47bf-bac8-0cd1c4876e6a</Guid>
+      <ProjectName>izhg.lib.Nodes.Abstracts</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

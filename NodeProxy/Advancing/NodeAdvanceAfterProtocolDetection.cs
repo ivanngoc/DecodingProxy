@@ -7,9 +7,9 @@ using IziHardGames.Graphs.Abstractions.Lib;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using IziHardGames.NodeProxies.Graphs;
 using IziHardGames.NodeProxies.Nodes;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
-using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
 using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.NodeProxies.Advancing
 {
@@ -35,7 +35,27 @@ namespace IziHardGames.NodeProxies.Advancing
             result.Add(nextNodeSocketReader);
             indx[isOrigin ? INDX_ORIGIN_SOCKET_READER : INDX_AGENT_SOCKET_READER] = nodeSocketReader;
 
-            if (!isOrigin) registry.QueueNode(nodeSocketReader, new NodeGate(), ERelations.Next | ERelations.FragPeek);
+            if (!isOrigin)
+            {
+                var agentGate = IziPool.GetConcurrent<NodeGate>();
+                indx[INDX_GATE_AGENT] = agentGate;
+                registry.QueueNode(nodeSocketReader, agentGate, ERelations.Next | ERelations.FragPeek);
+            }
+            else
+            {
+                var nodeSocketClient = indx[INDX_CLIENT_SOCKET] as NodeSocket ?? throw new NullReferenceException();
+                var nodeSocketOrigin = indx[INDX_ORIGIN_SOCKET] as NodeSocket ?? throw new NullReferenceException();
+
+                NodeBridgeSocket bridge = new NodeBridgeSocket();
+                indx[INDX_SOCKET_BRIDGE] = bridge;
+
+                bridge.SetA(nodeSocketClient);
+                bridge.SetB(nodeSocketOrigin);
+                result.Add(new NextNode(bridge, ERelations.Next));
+
+                NodeBridgeProxy nodeProxyBridge = IziPool.GetConcurrent<NodeBridgeProxy>();
+                result.Add(new NextNode(nodeProxyBridge, ERelations.Next));
+            }
 
             NodeSocketWriter nodeSocketWriter = IziPool.GetConcurrent<NodeSocketWriter>();
             nodeSocketWriter.SetControl(control);

@@ -1,7 +1,7 @@
 ﻿using Grpc.Core;
 using IziHardGames.Libs.Async;
 using IziHardGames.Libs.Networking.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

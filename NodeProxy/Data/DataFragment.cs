@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Buffers;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.NodeProxies.Nodes.SOCKS5;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
@@ -68,6 +68,11 @@ namespace IziHardGames.NodeProxies.Nodes
         internal void SetOwner(Node node)
         {
             this.owner = node;
+        }
+
+        internal void From(DataFrame frame)
+        {
+            throw new NotImplementedException();
         }
     }
 }

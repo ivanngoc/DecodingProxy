@@ -11,7 +11,7 @@ using IziHardGames.Libs.IO;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.NonEngine.Enumerators;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace HttpDecodingProxy.ForHttp
 {

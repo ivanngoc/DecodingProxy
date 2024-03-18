@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.Async</RootNamespace>
+    <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+    <ProjectGuid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

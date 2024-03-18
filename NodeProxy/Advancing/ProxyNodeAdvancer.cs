@@ -2,13 +2,15 @@
 using System;
 using System.Net.Sockets;
 using IziHardGames.NodeProxies.Nodes;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Graphs.Abstractions.Lib;
 using System.Threading;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using System.Collections.Generic;
 using System.Linq;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
+using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.NodeProxies.Graphs
 {
@@ -33,10 +35,12 @@ namespace IziHardGames.NodeProxies.Graphs
 
         public Task RunAsyncV2(Socket socket, CancellationToken ct)
         {
+            var indx = graph.indexators[typeof(Indx)].As<Indx>();
             NodeSocket node = new NodeSocket();
             node.SetSocket(socket);
             IziNode iziNode = graph!.GetNewNode();
             Associate(iziNode, node);
+            indx[INDX_CLIENT_SOCKET] = node;
             return Iterate(iziNode, ct);
         }
         public Task RunAsyncV1(Socket socket, CancellationToken ct)
@@ -67,6 +71,8 @@ namespace IziHardGames.NodeProxies.Graphs
                 {
                     var traits = node.GetTraits();
                     var flags = node.GetRunFlags();
+
+                    if (!node.Validate()) throw new InvalidOperationException();
 
                     var relations = nodeRelations![iziNode];
 

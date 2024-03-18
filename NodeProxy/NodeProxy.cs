@@ -40,12 +40,13 @@ namespace IziHardGames.NodeProxies.Version1
 
             while (!cts.IsCancellationRequested)
             {
-                Pipe pipe = new Pipe(schema);
-                pipes.Add(pipe);
-                NodeTcpAcceptStart nodeTcpAccept = Manager.Get<NodeTcpAcceptStart>();
-                pipe.Head = nodeTcpAccept;
-                nodeTcpAccept.Bind(await tcpListener.AcceptSocketAsync(ct).ConfigureAwait(false));
-                pipe.Start(ct);
+                //Pipe pipe = new Pipe(schema);
+                //pipes.Add(pipe);
+                //NodeTcpAcceptStart nodeTcpAccept = Manager.Get<NodeTcpAcceptStart>();
+                //pipe.Head = nodeTcpAccept;
+                //nodeTcpAccept.Bind(await tcpListener.AcceptSocketAsync(ct).ConfigureAwait(false));
+                //pipe.Start(ct);
+                throw new System.NotImplementedException();
             }
             await Task.WhenAll(pipes.Select(x => x.task)!);
         }

@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.ObjectPools.Abstractions.Lib</RootNamespace>
+    <ProjectName>izhg.pools.Proxy</ProjectName>
+    <ProjectGuid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\[Unity] Projects\GameProject3\Packages\com.izihardgames.pools.abstractions\Any\izhg.pools.abstractions.netstd21.asmdef.csproj">
+      <Guid>7648b4c5-6e23-4870-8d02-72e33cca5841</Guid>
+      <ProjectName>izhg.pools.abstractions.netstd21.asmdef</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\IzhgLibLogging\Izhg.Lib.Logging.csproj">
+      <Guid>ead0039d-c8ef-4aff-8d9c-c74136bbbe8d</Guid>
+      <ProjectName>Izhg.Lib.Logging</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Contracts\" />
+  </ItemGroup>
+</Project>

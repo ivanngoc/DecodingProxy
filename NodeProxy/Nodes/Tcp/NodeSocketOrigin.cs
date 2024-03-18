@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
 using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
 using IziHardGames.Libs.Async;
 using IziHardGames.NodeProxies.Nodes.SOCKS5;
@@ -13,6 +13,9 @@ namespace IziHardGames.NodeProxies.Nodes
     internal class NodeSignaler : Node
     {
         public readonly AsyncSignaler signaler = new AsyncSignaler();
+        private Node a;
+        public Node b;
+
         internal void SetSync(Node node, Node nodeSocketOrigin)
         {
             this.a = node;
@@ -22,12 +25,11 @@ namespace IziHardGames.NodeProxies.Nodes
 
     internal class NodeSocketOrigin : NodeSocket
     {
-        internal override Task ExecuteAsync(CancellationToken ct)
+        internal override void Execute()
         {
             var index = graph!.indexators[typeof(Indx)].As<Indx>();
-            index[INDX_ORIGIN_SOCKET] = this;
+            
             var nodeSocks5 = index[INDX_SOCKS_GREET];
-            return base.ExecuteAsync(ct);
         }
 
         public async Task ConnectAsync(IPAddress destinationIpAddress, ushort destinationPort)
@@ -37,7 +39,7 @@ namespace IziHardGames.NodeProxies.Nodes
         }
         public override ENodeRunFlags GetRunFlags()
         {
-            return ENodeRunFlags.Async | ENodeRunFlags.Sustainable;
+            return ENodeRunFlags.Sync;
         }
         public override ETraits GetTraits()
         {

@@ -11,7 +11,7 @@ using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
 using Callback = System.Func<IziHardGames.Proxy.Consuming.HttpSource, System.Buffers.ReadOnlySequence<byte>, System.Threading.Tasks.Task>;

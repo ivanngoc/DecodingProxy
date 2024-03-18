@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.Networking.SocketLevel;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Pipelines;
 using IziHardGames.Libs.Pipelines.Contracts;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Buffers;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Libs.Buffers.Sequences
 {

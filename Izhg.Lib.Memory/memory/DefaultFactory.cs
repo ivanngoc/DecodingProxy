@@ -1,6 +1,6 @@
-﻿namespace IziHardGames.Libs.NonEngine.Memory
+﻿namespace IziHardGames.Pools.Abstractions.NetStd21
 {
-    public class DefaultFactory<T> : IFactory<T> where T : new()
+    public class DefaultFactory<T> : IPoolFactory<T> where T : new()
     {
         public T Create()
         {

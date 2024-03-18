@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using AsyncSignaler = IziHardGames.Libs.Async.AsyncSignaler;
 
 namespace IziHardGames.Libs.Streams

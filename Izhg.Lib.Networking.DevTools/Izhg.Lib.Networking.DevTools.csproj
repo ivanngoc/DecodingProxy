@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>IziHardGames.Libs.Networking.DevTools</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Networking.DevTools</ProjectName>
+    <ProjectGuid>8f33d4ea-81aa-46d9-9621-0c544dc856b1</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.netstd21.csproj">
+      <Guid>70c3cc7b-912b-4962-a5ee-8821616edda8</Guid>
+      <ProjectName>Izhg.Lib.Binary.netstd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj">
+      <Guid>ba1437d3-d896-45ae-b3fb-ba17cf9d843a</Guid>
+      <ProjectName>Izhg.Lib.Networking</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

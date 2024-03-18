@@ -1,21 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Networking</ProjectName>
+    <ProjectGuid>ba1437d3-d896-45ae-b3fb-ba17cf9d843a</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj">
+      <Guid>66ef5c96-2d49-49eb-845a-e73585a979eb</Guid>
+      <ProjectName>Izhg.NetStandart21.Core</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj">
+      <Guid>8e6373a4-7661-4f82-9a70-419fb6fb0b00</Guid>
+      <ProjectName>Izhg.Lib.Cryptography</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj">
+      <Guid>7a027b87-078c-4858-a618-6645993630f4</Guid>
+      <ProjectName>Izhg.Lib.ManagersForObjects</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Clients\" />
     <Folder Include="TcpBinaryExchanger\" />
   </ItemGroup>
-
 </Project>

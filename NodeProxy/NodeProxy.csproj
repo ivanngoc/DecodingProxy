@@ -1,23 +1,72 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>IziHardGames.NodeProxy</RootNamespace>
     <Nullable>enable</Nullable>
+    <ProjectName>NodeProxy</ProjectName>
+    <ProjectGuid>d1b13569-1d6c-4dd0-ac50-a5ba800f07c5</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj" />
-    <ProjectReference Include="..\izhg.lib.Nodes.RefTypes\izhg.lib.Nodes.RefTypes.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
-    <ProjectReference Include="..\SOCKS\SOCKS.csproj" />
-    <ProjectReference Include="..\XmlGraph\XmlGraph.csproj" />
+    <ProjectReference Include="..\..\..\[Unity] Projects\GameProject3\Packages\com.izihardgames.pools.abstractions\Any\izhg.pools.abstractions.netstd21.asmdef.csproj">
+      <Guid>7648b4c5-6e23-4870-8d02-72e33cca5841</Guid>
+      <ProjectName>izhg.pools.abstractions.netstd21.asmdef</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\com.izihardgames.tasking.pack\Pack\netstd21.abstractions\izhg.tasking.netstd21.abstractions.csproj">
+      <Guid>67f8e244-946a-483f-9672-090be43e4240</Guid>
+      <ProjectName>izhg.tasking.netstd21.abstractions</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\com.izihardgames.tasking.pack\Pack\netstd21\izhg.tasking.netstd21.csproj">
+      <Guid>28d38194-1ab6-4ba3-b010-4b4e6c0936b3</Guid>
+      <ProjectName>izhg.tasking.netstd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.Async.NetStd21\izhg.Async.NetStd21.csproj">
+      <Guid>4d08edc4-23c7-4ae1-9450-d503905c3b1a</Guid>
+      <ProjectName>izhg.Async.NetStd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj">
+      <Guid>8e6373a4-7661-4f82-9a70-419fb6fb0b00</Guid>
+      <ProjectName>Izhg.Lib.Cryptography</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj">
+      <Guid>186c0734-4ff8-47bf-bac8-0cd1c4876e6a</Guid>
+      <ProjectName>izhg.lib.Nodes.Abstracts</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.lib.Nodes.RefTypes\izhg.lib.Nodes.RefTypes.csproj">
+      <Guid>4f7a06a0-9482-4e47-804b-1063789f60f5</Guid>
+      <ProjectName>izhg.lib.Nodes.RefTypes</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\SOCKS\SOCKS.csproj">
+      <Guid>bff74220-3a4f-47b8-9871-5e9b3deb4153</Guid>
+      <ProjectName>SOCKS</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\XmlGraph\XmlGraph.csproj">
+      <Guid>bc2c1595-1c32-4867-80ab-600657c0d5d1</Guid>
+      <ProjectName>XmlGraph</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
+    <Folder Include="Contracts\Fragments\" />
+    <Folder Include="Graphs\" />
     <Folder Include="TestData\" />
   </ItemGroup>
 </Project>

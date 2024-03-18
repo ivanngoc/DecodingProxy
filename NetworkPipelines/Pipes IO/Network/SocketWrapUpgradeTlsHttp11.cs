@@ -14,7 +14,7 @@ using IziHardGames.Libs.Networking.DevTools;
 using IziHardGames.Libs.Networking.Pipelines.Contracts;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {

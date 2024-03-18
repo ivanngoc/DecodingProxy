@@ -8,7 +8,7 @@ using IziHardGames.Libs.Cryptography.Tls12;
 using IziHardGames.Libs.Networking.Options;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using Enumerator = IziHardGames.Libs.Cryptography.Tls.Shared.TlsHelloFromServerExtensionsEnumerator;
 
 namespace IziHardGames.Libs.IO

@@ -1,6 +1,6 @@
 ﻿namespace IziHardGames.NodeProxies.Nodes
 {
-    internal interface IFrameFlowNode
+    public interface IBridge
     {
 
     }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using IziHardGames.Core.Buffers;
 using IziHardGames.Libs.Buffers.Abstracts;
 using IziHardGames.Libs.Buffers.Sources;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Libs.Buffers.Readers
 {

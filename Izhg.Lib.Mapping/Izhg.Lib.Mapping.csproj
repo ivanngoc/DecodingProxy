@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Mapping</ProjectName>
+    <ProjectGuid>bfecbd85-8a1c-44ce-8eea-1b899ac6dc56</ProjectGuid>
   </PropertyGroup>
-
 </Project>

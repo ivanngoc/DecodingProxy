@@ -2,7 +2,7 @@
 using System.Buffers;
 using IziHardGames.Lib.Collections.Contracts;
 using IziHardGames.Libs.HttpCommon.Attributes;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Libs.HttpCommon
 {

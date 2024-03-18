@@ -8,7 +8,7 @@ using IziHardGames.NodeProxies.Nodes.Tls;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
-    internal class AdaptableSmartProgressingNode : NodeRead
+    internal class AdaptableSmartProgressingNode : Node
     {
         private readonly NodeSmartProxyTcp nodeSmartProxyTcp;
         private readonly NodeSocketReader reader;

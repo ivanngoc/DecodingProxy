@@ -3,12 +3,12 @@ using IziHardGames.Graphs.Abstractions.Lib;
 using IziHardGames.NodeProxies.Advancing;
 using System;
 using System.Collections.Generic;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
 using IziHardGames.Graphs.Abstractions.Lib.ValueTypes;
 using IziHardGames.NodeProxies.Nodes.SOCKS5;
-using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
 using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
 using IziHardGames.NodeProxies.Nodes.Tls;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.NodeProxies.Graphs
 {
@@ -49,17 +49,53 @@ namespace IziHardGames.NodeProxies.Graphs
                 {
                     AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
                     NodeGate nodeGate = new NodeGate();
+                    indx[INDX_GATE_ORIGIN] = nodeGate;
                     result.Add(new NextNode(nodeGate, ERelations.Next));
                     return result;
                 }
             }
-            else if (node is NodeTlsClientAuth tlsClient)
+            else if (node is NodeTlsAuthClient tlsClient)
             {
-
+                if (variant == default)
+                {
+                    AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
+                    NodeTlsFramesReader reader = IziPool.GetConcurrent<NodeTlsFramesReader>();
+                    NodeTlsFramesWriter writer = IziPool.GetConcurrent<NodeTlsFramesWriter>();
+                    NodeTlsHub hub = IziPool.GetConcurrent<NodeTlsHub>();
+                    hub.SetReader(reader);
+                    hub.SetWriter(writer);
+                    hub.SetAuth(tlsClient);
+                    result.Add(new NextNode(reader, ERelations.Next));
+                    result.Add(new NextNode(writer, ERelations.Next));
+                    indx[INDX_TLS_CLIENT_READER] = reader;
+                    indx[INDX_TLS_CLIENT_WRITER] = writer;
+                    indx[INDX_TLS_CLIENT_HUB] = hub;
+                    return result;
+                }
             }
-            else if (node is NodeTlsServerAuth tlsServ)
+            else if (node is NodeTlsAuthServer tlsServ)
             {
+                if (variant == default)
+                {
+                    AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
+                    NodeTlsFramesReader reader = IziPool.GetConcurrent<NodeTlsFramesReader>();
+                    NodeTlsFramesWriter writer = IziPool.GetConcurrent<NodeTlsFramesWriter>();
+                    NodeTlsHub hub = IziPool.GetConcurrent<NodeTlsHub>();
+                    hub.SetReader(reader);
+                    hub.SetWriter(writer);
+                    hub.SetAuth(tlsServ);
 
+                    result.Add(new NextNode(reader, ERelations.Next));
+                    result.Add(new NextNode(writer, ERelations.Next));
+                    indx[INDX_TLS_SERVER_READER] = reader;
+                    indx[INDX_TLS_SERVER_WRITER] = writer;
+                    indx[INDX_TLS_SERVER_HUB] = hub;
+                    return result;
+                }
+            }
+            else if (node is NodeBridgeProxy bridge)
+            {
+                throw new System.NotImplementedException();
             }
             else if (node is NodeSmartProxyTcp nodeSmartProxyTcp)
             {

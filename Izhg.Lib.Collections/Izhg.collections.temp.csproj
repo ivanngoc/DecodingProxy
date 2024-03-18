@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ProjectName>Izhg.collections.temp</ProjectName>
+    <ProjectGuid>5e40763a-8e85-4268-acd6-a682cad236f7</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Izhg.Core\Izhg.NetStandart21.Core.csproj">
+      <Guid>66ef5c96-2d49-49eb-845a-e73585a979eb</Guid>
+      <ProjectName>Izhg.NetStandart21.Core</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj">
+      <Guid>592bf3e6-9a43-4293-aca0-b5ac2d6fa06c</Guid>
+      <ProjectName>Izhg.Lib.Buffers</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

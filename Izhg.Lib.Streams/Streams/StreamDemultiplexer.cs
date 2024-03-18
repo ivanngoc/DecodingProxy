@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Libs.Async;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Streams.Contracts;
 using Func = System.Func<System.ReadOnlyMemory<byte>, bool>;
 using FuncAsync = IziHardGames.Libs.Async.AsyncOperation<System.Threading.Tasks.Task<bool>>;

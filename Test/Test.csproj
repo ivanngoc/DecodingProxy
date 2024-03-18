@@ -7,21 +7,74 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectName>Test</ProjectName>
+    <ProjectGuid>03438467-1ba5-46df-aae0-1e49b3471b98</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\DevConsole.Client\DevConsole.Client.csproj" />
-    <ProjectReference Include="..\DevConsole.Server\DevConsole.Server.csproj" />
-    <ProjectReference Include="..\DevConsole.Shared\DevConsole.Shared.csproj" />
-    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
-    <ProjectReference Include="..\Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj" />
-    <ProjectReference Include="..\ProxyForRecording\ProxyForRecording.csproj" />
-    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
-    <ProjectReference Include="..\SOCKS\SOCKS.csproj" />
+    <ProjectReference Include="..\DevConsole.Client\DevConsole.Client.csproj">
+      <Guid>637b6cda-4329-4a3f-a714-11e812cfc88e</Guid>
+      <ProjectName>DevConsole.Client</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\DevConsole.Server\DevConsole.Server.csproj">
+      <Guid>72d5528d-dcb9-4b63-92b3-ff4588a2964c</Guid>
+      <ProjectName>DevConsole.Server</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\DevConsole.Shared\DevConsole.Shared.csproj">
+      <Guid>8d71dd55-b886-4298-a849-6eefe2045153</Guid>
+      <ProjectName>DevConsole.Shared</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj">
+      <Guid>ed4c3ce1-4d62-4d1f-997f-df57e307c939</Guid>
+      <ProjectName>Izhg.Lib.Http.Recording</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Networking.DevTools\Izhg.Lib.Networking.DevTools.csproj">
+      <Guid>8f33d4ea-81aa-46d9-9621-0c544dc856b1</Guid>
+      <ProjectName>Izhg.Lib.Networking.DevTools</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.Async.NetStd21\izhg.Async.NetStd21.csproj">
+      <Guid>4d08edc4-23c7-4ae1-9450-d503905c3b1a</Guid>
+      <ProjectName>izhg.Async.NetStd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj">
+      <Guid>6483ebc3-14d1-4f10-ad60-c12af03c3390</Guid>
+      <ProjectName>Izhg.Lib.Http.Monitoring</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj">
+      <Guid>94ab439b-4f17-4926-a38f-a92c1f93b961</Guid>
+      <ProjectName>Izhg.MappedFrameReader</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\ProxyForRecording\ProxyForRecording.csproj">
+      <Guid>4e943c16-bdc4-4591-9b9f-51f0e7fdf795</Guid>
+      <ProjectName>ProxyForRecording</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj">
+      <Guid>4505eca9-f59e-4bbc-870f-0796a96f1eff</Guid>
+      <ProjectName>Izhg.Lib.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\SOCKS\SOCKS.csproj">
+      <Guid>bff74220-3a4f-47b8-9871-5e9b3deb4153</Guid>
+      <ProjectName>SOCKS</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

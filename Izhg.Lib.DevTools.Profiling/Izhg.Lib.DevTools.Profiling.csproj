@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.DevTools.Profiling</ProjectName>
+    <ProjectGuid>b2d2ae9c-0a40-4e17-b5e3-2f465b0372a7</ProjectGuid>
   </PropertyGroup>
-
 </Project>

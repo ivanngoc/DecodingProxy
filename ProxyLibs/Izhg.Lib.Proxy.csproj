@@ -1,27 +1,65 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Proxy</ProjectName>
+    <ProjectGuid>4505eca9-f59e-4bbc-870f-0796a96f1eff</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.3" />
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http.Piped\Izhg.Lib.Http.Piped.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
-    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
-    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.netstd21.csproj">
+      <Guid>70c3cc7b-912b-4962-a5ee-8821616edda8</Guid>
+      <ProjectName>Izhg.Lib.Binary.netstd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj">
+      <Guid>8e6373a4-7661-4f82-9a70-419fb6fb0b00</Guid>
+      <ProjectName>Izhg.Lib.Cryptography</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http.Piped\Izhg.Lib.Http.Piped.csproj">
+      <Guid>669dba73-f9f9-46f4-bd9b-17307b17dd64</Guid>
+      <ProjectName>Izhg.Lib.Http.Piped</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.ManagersForObjects\Izhg.Lib.ManagersForObjects.csproj">
+      <Guid>7a027b87-078c-4858-a618-6645993630f4</Guid>
+      <ProjectName>Izhg.Lib.ManagersForObjects</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj">
+      <Guid>ba1437d3-d896-45ae-b3fb-ba17cf9d843a</Guid>
+      <ProjectName>Izhg.Lib.Networking</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj">
+      <Guid>1b092f98-024d-46ff-90f9-0e9953aa5128</Guid>
+      <ProjectName>Izhg.Lib.ExtensionsForBcl</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj">
+      <Guid>b847a9c0-943f-41c0-be84-5207af272d3f</Guid>
+      <ProjectName>Izhg.Lib.Networking.Pipelines</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

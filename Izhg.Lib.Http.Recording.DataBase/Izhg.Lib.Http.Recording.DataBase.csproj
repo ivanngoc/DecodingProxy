@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Http.Recording.DataBase</ProjectName>
+    <ProjectGuid>7f79e0d4-46bb-4c39-af78-601b2d52da85</ProjectGuid>
   </PropertyGroup>
-
 </Project>

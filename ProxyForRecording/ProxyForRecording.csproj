@@ -1,19 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>ProxyForRecording</ProjectName>
+    <ProjectGuid>4e943c16-bdc4-4591-9b9f-51f0e7fdf795</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj">
+      <Guid>4505eca9-f59e-4bbc-870f-0796a96f1eff</Guid>
+      <ProjectName>Izhg.Lib.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

@@ -4,7 +4,7 @@ using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Tls;
 using System;
 using System.Net.Security;

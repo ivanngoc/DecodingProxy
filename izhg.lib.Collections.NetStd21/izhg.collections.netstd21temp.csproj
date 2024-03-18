@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ProjectName>izhg.collections.netstd21temp</ProjectName>
+    <ProjectGuid>76392448-5e57-46ca-8d20-b3fcc07e770e</ProjectGuid>
+    <RootNamespace>IziHardGames.Collections.NetStd21</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\[Unity] Projects\GameProject3\Packages\com.izihardgames.collections.pack\Abstractions\izhg.collections.abstractions.csproj">
+      <Guid>16d37826-acfc-42b4-85f7-981e38df4227</Guid>
+      <ProjectName>izhg.collections.abstractions</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

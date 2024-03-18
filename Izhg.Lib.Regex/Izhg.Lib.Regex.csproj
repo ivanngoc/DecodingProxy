@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.RegexExpressions</RootNamespace>
+    <ProjectName>Izhg.Lib.Regex</ProjectName>
+    <ProjectGuid>3cc802fc-670d-43bf-a83c-5d7686138fcf</ProjectGuid>
   </PropertyGroup>
-
 </Project>

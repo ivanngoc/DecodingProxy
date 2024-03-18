@@ -5,7 +5,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using IziHardGames.Libs.gRPC.Clients.Attributes;
 using IziHardGames.Libs.gRPC.Clients.Contracts;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using static IziHardGames.Libs.gRPC.Hubs.GrpcHub;
 using BinaryMessage = IziHardGames.Libs.gRPC.Hubs.BinaryMessage;
 using Func = System.Func<System.ReadOnlyMemory<byte>, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>;

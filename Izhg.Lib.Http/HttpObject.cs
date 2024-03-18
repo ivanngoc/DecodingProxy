@@ -3,7 +3,7 @@ using System.Buffers;
 using System.IO;
 using System.Linq;
 using System.Text;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace HttpDecodingProxy.ForHttp
 {

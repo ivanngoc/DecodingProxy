@@ -1,7 +1,7 @@
 ﻿using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Servers;
 using IziHardGames.Libs.Networking.SocketLevel;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using System;
 using System.Net.Sockets;
 using System.Threading;

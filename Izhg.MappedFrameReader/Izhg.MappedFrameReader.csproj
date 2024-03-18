@@ -1,21 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.MappedFrameReader</RootNamespace>
+    <ProjectName>Izhg.MappedFrameReader</ProjectName>
+    <ProjectGuid>94ab439b-4f17-4926-a38f-a92c1f93b961</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Regex\Izhg.Lib.Regex.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Text\Izhg.Lib.Text.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.collections.temp.csproj">
+      <Guid>5e40763a-8e85-4268-acd6-a682cad236f7</Guid>
+      <ProjectName>Izhg.collections.temp</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj">
+      <Guid>bfecbd85-8a1c-44ce-8eea-1b899ac6dc56</Guid>
+      <ProjectName>Izhg.Lib.Mapping</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Regex\Izhg.Lib.Regex.csproj">
+      <Guid>3cc802fc-670d-43bf-a83c-5d7686138fcf</Guid>
+      <ProjectName>Izhg.Lib.Regex</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Text\Izhg.Lib.Text.csproj">
+      <Guid>6e0c5190-d147-464f-9205-7b1b69b26a24</Guid>
+      <ProjectName>Izhg.Lib.Text</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Test\" />
   </ItemGroup>
-
 </Project>

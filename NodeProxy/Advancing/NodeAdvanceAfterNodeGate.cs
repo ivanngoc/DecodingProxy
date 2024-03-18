@@ -5,7 +5,10 @@ using IziHardGames.NodeProxies.Graphs;
 using IziHardGames.NodeProxies.Nodes;
 using IziHardGames.NodeProxies.Nodes.SOCKS5;
 using IziHardGames.NodeProxies.Nodes.Tls;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
+using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
+using System;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.NodeProxies.Advancing
 {
@@ -13,6 +16,7 @@ namespace IziHardGames.NodeProxies.Advancing
     {
         internal static AdvanceResult Advance(RegistryForAdvancing registry, NodeGate nodeGate, IziGraph graph)
         {
+            var indx = graph.indexators[typeof(Indx)].As<Indx>();
             AdvanceResult result = IziPool.GetConcurrent<AdvanceResult>();
             var prot = nodeGate.Protocol;
             if (prot == EGateProtocol.SOCKS5)
@@ -24,15 +28,16 @@ namespace IziHardGames.NodeProxies.Advancing
                 NodeSocketOrigin nodeSocketOrigin = IziPool.GetConcurrent<NodeSocketOrigin>();
                 result.Add(new NextNode(nodeSocketOrigin, ERelations.Next));
                 node.SetOrigin(nodeSocketOrigin);
+                indx[INDX_ORIGIN_SOCKET] = nodeSocketOrigin;
             }
             else if (prot == EGateProtocol.TLS_CLIENT)
             {
-                NodeTlsClientAuth node = new NodeTlsClientAuth();
+                NodeTlsAuthClient node = IziPool.GetConcurrent<NodeTlsAuthClient>();
                 result.Add(new NextNode(node, ERelations.Next));
             }
             else if (prot == EGateProtocol.TLS_SERVER)
             {
-                NodeTlsServerAuth node = new NodeTlsServerAuth();
+                NodeTlsAuthServer node = IziPool.GetConcurrent<NodeTlsAuthServer>();
                 result.Add(new NextNode(node, ERelations.Next));
             }
             else

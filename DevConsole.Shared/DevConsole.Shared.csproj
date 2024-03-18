@@ -1,21 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <RootNamespace>DevConsole.Shared</RootNamespace>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectName>DevConsole.Shared</ProjectName>
+    <ProjectGuid>8d71dd55-b886-4298-a849-6eefe2045153</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Mapping\Izhg.Lib.Mapping.csproj">
+      <Guid>bfecbd85-8a1c-44ce-8eea-1b899ac6dc56</Guid>
+      <ProjectName>Izhg.Lib.Mapping</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj">
+      <Guid>a90a0357-48d0-40a7-9b03-e37981927482</Guid>
+      <ProjectName>Izhg.Lib.Streams</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

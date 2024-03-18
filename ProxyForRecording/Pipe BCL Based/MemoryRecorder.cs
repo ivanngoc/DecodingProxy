@@ -1,4 +1,4 @@
-﻿using IziHardGames.Libs.NonEngine.Memory;
+﻿using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Proxy.Consuming;
 using System;
 using System.Buffers;

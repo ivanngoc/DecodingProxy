@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.Grpc.Shared</RootNamespace>
+    <ProjectName>Izhg.Lib.gRPC.Shared</ProjectName>
+    <ProjectGuid>4b30a56c-df9c-4b74-9a62-be93cc6b361d</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Grpc.Core.Api" Version="2.58.0" />
   </ItemGroup>
-
 </Project>

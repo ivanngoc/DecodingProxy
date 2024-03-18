@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace IziHardGames.Libs.NonEngine.Memory
+namespace IziHardGames.Pools.Abstractions.NetStd21
 {
     public class PoolObjects<T> : IPoolObjects<T> where T : class, new()
     {

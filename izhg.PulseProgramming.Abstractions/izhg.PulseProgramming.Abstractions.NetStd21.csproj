@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.Pulse.Abstractions</RootNamespace>
+    <ProjectName>izhg.PulseProgramming.Abstractions.NetStd21</ProjectName>
+    <ProjectGuid>323939b8-82b6-4f6b-8326-476d82fe0c75</ProjectGuid>
+  </PropertyGroup>
+</Project>

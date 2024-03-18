@@ -1,6 +1,6 @@
 ﻿using Google.Protobuf;
 using Grpc.Net.Client;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using static IziHardGames.Libs.gRPC.Hubs.GrpcHub;
 using BinaryMessage = IziHardGames.Libs.gRPC.Hubs.BinaryMessage;
 

@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
+    <Authors>Tran Ngoc Anh</Authors>
+    <Company>IziHardGames</Company>
+    <ProjectName>Izhg.NetStandart21.Core</ProjectName>
+    <ProjectGuid>66ef5c96-2d49-49eb-845a-e73585a979eb</ProjectGuid>
   </PropertyGroup>
-
 </Project>

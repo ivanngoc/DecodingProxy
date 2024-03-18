@@ -1,14 +1,14 @@
 ﻿using System.Collections.Concurrent;
 
-namespace IziHardGames.Libs.NonEngine.Memory
+namespace IziHardGames.Pools.Abstractions.NetStd21
 {
     public class PoolObjectsConcurentWithBag<T> : IPoolObjects<T>, IPoolReturn<T>, IPoolRent<T> where T : class
     {
-        private IFactory<T> factory;
+        private IPoolFactory<T> factory;
 
         private readonly ConcurrentBag<T> items = new ConcurrentBag<T>();
 
-        public void SetFactory(IFactory<T> factory)
+        public void SetFactory(IPoolFactory<T> factory)
         {
             this.factory = factory;
         }

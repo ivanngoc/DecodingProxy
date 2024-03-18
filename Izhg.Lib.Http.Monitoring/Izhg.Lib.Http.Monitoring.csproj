@@ -1,16 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Http.Monitoring</ProjectName>
+    <ProjectGuid>6483ebc3-14d1-4f10-ad60-c12af03c3390</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj">
+      <Guid>82372de1-65bf-4b30-92da-80c39fa46a4b</Guid>
+      <ProjectName>Izhg.Lib.gRPC.Servers</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

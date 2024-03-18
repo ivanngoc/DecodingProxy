@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Networking.Pipelines", "NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj", "{91A324CF-7936-4D97-8A0A-FF2973DEFCDC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Memory", "Izhg.Lib.Memory\Izhg.Lib.Memory.csproj", "{35BA41DB-0A4E-4B46-B47F-03E6FA1B67E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.pools.Proxy", "Izhg.Lib.Memory\izhg.pools.Proxy.csproj", "{35BA41DB-0A4E-4B46-B47F-03E6FA1B67E6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Logging", "IzhgLibLogging\Izhg.Lib.Logging.csproj", "{B7311202-9CF9-489B-A14E-32B7D43C58FC}"
 EndProject
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.ManagersForObjects
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Cryptography", "Izhg.Lib.Cryptography\Izhg.Lib.Cryptography.csproj", "{3A00C886-F947-45A8-A71B-F6C285831578}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Binary", "Izhg.Lib.Binary\Izhg.Lib.Binary.csproj", "{ED8EA0E3-3097-43E5-B635-2DE71DBD3906}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Binary.netstd21", "Izhg.Lib.Binary\Izhg.Lib.Binary.netstd21.csproj", "{ED8EA0E3-3097-43E5-B635-2DE71DBD3906}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.NetStandart21.Core", "Izhg.Core\Izhg.NetStandart21.Core.csproj", "{93503716-E5F4-45F4-BDDD-5359F612DC83}"
 EndProject
@@ -53,9 +53,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Http.Piped", "Izhg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Text", "Izhg.Lib.Text\Izhg.Lib.Text.csproj", "{ADE5286B-73D2-4FAE-B055-4DDC136BFBCA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Collections", "Izhg.Lib.Collections\Izhg.Lib.Collections.csproj", "{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.collections.temp", "Izhg.Lib.Collections\Izhg.collections.temp.csproj", "{F1D6CB6C-B2D6-4B7D-8FF2-240A8DB0B686}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg,Lib.Networking.DevTools", "Izhg,Lib.Networking.DevTools\Izhg,Lib.Networking.DevTools.csproj", "{BABDAFAB-1179-445A-B75B-02669266A698}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Networking.DevTools", "Izhg.Lib.Networking.DevTools\Izhg.Lib.Networking.DevTools.csproj", "{BABDAFAB-1179-445A-B75B-02669266A698}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Izhg.Lib.Streams", "Izhg.Lib.Streams\Izhg.Lib.Streams.csproj", "{C7952C83-5DB8-4303-96A6-B329F17DCDC4}"
 EndProject
@@ -91,21 +91,31 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XmlGraph", "XmlGraph\XmlGra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SOCKS", "SOCKS\SOCKS.csproj", "{A5B3A319-86E4-4BD4-A371-ABFC8E6C7BAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.Nodes.Abstracts", "izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj", "{076BE4D1-61C9-4EFE-8336-52B66944A384}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.Nodes.Abstracts", "izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj", "{076BE4D1-61C9-4EFE-8336-52B66944A384}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.Nodes.RefTypes", "izhg.lib.Nodes.RefTypes\izhg.lib.Nodes.RefTypes.csproj", "{9321A134-F74B-46DC-BF6E-422F1896A7DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.Nodes.RefTypes", "izhg.lib.Nodes.RefTypes\izhg.lib.Nodes.RefTypes.csproj", "{9321A134-F74B-46DC-BF6E-422F1896A7DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.Nodes.ValueTypes", "izhg.lib.Nodes.ValueTypes\izhg.lib.Nodes.ValueTypes.csproj", "{C66B43E4-893F-4016-A435-CF32A69DA773}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.Nodes.ValueTypes", "izhg.lib.Nodes.ValueTypes\izhg.lib.Nodes.ValueTypes.csproj", "{C66B43E4-893F-4016-A435-CF32A69DA773}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataRecording", "izhg.lib.DataRecording\izhg.lib.DataRecording.csproj", "{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.DataRecording", "izhg.lib.DataRecording\izhg.lib.DataRecording.csproj", "{44DBACF3-CC33-4B04-A0D3-E3FEC0DEF79A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataRecording.ToDataBase", "izhg.lib.DataRecording.ToDataBase\izhg.lib.DataRecording.ToDataBase.csproj", "{7F95C560-E18F-4EE7-9A85-AAC7721518AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.DataRecording.ToDataBase", "izhg.lib.DataRecording.ToDataBase\izhg.lib.DataRecording.ToDataBase.csproj", "{7F95C560-E18F-4EE7-9A85-AAC7721518AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.PostgreSQL", "izhg.lib.DataBase.PostgreSQL\izhg.lib.DataBase.PostgreSQL.csproj", "{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.DataBase.PostgreSQL", "izhg.lib.DataBase.PostgreSQL\izhg.lib.DataBase.PostgreSQL.csproj", "{938CEF0E-51B3-4865-9D99-8EC8BC0B0261}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.Abstractions.NetStd21", "izhg.lib.DataBase.Abstractions.NetStd21\izhg.lib.DataBase.Abstractions.NetStd21.csproj", "{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.DataBase.Abstractions.NetStd21", "izhg.lib.DataBase.Abstractions.NetStd21\izhg.lib.DataBase.Abstractions.NetStd21.csproj", "{EE2E4D22-B400-4FD3-96CE-4C9EC1D83C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "izhg.lib.DataBase.Abstractions", "izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj", "{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.lib.DataBase.Abstractions", "izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj", "{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.Async.NetStd21", "izhg.Async.NetStd21\izhg.Async.NetStd21.csproj", "{D9ED8859-36BD-41D2-98A5-440D60E07026}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.PulseProgramming.Abstractions.NetStd21", "izhg.PulseProgramming.Abstractions\izhg.PulseProgramming.Abstractions.NetStd21.csproj", "{D3FE4DAC-93AB-4E9D-8265-A7A37DC30982}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.tasking.netstd21", "com.izihardgames.tasking.pack\Pack\netstd21\izhg.tasking.netstd21.csproj", "{4385C313-6BD3-430F-8303-6B5BB7D845C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7D45908-E584-4B22-B23B-B075B1FFEC37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "izhg.tasking.netstd21.abstractions", "com.izihardgames.tasking.pack\Pack\netstd21.abstractions\izhg.tasking.netstd21.abstractions.csproj", "{C4EFAE6B-A670-4D2C-8810-EA9A5312196F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -321,6 +331,22 @@ Global
 		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6D48E69-D3A0-4D6A-84AD-B2E3AA3EA1A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9ED8859-36BD-41D2-98A5-440D60E07026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9ED8859-36BD-41D2-98A5-440D60E07026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9ED8859-36BD-41D2-98A5-440D60E07026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9ED8859-36BD-41D2-98A5-440D60E07026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3FE4DAC-93AB-4E9D-8265-A7A37DC30982}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3FE4DAC-93AB-4E9D-8265-A7A37DC30982}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3FE4DAC-93AB-4E9D-8265-A7A37DC30982}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3FE4DAC-93AB-4E9D-8265-A7A37DC30982}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4385C313-6BD3-430F-8303-6B5BB7D845C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4385C313-6BD3-430F-8303-6B5BB7D845C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4385C313-6BD3-430F-8303-6B5BB7D845C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4385C313-6BD3-430F-8303-6B5BB7D845C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4EFAE6B-A670-4D2C-8810-EA9A5312196F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EFAE6B-A670-4D2C-8810-EA9A5312196F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EFAE6B-A670-4D2C-8810-EA9A5312196F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EFAE6B-A670-4D2C-8810-EA9A5312196F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

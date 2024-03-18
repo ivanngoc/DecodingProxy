@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Cryptography.Shared.Headers;
 using IziHardGames.Socks5.Headers;
-using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
 using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
 using IziHardGames.Libs.Cryptography;
 using IziHardGames.NodeProxies.Nodes.Tls;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
+
     /// <summary>
     /// анализирует первый пакет и выявляет тип протокола
     /// </summary>
@@ -30,8 +31,6 @@ namespace IziHardGames.NodeProxies.Nodes
 
         internal override async Task ExecuteAsync(CancellationToken ct)
         {
-            graph!.indexators[typeof(Indx)].As<Indx>()[INDX_GATE] = this;
-
             int count = 1;
             do
             {

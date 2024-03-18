@@ -1,18 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Streams.Piped</ProjectName>
+    <ProjectGuid>b92c6536-d1b8-4773-abf7-8bf2b1e005d1</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Pipelines\Izhg.Lib.Pipelines.csproj">
+      <Guid>54313c67-cfc8-4712-829c-7ccb60363f5f</Guid>
+      <ProjectName>Izhg.Lib.Pipelines</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

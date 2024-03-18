@@ -1,5 +1,14 @@
 ﻿namespace IziHardGames.NodeProxies.Nodes
 {
+    internal enum EFrameType
+    {
+        None,
+        Unknown,
+        Tls,
+        HTTP11,
+        HTTP20,
+    }
+
     internal enum EGateProtocol
     {
         None,

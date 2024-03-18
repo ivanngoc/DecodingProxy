@@ -24,6 +24,7 @@ using System.Threading;
 using IziHardGames.Libs.HttpCommon;
 using IziHardGames.Proxy.Recoreder;
 using IziHardGames.DataRecording.Abstractions.Lib;
+using IziHardGames.Async.NetStd21;
 
 namespace IziHardGames.Tests
 {
@@ -34,6 +35,11 @@ namespace IziHardGames.Tests
         {
             Console.WriteLine("Begin Test");
             //IziDataRecorder.ToDataBase = ;
+
+            if (true)
+            {
+                await IziSignaler.Test();
+            }
 
             if (false)
             {

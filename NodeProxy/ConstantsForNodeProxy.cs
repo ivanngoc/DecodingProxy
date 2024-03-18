@@ -4,18 +4,33 @@ namespace IziHardGames.NodeProxies.Advancing
 {
     public static class ConstantsForNodeProxy
     {
-        public const string INDX_AGENT_CONN_CONTROL = "AgentConnectionControl";
-        public const string INDX_AGENT_SOCKET_READER = "AgentSocketReader";
-        public const string INDX_AGENT_SOCKET_WRITER = "AgentSocketWriter";
-        public const string INDX_GATE = "NODE_GATE";
-        public const string INDX_SOCKS_GREET = nameof(INDX_SOCKS_GREET);
+        public const int INDX_GATE_AGENT = 0;
+        public const int INDX_GATE_ORIGIN = 1;
 
-        public const string INDX_ORIGIN_SOCKET = nameof(INDX_ORIGIN_SOCKET);
-        public const string INDX_ORIGIN_CONN_CONTROL = nameof(INDX_ORIGIN_CONN_CONTROL);
-        public const string INDX_ORIGIN_SOCKET_READER = nameof(INDX_ORIGIN_SOCKET_READER);
-        public const string INDX_ORIGIN_SOCKET_WRITER = nameof(INDX_ORIGIN_SOCKET_WRITER);
-        
-        
+
+        public const int INDX_AGENT_CONN_CONTROL = 2;
+        public const int INDX_AGENT_SOCKET_READER = 3;
+        public const int INDX_AGENT_SOCKET_WRITER = 4;
+
+        public const int INDX_SOCKS_GREET = 5;
+
+        public const int INDX_ORIGIN_SOCKET = 6;
+        public const int INDX_CLIENT_SOCKET = 7;
+
+        public const int INDX_ORIGIN_CONN_CONTROL = 8;
+        public const int INDX_ORIGIN_SOCKET_READER = 9;
+        public const int INDX_ORIGIN_SOCKET_WRITER = 10;
+
+
+        public const int INDX_TLS_SERVER_READER = 11;
+        public const int INDX_TLS_SERVER_WRITER = 12;
+        public const int INDX_TLS_CLIENT_READER = 13;
+        public const int INDX_TLS_CLIENT_WRITER = 14;
+
+        public const int INDX_TLS_CLIENT_HUB = 15;
+        public const int INDX_TLS_SERVER_HUB = 16;
+
+        public const int INDX_SOCKET_BRIDGE = 17;
     }
 
     public static class NodeProxyGlobals

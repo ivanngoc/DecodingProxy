@@ -1,20 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>IziHardGames.Libs.Streams</RootNamespace>
-    
+    <ProjectName>Izhg.Lib.Streams</ProjectName>
+    <ProjectGuid>a90a0357-48d0-40a7-9b03-e37981927482</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj" />
-    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
-    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.netstd21.csproj">
+      <Guid>70c3cc7b-912b-4962-a5ee-8821616edda8</Guid>
+      <ProjectName>Izhg.Lib.Binary.netstd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Buffers\Izhg.Lib.Buffers.csproj">
+      <Guid>592bf3e6-9a43-4293-aca0-b5ac2d6fa06c</Guid>
+      <ProjectName>Izhg.Lib.Buffers</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj">
+      <Guid>be72daa6-92a1-4500-a9a4-f784da177e40</Guid>
+      <ProjectName>izhg.lib.DataRecording</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\IzhgLibExtensionsForObject\Izhg.Lib.ExtensionsForBcl.csproj">
+      <Guid>1b092f98-024d-46ff-90f9-0e9953aa5128</Guid>
+      <ProjectName>Izhg.Lib.ExtensionsForBcl</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

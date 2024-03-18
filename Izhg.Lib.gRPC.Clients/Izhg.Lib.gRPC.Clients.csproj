@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.Grpc.Clients</RootNamespace>
+    <ProjectName>Izhg.Lib.gRPC.Clients</ProjectName>
+    <ProjectGuid>684f2004-fcb0-4a09-ac78-93f84868cdaa</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.24.3" />
     <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
@@ -16,17 +16,25 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj">
+      <Guid>82372de1-65bf-4b30-92da-80c39fa46a4b</Guid>
+      <ProjectName>Izhg.Lib.gRPC.Servers</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Threading\Izhg.Lib.Concurrency.csproj">
+      <Guid>2ad06e2a-2f85-4336-af3d-0c81ad36a7c9</Guid>
+      <ProjectName>Izhg.Lib.Concurrency</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
-
   <ItemGroup>
     <Protobuf Include="..\Izhg.Lib.gRPC.Servers\Protos\grpchub.proto" GrpcServices="Client" />
     <Protobuf Include="..\Izhg.Lib.gRPC.Servers\Protos\echo.proto" GrpcServices="Client" />
   </ItemGroup>
-
 </Project>

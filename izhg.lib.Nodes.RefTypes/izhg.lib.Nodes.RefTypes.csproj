@@ -1,14 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGaems.Nodes.RefTypes.Lib</RootNamespace>
+    <ProjectName>izhg.lib.Nodes.RefTypes</ProjectName>
+    <ProjectGuid>4f7a06a0-9482-4e47-804b-1063789f60f5</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.lib.Nodes.Abstracts\izhg.lib.Nodes.Abstracts.csproj">
+      <Guid>186c0734-4ff8-47bf-bac8-0cd1c4876e6a</Guid>
+      <ProjectName>izhg.lib.Nodes.Abstracts</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

@@ -6,6 +6,7 @@ using IziHardGames.Libs.Cryptography.Tls12;
 
 namespace IziHardGames.NodeProxies.Nodes.Tls
 {
+
     internal abstract class NodeTls : Node
     {
         internal static EGateProtocol DetectTls(DataFragment dataFragment)

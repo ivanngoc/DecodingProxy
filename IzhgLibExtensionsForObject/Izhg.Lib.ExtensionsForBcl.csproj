@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.ExtensionsForBcl</ProjectName>
+    <ProjectGuid>1b092f98-024d-46ff-90f9-0e9953aa5128</ProjectGuid>
   </PropertyGroup>
-
 </Project>

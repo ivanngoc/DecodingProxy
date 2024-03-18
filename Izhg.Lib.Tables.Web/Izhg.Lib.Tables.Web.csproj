@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.Tables.Web</RootNamespace>
+    <ProjectName>Izhg.Lib.Tables.Web</ProjectName>
+    <ProjectGuid>16ef2cb7-a4da-497a-9ccc-04a568cb6957</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj" />
+    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj">
+      <Guid>a5b7eb78-d3ca-46fb-909b-59707f070870</Guid>
+      <ProjectName>Izhg.Lib.Tables</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

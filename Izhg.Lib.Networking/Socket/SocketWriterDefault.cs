@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Threading;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using System.Runtime.CompilerServices;
 
 namespace IziHardGames.Libs.Networking.SocketLevel

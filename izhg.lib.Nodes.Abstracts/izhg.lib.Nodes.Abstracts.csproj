@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGaems.Nodes.Abstracions.Lib</RootNamespace>
+    <ProjectName>izhg.lib.Nodes.Abstracts</ProjectName>
+    <ProjectGuid>186c0734-4ff8-47bf-bac8-0cd1c4876e6a</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <Folder Include="Flows\" />
     <Folder Include="Datas\" />
   </ItemGroup>
-
 </Project>

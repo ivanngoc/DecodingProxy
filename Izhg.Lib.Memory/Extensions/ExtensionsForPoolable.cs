@@ -1,4 +1,4 @@
-﻿namespace IziHardGames.Libs.NonEngine.Memory
+﻿namespace IziHardGames.Pools.Abstractions.NetStd21
 {
     public static class ExtensionsForPoolable
     {

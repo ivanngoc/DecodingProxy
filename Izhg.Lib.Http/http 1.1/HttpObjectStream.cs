@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using HttpDecodingProxy.ForHttp;
 using IziHardGames.Libs.NonEngine.Collections;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Streaming;
 using IziHardGames.Libs.Text;
 using ProxyLibs.Extensions;

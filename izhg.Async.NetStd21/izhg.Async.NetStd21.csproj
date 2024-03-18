@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>IziHardGames.Async.NetStd21</RootNamespace>
+    <ProjectName>izhg.Async.NetStd21</ProjectName>
+    <ProjectGuid>4d08edc4-23c7-4ae1-9450-d503905c3b1a</ProjectGuid>
+  </PropertyGroup>
+</Project>

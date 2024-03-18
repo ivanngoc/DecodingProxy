@@ -14,7 +14,7 @@ using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.Pipelines;
 using IziHardGames.Libs.Networking.SocketLevel;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.ObjectsManagment;
 using IziHardGames.Proxy.Consuming;
 using IziHardGames.Proxy.Tcp.Tls;

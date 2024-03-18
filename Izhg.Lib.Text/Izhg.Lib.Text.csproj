@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectName>Izhg.Lib.Text</ProjectName>
+    <ProjectGuid>6e0c5190-d147-464f-9205-7b1b69b26a24</ProjectGuid>
   </PropertyGroup>
-
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IziHardGames.Libs.NonEngine.Memory
+namespace IziHardGames.Pools.Abstractions.NetStd21
 {
     public class PoolObjectsConcurent<T>
         where T : class, new()

@@ -1,13 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>DevConsole.Client</RootNamespace>
+    <Authors>Tran Ngoc Anh</Authors>
+    <Company>IziHardGames</Company>
+    <ProjectName>DevConsole.Client</ProjectName>
+    <ProjectGuid>637b6cda-4329-4a3f-a714-11e812cfc88e</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\DevConsole.Shared\DevConsole.Shared.csproj" />
+    <ProjectReference Include="..\DevConsole.Shared\DevConsole.Shared.csproj">
+      <Guid>8d71dd55-b886-4298-a849-6eefe2045153</Guid>
+      <ProjectName>DevConsole.Shared</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

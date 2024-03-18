@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.MITM</ProjectName>
+    <ProjectGuid>19598019-5263-4d7c-b941-e8f302998404</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj">
+      <Guid>ed4c3ce1-4d62-4d1f-997f-df57e307c939</Guid>
+      <ProjectName>Izhg.Lib.Http.Recording</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

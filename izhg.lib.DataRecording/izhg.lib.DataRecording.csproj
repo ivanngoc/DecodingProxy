@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.DataRecording.Abstractions.Lib</RootNamespace>
+    <ProjectName>izhg.lib.DataRecording</ProjectName>
+    <ProjectGuid>be72daa6-92a1-4500-a9a4-f784da177e40</ProjectGuid>
   </PropertyGroup>
-
 </Project>

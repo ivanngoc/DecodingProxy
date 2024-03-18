@@ -20,7 +20,7 @@ using IziHardGames.Libs.HttpCommon.Helpers;
 using IziHardGames.Libs.HttpCommon.Monitoring;
 using IziHardGames.Libs.Networking.States;
 using IziHardGames.Libs.Networking.Tls;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Libs.Streams;
 using IziHardGames.Proxy;
 using IziHardGames.Proxy.Consuming;

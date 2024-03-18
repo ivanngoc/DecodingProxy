@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using IziHardGames.Core;
 using IziHardGames.Libs.Networking.Contracts;
 using IziHardGames.Libs.Networking.States;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Proxy.Tcp;
 using Microsoft.Extensions.Logging;
 

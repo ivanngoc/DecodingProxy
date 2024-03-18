@@ -1,22 +1,44 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Http.Piped</ProjectName>
+    <ProjectGuid>669dba73-f9f9-46f4-bd9b-17307b17dd64</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.Lib.Collections.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
-    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Collections\Izhg.collections.temp.csproj">
+      <Guid>5e40763a-8e85-4268-acd6-a682cad236f7</Guid>
+      <ProjectName>Izhg.collections.temp</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj">
+      <Guid>ba1437d3-d896-45ae-b3fb-ba17cf9d843a</Guid>
+      <ProjectName>Izhg.Lib.Networking</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj">
+      <Guid>a90a0357-48d0-40a7-9b03-e37981927482</Guid>
+      <ProjectName>Izhg.Lib.Streams</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj">
+      <Guid>b847a9c0-943f-41c0-be84-5207af272d3f</Guid>
+      <ProjectName>Izhg.Lib.Networking.Pipelines</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="HTTP30\" />
     <Folder Include="Shared\" />
   </ItemGroup>
-
 </Project>

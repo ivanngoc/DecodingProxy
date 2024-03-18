@@ -3,8 +3,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using IziHardGames.Libs.NonEngine.Memory;
-using IziHardGames.ObjectPools.Abstractions.Lib.Abstractions;
+using IziHardGames.Pools.Abstractions.NetStd21;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Graphs.Abstractions.Lib.ValueTypes
 {

@@ -1,14 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.DataRecording.Abstractions.Lib.ToDataBase</RootNamespace>
+    <ProjectName>izhg.lib.DataRecording.ToDataBase</ProjectName>
+    <ProjectGuid>3b9d2b24-35ce-4260-a1ab-4bcc9336e592</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj" />
-    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj" />
+    <ProjectReference Include="..\izhg.lib.DataBase.Abstractions\izhg.lib.DataBase.Abstractions.csproj">
+      <Guid>480f2a2e-f771-4a9e-9e66-033f1bd4178e</Guid>
+      <ProjectName>izhg.lib.DataBase.Abstractions</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj">
+      <Guid>be72daa6-92a1-4500-a9a4-f784da177e40</Guid>
+      <ProjectName>izhg.lib.DataRecording</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

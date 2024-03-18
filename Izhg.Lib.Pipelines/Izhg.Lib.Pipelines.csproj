@@ -1,16 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>Izhg.Lib.Pipelines</ProjectName>
+    <ProjectGuid>54313c67-cfc8-4712-829c-7ccb60363f5f</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Streams\Izhg.Lib.Streams.csproj">
+      <Guid>a90a0357-48d0-40a7-9b03-e37981927482</Guid>
+      <ProjectName>Izhg.Lib.Streams</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

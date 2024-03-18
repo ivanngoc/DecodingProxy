@@ -9,7 +9,7 @@ using IziHardGames.Libs.Binary.Readers;
 using IziHardGames.Libs.Binary.Writers;
 using IziHardGames.Socks5.Enums;
 using IziHardGames.Socks5.Headers;
-using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<string, IziHardGames.NodeProxies.Nodes.Node>;
+using Indx = IziHardGames.Graphs.Abstractions.Lib.ValueTypes.Indexator<int, IziHardGames.NodeProxies.Nodes.Node>;
 using static IziHardGames.NodeProxies.Advancing.ConstantsForNodeProxy;
 using IziHardGames.NodeProxies.Advancing;
 
@@ -47,9 +47,6 @@ namespace IziHardGames.NodeProxies.Nodes.SOCKS5
             var iziNodeThis = graph.Nodes[this.id];
             var iziSource = graph.Nodes[nodeSource.id];
             var iziWriter = graph.Nodes[writer.id];
-            //graph.relations.CreateRelationship(iziNodeThis, iziSource, (int)(ERelations.TakeFragment));
-            //graph.relations.CreateRelationship(iziSource, iziNodeThis, (int)(ERelations.GiveFragment));
-            //graph.relations.CreateRelationship(iziNodeThis, iziWriter, (int)(ERelations.GiveFragment));
 
             var frag = await source.TakeFragAsync(ct);
             frag.SetOwner(this);

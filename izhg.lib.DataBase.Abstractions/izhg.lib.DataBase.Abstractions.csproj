@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.DataBases.Abstreactions.Lib</RootNamespace>
+    <ProjectName>izhg.lib.DataBase.Abstractions</ProjectName>
+    <ProjectGuid>480f2a2e-f771-4a9e-9e66-033f1bd4178e</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.14" />
   </ItemGroup>
-
 </Project>

@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>ProxyForDecodingTcp</ProjectName>
+    <ProjectGuid>a12ccc44-137a-46da-b5a6-067a824c65f6</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Networking\Izhg.Lib.Networking.csproj">
+      <Guid>ba1437d3-d896-45ae-b3fb-ba17cf9d843a</Guid>
+      <ProjectName>Izhg.Lib.Networking</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

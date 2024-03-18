@@ -1,13 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>iziHardGames.Socks5</RootNamespace>
     <Nullable>enable</Nullable>
+    <ProjectName>SOCKS</ProjectName>
+    <ProjectGuid>bff74220-3a4f-47b8-9871-5e9b3deb4153</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.csproj" />
+    <ProjectReference Include="..\Izhg.Lib.Binary\Izhg.Lib.Binary.netstd21.csproj">
+      <Guid>70c3cc7b-912b-4962-a5ee-8821616edda8</Guid>
+      <ProjectName>Izhg.Lib.Binary.netstd21</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>

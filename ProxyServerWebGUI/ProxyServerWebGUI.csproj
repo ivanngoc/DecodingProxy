@@ -1,32 +1,60 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ProjectName>ProxyServerWebGUI</ProjectName>
+    <ProjectGuid>09d0cb7c-b1e3-402e-8c47-270304f9e154</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.55.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.20" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.17" />
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.gRPC.Clients\Izhg.Lib.gRPC.Clients.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj" />
-    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
+    <ProjectReference Include="..\HttpDecodingProxy\Izhg.Lib.Http.Recording.csproj">
+      <Guid>ed4c3ce1-4d62-4d1f-997f-df57e307c939</Guid>
+      <ProjectName>Izhg.Lib.Http.Recording</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Clients\Izhg.Lib.gRPC.Clients.csproj">
+      <Guid>684f2004-fcb0-4a09-ac78-93f84868cdaa</Guid>
+      <ProjectName>Izhg.Lib.gRPC.Clients</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.gRPC.Servers\Izhg.Lib.gRPC.Servers.csproj">
+      <Guid>82372de1-65bf-4b30-92da-80c39fa46a4b</Guid>
+      <ProjectName>Izhg.Lib.gRPC.Servers</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj">
+      <Guid>6483ebc3-14d1-4f10-ad60-c12af03c3390</Guid>
+      <ProjectName>Izhg.Lib.Http.Monitoring</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Libs.Tables\Izhg.Lib.Tables.csproj">
+      <Guid>a5b7eb78-d3ca-46fb-909b-59707f070870</Guid>
+      <ProjectName>Izhg.Lib.Tables</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj">
+      <Guid>4505eca9-f59e-4bbc-870f-0796a96f1eff</Guid>
+      <ProjectName>Izhg.Lib.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:10</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Lib\" />
     <Folder Include="WebConsole\" />
     <Folder Include="Views\Shared\Components\ComponentRaw\" />
   </ItemGroup>
-
-
 </Project>

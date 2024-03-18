@@ -1,5 +1,5 @@
 ﻿using HttpDecodingProxy.ForHttp;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using IziHardGames.Proxy.Sniffing.ForHttp;
 using Microsoft.Extensions.Logging;
 using System;

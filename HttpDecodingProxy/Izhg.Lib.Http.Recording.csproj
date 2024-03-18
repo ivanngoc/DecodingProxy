@@ -1,29 +1,58 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <RootNamespace>IziHardGames.Libs.Http.Recording</RootNamespace>
+    <ProjectName>Izhg.Lib.Http.Recording</ProjectName>
+    <ProjectGuid>ed4c3ce1-4d62-4d1f-997f-df57e307c939</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj" />
-    <ProjectReference Include="..\Izhg.Lib.Memory\Izhg.Lib.Memory.csproj" />
-    <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj" />
-    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj" />
-    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj" />
-    <ProjectReference Include="..\TcpDecodingProxy\ProxyForDecodingTcp.csproj" />
+    <ProjectReference Include="..\izhg.lib.DataRecording\izhg.lib.DataRecording.csproj">
+      <Guid>be72daa6-92a1-4500-a9a4-f784da177e40</Guid>
+      <ProjectName>izhg.lib.DataRecording</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http.Monitoring\Izhg.Lib.Http.Monitoring.csproj">
+      <Guid>6483ebc3-14d1-4f10-ad60-c12af03c3390</Guid>
+      <ProjectName>Izhg.Lib.Http.Monitoring</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Http\Izhg.Lib.Http.csproj">
+      <Guid>47499b54-0061-4d78-a4cd-f2ae8c53e5d9</Guid>
+      <ProjectName>Izhg.Lib.Http</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.Lib.Memory\izhg.pools.Proxy.csproj">
+      <Guid>39a6be17-ae81-4ab6-aec8-3b2ab872b2bb</Guid>
+      <ProjectName>izhg.pools.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\Izhg.MappedFrameReader\Izhg.MappedFrameReader.csproj">
+      <Guid>94ab439b-4f17-4926-a38f-a92c1f93b961</Guid>
+      <ProjectName>Izhg.MappedFrameReader</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\NetworkPipelines\Izhg.Lib.Networking.Pipelines.csproj">
+      <Guid>b847a9c0-943f-41c0-be84-5207af272d3f</Guid>
+      <ProjectName>Izhg.Lib.Networking.Pipelines</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\ProxyLibs\Izhg.Lib.Proxy.csproj">
+      <Guid>4505eca9-f59e-4bbc-870f-0796a96f1eff</Guid>
+      <ProjectName>Izhg.Lib.Proxy</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
+    <ProjectReference Include="..\TcpDecodingProxy\ProxyForDecodingTcp.csproj">
+      <Guid>a12ccc44-137a-46da-b5a6-067a824c65f6</Guid>
+      <ProjectName>ProxyForDecodingTcp</ProjectName>
+      <IziTag>28-Nov-23 02:31:09</IziTag>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="Examples\" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
   </ItemGroup>
-
 </Project>

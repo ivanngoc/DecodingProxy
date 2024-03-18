@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using IziHardGames.Libs.Async;
+using IziHardGames.Tasking.NetStd21.Abstractions;
 
 namespace IziHardGames.NodeProxies.Nodes
 {
@@ -13,6 +14,7 @@ namespace IziHardGames.NodeProxies.Nodes
         private readonly Queue<DataFragment> fragments = new Queue<DataFragment>();
         private NodeConnectionControl? control;
         public event Action<DataFragment>? OnReadedEvent;
+        private IExecutable<DataFragment>? peeker;
 
         internal void SetControl(NodeConnectionControl control)
         {
@@ -32,6 +34,8 @@ namespace IziHardGames.NodeProxies.Nodes
                     {
                         fragments.Enqueue(fragment);
                     }
+                    IziTasks.Run(fragment, peeker!);
+
                     control!.ReportRead(readed);
                     OnReadedEvent?.Invoke(fragment);
                     Console.WriteLine($"Readed buffer:{readed}");

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using IziHardGames.Libs.Networking.SocketLevel;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 
 namespace IziHardGames.Libs.Networking.Pipelines
 {

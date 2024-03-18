@@ -5,7 +5,7 @@ using Google.Protobuf;
 using Grpc.Core;
 using IziHardGames.Libs.gRPC.Hubs;
 using IziHardGames.Libs.gRPC.InterprocessCommunication;
-using IziHardGames.Libs.NonEngine.Memory;
+using IziHardGames.Pools.Abstractions.NetStd21;
 using Func = System.Func<System.ReadOnlyMemory<byte>, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>;
 
 namespace IziHardGames.Libs.gRPC.Services
